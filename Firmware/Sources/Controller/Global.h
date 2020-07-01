@@ -31,8 +31,8 @@
 // --- Debug modes
 #define DBG_USE_BRIDGE_SHORT	TRUE
 #define DBG_USE_OPTO_TIMEOUT	TRUE
-//#define DBG_USE_OPTO_TIMEOUT	FALSE
-#define DBG_USE_FOLLOWING_ERR   FALSE
+#define DBG_USE_OPTO_TIMEOUT	TRUE
+#define DBG_USE_FOLLOWING_ERR	FALSE
 
 //
 // Invert result values
@@ -41,8 +41,8 @@
 
 // --- Capacitor battery
 #define CAP_DELTA				3				// Detection voltage delta (in V)
-#define CAP_SW_VOLTAGE			500 			// Output voltage switch limit (in V)
-#define CAP_SW_POWER			150				// Output power switch limit (in W)
+#define CAP_SW_VOLTAGE			800				// Output voltage switch limit (in V)
+#define CAP_SW_POWER			100				// Output power switch limit (in W)
 
 #define BAT_CHARGE_TIMEOUT		15000			// in ms
 // ----------------------------------------
@@ -52,7 +52,7 @@
 #define MAX_CURRENT_1ST_PULSE	_IQ(25.0f)		// in mA
 
 // Modes for HVDigitizer
-#define HVD_VL_TH				_IQ(500)		// < 500V		(low range)
+#define HVD_VL_TH				_IQ(100)		// < 100V		(low range)
 #define HVD_IL_TH				_IQ(30.0f)		// <= 30mA		(low range)
 #define HVD_IH_TH				_IQ(300.0f)		// <= 300mA		(high range)
 
