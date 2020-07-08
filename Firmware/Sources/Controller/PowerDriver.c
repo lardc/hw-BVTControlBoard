@@ -61,7 +61,7 @@ void DRIVER_SwitchPowerHigh()
 void DRIVER_SwitchPowerLow()
 {
 	// Отключение разряда
-	ZwGPIO_WritePin(PIN_DIS, FALSE);
+	ZwGPIO_WritePin(PIN_DIS, TRUE);
 
 	// Включение низковольтного силового БП
    	ZwGPIO_WritePin(PIN_POWER_1, TRUE);
