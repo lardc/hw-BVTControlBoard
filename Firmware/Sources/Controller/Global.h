@@ -31,7 +31,6 @@
 // --- Debug modes
 #define DBG_USE_BRIDGE_SHORT	TRUE
 #define DBG_USE_OPTO_TIMEOUT	TRUE
-#define DBG_USE_OPTO_TIMEOUT	TRUE
 #define DBG_USE_FOLLOWING_ERR	FALSE
 
 //
