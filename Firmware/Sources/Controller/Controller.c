@@ -229,7 +229,6 @@ void CONTROL_RequestStop(Int16U Reason, Boolean HWSignal)
 	}
 	
 	CurrentMeasurementType = MEASUREMENT_TYPE_NONE;
-	
 	DRIVER_ClearTZFault();
 }
 // ----------------------------------------
@@ -297,14 +296,10 @@ static void CONTROL_EndTestDPC()
 	}
 	else
 	{
-		DataTable[REG_FINISHED] = (EndXDPCArgument.SavedProblem == PROBLEM_NONE) ?
-		OPRESULT_OK :
-																					OPRESULT_FAIL;
+		DataTable[REG_FINISHED] = (EndXDPCArgument.SavedProblem == PROBLEM_NONE) ? OPRESULT_OK : OPRESULT_FAIL;
 		DataTable[REG_WARNING] = EndXDPCArgument.SavedWarning;
 		DataTable[REG_PROBLEM] =
-				(EndXDPCArgument.SavedProblem == PROBLEM_OUTPUT_SHORT) ?
-				PROBLEM_NONE :
-																			EndXDPCArgument.SavedProblem;
+				(EndXDPCArgument.SavedProblem == PROBLEM_OUTPUT_SHORT) ? PROBLEM_NONE : EndXDPCArgument.SavedProblem;
 		DataTable[REG_RESULT_V] = EndXDPCArgument.SavedResultV;
 		DataTable[REG_RESULT_I] = EndXDPCArgument.SavedResultI;
 		CONTROL_SwitchStateToPowered();
@@ -385,7 +380,6 @@ static void CONTROL_SwitchStateToInProcess()
 {
 	// Mark cycle active
 	CycleActive = TRUE;
-	
 	CONTROL_SetDeviceState(DS_InProcess);
 }
 // ----------------------------------------
@@ -434,6 +428,7 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U UserError)
 					*UserError = ERR_DEVICE_NOT_READY;
 			}
 			break;
+			
 		case ACT_DISABLE_POWER:
 			{
 				if(CONTROL_State == DS_InProcess)
@@ -442,6 +437,7 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U UserError)
 					CONTROL_SwitchStateToNone();
 			}
 			break;
+			
 		case ACT_START_TEST:
 			{
 				if(CONTROL_State == DS_InProcess)
@@ -466,12 +462,14 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U UserError)
 					*UserError = ERR_DEVICE_NOT_READY;
 			}
 			break;
+			
 		case ACT_STOP:
 			{
 				if(CONTROL_State == DS_InProcess)
 					CONTROL_RequestStop(DF_NONE, FALSE);
 			}
 			break;
+			
 		case ACT_READ_FRAGMENT:
 			{
 				DEVPROFILE_ResetScopes(0, IND_EP_I | IND_EP_V);
@@ -486,11 +484,13 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U UserError)
 					MU_LoadDataFragment();
 			}
 			break;
+			
 		case ACT_READ_MOVE_BACK:
 			{
 				MU_SeekScopeBack(DataTable[REG_DBG_READ_XY_FRAGMENT]);
 			}
 			break;
+			
 		case ACT_CLR_FAULT:
 			{
 				if(CONTROL_State == DS_Fault)
@@ -506,20 +506,18 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U UserError)
 				
 			}
 			break;
+			
 		case ACT_CLR_WARNING:
 			DataTable[REG_WARNING] = WARNING_NONE;
 			break;
-//		case ACT_DBG_PIN_PULSE:
-//			ZbGPIO_SwitchDebug(TRUE);
-//			DELAY_US(DataTable[REG_DBG_PULSE_LENGTH]);
-//			ZbGPIO_SwitchDebug(FALSE);
-//			break;
+			
 		case ACT_DBG_OPTO_DIGITIZER:
 			if(CONTROL_State == DS_None)
 				DataTable[REG_DIAG_PING_RESULT] = SS_Ping() ? 1 : 0;
 			else
 				*UserError = ERR_OPERATION_BLOCKED;
 			break;
+			
 		case ACT_DBG_SET_PWM:
 			if(CONTROL_State == DS_Powered)
 				SS_SetPWM(DataTable[REG_DBG_SET_DC_PWM]);
