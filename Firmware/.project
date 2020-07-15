@@ -36,11 +36,6 @@
 			<locationURI>PARENT-2-PROJECT_LOC/hw-TMS-libs/IQmath/IQmath.lib</locationURI>
 		</link>
 		<link>
-			<name>IQmath/IQmathLib.h</name>
-			<type>1</type>
-			<locationURI>PARENT-2-PROJECT_LOC/hw-TMS-libs/IQmath/IQmathLib.h</locationURI>
-		</link>
-		<link>
 			<name>IQmath/limits.h</name>
 			<type>1</type>
 			<locationURI>PARENT-2-PROJECT_LOC/hw-TMS-libs/IQmath/limits.h</locationURI>
