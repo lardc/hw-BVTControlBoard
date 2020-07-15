@@ -58,6 +58,7 @@ static DataSample ActualSecondarySample;
 static Boolean TripCurrentDetected, UseInstantMethod, FrequencyRateSwitch;
 static Boolean DbgDualPolarity, DbgSRAM, DbgMutePWM, SkipRegulation, SkipLoggingVoids;
 static Int16U MeasurementType, Problem, Warning, Fault;
+
 #pragma DATA_SECTION(PeakDetectorData, "data_mem");
 static DataSampleIQ PeakDetectorData[PEAK_DETECTOR_SIZE], PeakSample;
 static Int16U PeakDetectorCounter;
@@ -172,18 +173,24 @@ Int16S inline MEASURE_AC_TrimPWM(Int16S Duty)
 }
 // ----------------------------------------
 
-void inline MEASURE_AC_SetPWM(Int16S Duty)
+Int16S inline MEASURE_AC_SetPWM(Int16S Duty)
 {
 	static Int16S PrevDuty = 0;
 	static Boolean InvertPolarity = TRUE;
 	
+	Int16S PWMOutput = 0;
+
 	if(Duty >= 0 && PrevDuty < 0)
 		InvertPolarity = !InvertPolarity;
 	
 	if(Duty > 0)
-		ZwPWMB_SetValue12(MEASURE_AC_TrimPWM(InvertPolarity ? -Duty : Duty));
+	{
+		PWMOutput = MEASURE_AC_TrimPWM(InvertPolarity ? -Duty : Duty);
+		ZwPWMB_SetValue12(PWMOutput);
+	}
 	
 	PrevDuty = Duty;
+	return PWMOutput;
 }
 // ----------------------------------------
 
@@ -550,12 +557,12 @@ static void MEASURE_AC_ControlCycle()
 #endif
 static void MEASURE_AC_CCSub_CorrectionAndLog(Int16S ActualCorrection)
 {
-	MEASURE_AC_SetPWM(ActualCorrection);
+	Int16S PWMOutput = MEASURE_AC_SetPWM(ActualCorrection);
 	if(!SkipLoggingVoids || FrequencyRateSwitch)
 	{
 		MU_LogScope(&ActualSecondarySample, CurrentMultiply, DbgSRAM, DbgDualPolarity);
 		MU_LogScopeIV(ActualSecondarySample);
-		MU_LogScopeDIAG(MEASURE_AC_TrimPWM(ActualCorrection));
+		MU_LogScopeDIAG(PWMOutput);
 	}
 }
 // ----------------------------------------
