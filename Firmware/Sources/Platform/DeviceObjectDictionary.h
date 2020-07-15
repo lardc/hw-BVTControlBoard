@@ -9,7 +9,6 @@
 #define ACT_CLR_FAULT				3	// Clear fault (try switch state from FAULT to NONE)
 #define ACT_CLR_WARNING				4	// Clear warning flag
 //
-//#define ACT_DBG_PIN_PULSE			10	// Generate pulse on debug pin
 #define ACT_DBG_OPTO_DIGITIZER		11	// Test digitizer optical connection
 #define ACT_DBG_SET_PWM				12	// Set PMW
 #define ACT_DBG_POWER_EN_LOW		13  // Enable low voltage range power supply

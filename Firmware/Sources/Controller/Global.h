@@ -51,9 +51,9 @@
 #define MAX_CURRENT_1ST_PULSE	_IQ(25.0f)		// in mA
 
 // Modes for HVDigitizer
-#define HVD_VL_TH				_IQ(100)		// < 100V		(low range)
+#define HVD_VL_TH				_IQ(1000)		// < 1000V		(low range)
 #define HVD_IL_TH				_IQ(30.0f)		// <= 30mA		(low range)
-#define HVD_IH_TH				_IQ(300.0f)		// <= 300mA		(high range)
+#define HVD_IH_TH				_IQ(500.0f)		// <= 500mA		(high range)
 
 // Pre-plate parameters
 #define PRE_PLATE_MAX_TIME		1000			// pre-plate max time for stabilization (in ms)
