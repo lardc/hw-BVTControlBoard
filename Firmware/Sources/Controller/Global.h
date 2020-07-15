@@ -9,11 +9,9 @@
 #include "stdinc.h"
 #include "IQmathLib.h"
 
-
 // Constants
-
 // --- Global miscellaneous parameters
-#define	SCCI_TIMEOUT_TICKS		1000			// 1000 ms
+#define	SCCI_TIMEOUT_TICKS		1000			// in ms
 #define DT_EPROM_ADDRESS		0
 #define EP_COUNT				6
 
@@ -31,9 +29,8 @@
 // --- Debug modes
 #define DBG_USE_BRIDGE_SHORT	TRUE
 #define DBG_USE_OPTO_TIMEOUT	TRUE
-#define DBG_USE_FOLLOWING_ERR	FALSE
+#define DBG_USE_FOLLOWING_ERR	TRUE
 
-//
 // Invert result values
 #define SCOPE_DATA_INVERT		TRUE
 // ----------------------------------------
@@ -92,8 +89,7 @@
 // ----------------------------------------
 
 // Data logger
-#define DIAG_CURRENT_MUL		1000			// Diag current logger multiplier
-
+#define DIAG_CURRENT_MUL		1000			// diag current logger multiplier
 #define HV_SWITCH_DELAY			100000L			// time delay for HV commutation
 
 #endif // __GLOBAL_H

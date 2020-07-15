@@ -11,11 +11,11 @@
 //
 #define ACT_DBG_OPTO_DIGITIZER		11	// Test digitizer optical connection
 #define ACT_DBG_SET_PWM				12	// Set PMW
-#define ACT_DBG_POWER_EN_LOW		13  // Enable low voltage range power supply
-#define ACT_DBG_POWER_EN_HIGH       14  // Enable high voltage range power supply
-#define ACT_DBG_POWER_DIS			15  // Power off
+#define ACT_DBG_POWER_EN_LOW		13	// Enable low voltage range power supply
+#define ACT_DBG_POWER_EN_HIGH		14	// Enable high voltage range power supply
+#define ACT_DBG_POWER_DIS			15	// Power off
 //
-#define ACT_DBG_GENERATE_SYNC		20  // Generate SYNC sugnal
+#define ACT_DBG_GENERATE_SYNC		20	// Generate SYNC sugnal
 //
 #define ACT_START_TEST				100	// Start test with defined parameters
 #define ACT_STOP					101	// Stop test sequence
@@ -124,13 +124,13 @@
 //
 #define REG_DC_VOLTAGE_PLATE_TIME	138	// Voltage plate time in DC measurement mode (in ms)
 #define REG_DC_LIMIT_CURRENT		139	// Threshold current (in uA)
-#define REG_DC_LIMIT_VOLTAGE		140 // Maximum voltage for DC modes (in V)
+#define REG_DC_LIMIT_VOLTAGE		140	// Maximum voltage for DC modes (in V)
 #define REG_DC_VOLTAGE_RATE			141	// Rate of increasing DC voltage (in kV/s * 10)
 #define REG_DC_STEP_VOLTAGE			142	// Value for single DC voltage step (in V)
 #define REG_DC_STEP_TIME			143	// DC voltage step time (in ms)
 #define REG_RES_VOLTAGE				144	// DC voltage value for resistance measurement (in V)
 //
-#define REG_DBG_SRAM				170 // Write saw-shape debug sequence to SRAM
+#define REG_DBG_SRAM				170	// Write saw-shape debug sequence to SRAM
 #define REG_DBG_MUTE_PWM			171	// Mute PWM output
 #define REG_DBG_DUAL_POLARITY		172	// Use data points of both signs
 #define REG_DBG_READ_XY_FRAGMENT	173	// Fragment length for XY plot
@@ -159,14 +159,14 @@
 #define REG_ACTUAL_PRIM_VOLTAGE		210	// Primary side capacitor voltage based on sensing (in V)
 #define REG_PRIM_VOLTAGE_CTRL		211	// Primary side capacitor voltage used by control system (in V)
 //
-#define REG_CAN_BUSOFF_COUNTER		220 // Counter of bus-off states
+#define REG_CAN_BUSOFF_COUNTER		220	// Counter of bus-off states
 #define REG_CAN_STATUS_REG			221	// CAN status register (32 bit)
 #define REG_CAN_STATUS_REG_32		222
 #define REG_CAN_DIAG_TEC			223	// CAN TEC
 #define REG_CAN_DIAG_REC			224	// CAN REC
-#define REG_SPI_RX_RESETS			225 // Counter for SPI Rx resets
+#define REG_SPI_RX_RESETS			225	// Counter for SPI Rx resets
 //
-#define REG_DIAG_PING_RESULT		250 // Digitizer ping result
+#define REG_DIAG_PING_RESULT		250	// Digitizer ping result
 //
 #define REG_QUADRATIC_CORR			254	// Use quadratic correction for block
 //
@@ -207,8 +207,8 @@
 
 // FAULT & DISABLE
 //
-#define DF_NONE					    0	// No faults
-#define DF_BRIDGE_SHORT				200 // Bridge current overload
+#define DF_NONE						0	// No faults
+#define DF_BRIDGE_SHORT				200	// Bridge current overload
 #define DF_TEMP_MON					201	// Bridge temperature overload
 #define DF_OPTO_CON_ERROR			202	// Optical connection error
 #define DF_LOW_SIDE_PS				203	// Low-side power supply fault
@@ -223,9 +223,9 @@
 // WARNING CODES
 //
 #define WARNING_NONE				0	// No warning
-#define WARNING_CURRENT_NOT_REACHED 401 // No trip condition detected in I-mode
-#define WARNING_VOLTAGE_NOT_REACHED 402 // Trip condition detected in V-mode
-#define WARNING_RES_OUT_OF_RANGE	403 // Resistance is too low or too high
+#define WARNING_CURRENT_NOT_REACHED 401	// No trip condition detected in I-mode
+#define WARNING_VOLTAGE_NOT_REACHED 402	// Trip condition detected in V-mode
+#define WARNING_RES_OUT_OF_RANGE	403	// Resistance is too low or too high
 //
 #define WARNING_WATCHDOG_RESET		1001	// System has been reseted by WD
 
@@ -238,4 +238,4 @@
 #define ERR_WRONG_PWD				4	// Wrong password - unlock failed
 
 
-#endif // __DEV_OBJ_DIC_H
+#endif	// __DEV_OBJ_DIC_H
