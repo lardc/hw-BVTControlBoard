@@ -174,7 +174,16 @@ Int16S inline MEASURE_AC_TrimPWM(Int16S Duty)
 
 void inline MEASURE_AC_SetPWM(Int16S Duty)
 {
-	ZwPWMB_SetValue12(MEASURE_AC_TrimPWM(Duty));
+	static Int16S PrevDuty = 0;
+	static Boolean InvertPolarity = TRUE;
+	
+	if(Duty >= 0 && PrevDuty < 0)
+		InvertPolarity = !InvertPolarity;
+	
+	if(Duty > 0)
+		ZwPWMB_SetValue12(MEASURE_AC_TrimPWM(InvertPolarity ? -Duty : Duty));
+	
+	PrevDuty = Duty;
 }
 // ----------------------------------------
 
@@ -436,6 +445,7 @@ static void MEASURE_AC_HandleNonTripCondition()
 static void MEASURE_AC_ControlCycle()
 {
 	Int16S correction = 0;
+	Boolean trig_flag = FALSE;
 	static Int16S PrevCorrection = 0;
 	
 	MEASURE_AC_DoSampling();
@@ -467,8 +477,6 @@ static void MEASURE_AC_ControlCycle()
 			
 		case ACPS_VPrePlate:
 			{
-				Boolean trig_flag;
-				
 				MEASURE_AC_HandleVI();
 				VPrePlateTimeCounter++;
 				
@@ -491,12 +499,12 @@ static void MEASURE_AC_ControlCycle()
 				MEASURE_AC_HandleVI();
 				VPlateTimeCounter++;
 				
-				if(VPlateTimeCounter < VPlateTimeCounterTop)
-					correction = MEASURE_AC_CCSub_Regulator(NULL);
-				else
+				correction = MEASURE_AC_CCSub_Regulator(&trig_flag);
+
+				if(VPlateTimeCounter > VPlateTimeCounterTop && trig_flag)
 					MEASURE_AC_SwitchToBrake();
-				
-				MEASURE_AC_CCSub_CorrectionAndLog(correction);
+				else
+					MEASURE_AC_CCSub_CorrectionAndLog(correction);
 			}
 			break;
 			
@@ -606,11 +614,9 @@ static void MEASURE_AC_CacheVariables()
 	
 	VRateCounterTop = CONTROL_FREQUENCY / DataTable[REG_VOLTAGE_FREQUENCY];
 	VPrePlateTimeCounterTop = (CONTROL_FREQUENCY / 1000) * PRE_PLATE_MAX_TIME * (1 + FrequencyDivisorCounter / 5);
-	
-	// Counter top in integer number of half-sine periods
-	VPlateTimeCounterTop = ((Int32U)DataTable[REG_VOLTAGE_PLATE_TIME] * DataTable[REG_VOLTAGE_FREQUENCY] * 2 / 1000)
-			* (CONTROL_FREQUENCY / (DataTable[REG_VOLTAGE_FREQUENCY] * 2));
+	VPlateTimeCounterTop = (CONTROL_FREQUENCY * DataTable[REG_VOLTAGE_PLATE_TIME]) / 1000;
 	BrakeTimeCounterTop = (CONTROL_FREQUENCY * DataTable[REG_BRAKE_TIME]) / 1000;
+	
 	TransCoffInv = _FPtoIQ2(1, DataTable[REG_TRANSFORMER_COFF]);
 	PWMCoff = _IQdiv(_IQ(ZW_PWM_DUTY_BASE), _IQI(DataTable[REG_PRIM_VOLTAGE_CTRL]));
 	MaxSafePWM = DataTable[REG_SAFE_MAX_PWM];
