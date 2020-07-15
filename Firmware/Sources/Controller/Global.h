@@ -53,7 +53,7 @@
 #define HVD_IH_TH				_IQ(500.0f)		// <= 500mA		(high range)
 
 // Pre-plate parameters
-#define PRE_PLATE_MAX_TIME		1000			// pre-plate max time for stabilization (in ms)
+#define PRE_PLATE_MAX_TIME		300				// pre-plate max time for stabilization (in ms)
 #define PRE_PLATE_MAX_ERR		_IQ(10.0f)		// pre-plate max voltage error (in V)
 
 // --- Measure DC section

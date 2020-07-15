@@ -300,7 +300,9 @@ static Boolean MEASURE_AC_PIControllerSequence(_iq DesiredV)
 			
 			if(!SkipRegulation)
 			{
-				err = DesiredAmplitudeVHistory - MAX(PrevActualMaxPosVoltage, ActualMaxPosVoltage);
+				err = DesiredAmplitudeVHistory
+						- ((State == ACPS_VPlate) ?
+								MAX(ActualMaxPosVoltage, PrevActualMaxPosVoltage) : ActualMaxPosVoltage);
 				DesiredAmplitudeVHistory = DesiredAmplitudeV;
 				p = _IQmpy(err, KpVAC);
 				SIVAerr += _IQmpy(err, KiVAC);
@@ -579,7 +581,7 @@ static Int16S MEASURE_AC_CCSub_Regulator(Boolean *PeriodTrigger)
 	// Following error detection
 	if(ret && !DbgMutePWM && DBG_USE_FOLLOWING_ERR)
 	{
-		if((FollowingErrorFraction > FE_MAX_FRACTION) && (_IQabs(FollowingErrorAbsolute) > FE_MAX_ABSOLUTE))
+		if((FollowingErrorFraction > FE_MAX_FRACTION ) && (_IQabs(FollowingErrorAbsolute) > FE_MAX_ABSOLUTE ))
 		{
 			if(FollowingErrorCounter++ > FE_MAX_COUNTER)
 			{
