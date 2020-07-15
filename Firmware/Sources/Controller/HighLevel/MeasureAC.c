@@ -49,7 +49,7 @@ static Int16S MaxSafePWM, MinSafePWM, SSVoltageP2, SSCurrentP2;
 static _iq SSVoltageCoff, SSCurrentCoff, SSVoltageP1, SSVoltageP0, SSCurrentP1, SSCurrentP0, TransCoffInv, PWMCoff;
 static _iq LimitCurrent, LimitCurrentHaltLevel, LimitVoltage, VoltageRateStep, NormalizedFrequency;
 static _iq KpVAC, KiVAC, SIVAerr;
-static _iq FollowingErrorFraction, FollowingErrorAbsolute, FollowingErrorCurrentDelta;
+static _iq FollowingErrorFraction, FollowingErrorAbsolute;
 static _iq ResultV, ResultI;
 static _iq DesiredAmplitudeV, DesiredAmplitudeVHistory, ControlledAmplitudeV, DesiredVoltageHistory;
 static _iq ActualMaxPosVoltage, ActualMaxPosCurrent;
@@ -97,7 +97,7 @@ Boolean MEASURE_AC_StartProcess(Int16U Type, pInt16U pDFReason, pInt16U pProblem
 	TimeCounter = VRateCounter = 0;
 	VPrePlateTimeCounter = VPlateTimeCounter = BrakeTimeCounter = 0;
 	FrequencyRateSwitch = FALSE;
-	FollowingErrorFraction = FollowingErrorAbsolute = FollowingErrorCurrentDelta = 0;
+	FollowingErrorFraction = FollowingErrorAbsolute = 0;
 	FollowingErrorCounter = 0;
 	//
 	SkipRegulation = TRUE;
@@ -275,7 +275,7 @@ static void MEASURE_AC_HandlePeakLogic()
 static Boolean MEASURE_AC_PIControllerSequence(_iq DesiredV)
 {
 	static _iq PrevActualMaxPosVoltage = 0;
-
+	
 	// Every even zero
 	if((DesiredV >= 0) && (DesiredVoltageHistory < 0))
 	{
@@ -289,9 +289,6 @@ static Boolean MEASURE_AC_PIControllerSequence(_iq DesiredV)
 			
 			MEASURE_AC_HandlePeakLogic();
 			
-			// Following error parameter: current
-			FollowingErrorCurrentDelta = MaxPosCurrent - ActualMaxPosCurrent;
-			
 			ActualMaxPosVoltage = UseInstantMethod ? PeakSample.Voltage : MaxPosVoltage;
 			ActualMaxPosCurrent = MaxPosCurrent;
 			//
@@ -300,23 +297,22 @@ static Boolean MEASURE_AC_PIControllerSequence(_iq DesiredV)
 			MaxPosInstantCurrent = 0;
 			//
 			PeakDetectorCounter = 0;
-
+			
 			if(!SkipRegulation)
 			{
 				err = DesiredAmplitudeVHistory - MAX(PrevActualMaxPosVoltage, ActualMaxPosVoltage);
 				DesiredAmplitudeVHistory = DesiredAmplitudeV;
 				p = _IQmpy(err, KpVAC);
 				SIVAerr += _IQmpy(err, KiVAC);
-
+				
 				ControlledAmplitudeV = DesiredAmplitudeV + (SIVAerr + p);
 				PrevActualMaxPosVoltage = ActualMaxPosVoltage;
 			}
 			else
 				SkipRegulation = FALSE;
 			
-			// Following error parameter: voltage
-			FollowingErrorFraction = _IQdiv(err, DesiredAmplitudeV);
 			FollowingErrorAbsolute = err;
+			FollowingErrorFraction = _IQdiv(_IQabs(err), DesiredAmplitudeV);
 			
 			return TRUE;
 		}
@@ -489,7 +485,7 @@ static void MEASURE_AC_ControlCycle()
 				correction = MEASURE_AC_CCSub_Regulator(&trig_flag);
 				
 				if(trig_flag
-						&& (PRE_PLATE_MAX_ERR >= ABS(FollowingErrorAbsolute)
+						&& (PRE_PLATE_MAX_ERR >= _IQabs(FollowingErrorAbsolute)
 								|| VPrePlateTimeCounter >= VPrePlateTimeCounterTop))
 				{
 					State = ACPS_VPlate;
@@ -583,7 +579,7 @@ static Int16S MEASURE_AC_CCSub_Regulator(Boolean *PeriodTrigger)
 	// Following error detection
 	if(ret && !DbgMutePWM && DBG_USE_FOLLOWING_ERR)
 	{
-		if(FollowingErrorFraction > FE_MAX_FRACTION && FollowingErrorCurrentDelta < FE_MIN_I_DELTA)
+		if((FollowingErrorFraction > FE_MAX_FRACTION) && (_IQabs(FollowingErrorAbsolute) > FE_MAX_ABSOLUTE))
 		{
 			if(FollowingErrorCounter++ > FE_MAX_COUNTER)
 			{
@@ -621,7 +617,7 @@ static void MEASURE_AC_CacheVariables()
 	TransCoffInv = _FPtoIQ2(1, DataTable[REG_TRANSFORMER_COFF]);
 	PWMCoff = _IQdiv(_IQ(ZW_PWM_DUTY_BASE), _IQI(DataTable[REG_PRIM_VOLTAGE_CTRL]));
 	MaxSafePWM = DataTable[REG_SAFE_MAX_PWM];
-
+	
 	StartPauseTimeCounterTop = (CONTROL_FREQUENCY / DataTable[REG_VOLTAGE_FREQUENCY]) * 2;
 	NormalizedFrequency = _IQdiv(_IQ(1.0f), _IQI(CONTROL_FREQUENCY / DataTable[REG_VOLTAGE_FREQUENCY]));
 	VoltageRateStep = _IQmpy(_IQdiv(_IQ(1000.0f), _IQI(DataTable[REG_VOLTAGE_FREQUENCY])),

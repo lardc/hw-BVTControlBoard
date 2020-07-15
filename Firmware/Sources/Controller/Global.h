@@ -79,9 +79,9 @@
 
 // Following error settings
 // --- AC mode
-#define FE_MAX_FRACTION			_IQ(0.3f)		// part of 1
+#define FE_MAX_ABSOLUTE			_IQ(500)		// in V
+#define FE_MAX_FRACTION			_IQ(0.2f)		// part of 1
 #define FE_MAX_COUNTER			3
-#define FE_MIN_I_DELTA			_IQ(5.0f)		// in mA
 // --- DC mode
 #define FE_DC_MAX_FRACTION		_IQ(0.1f)		// part of 1 for DC mode
 #define FE_DC_MIN_VOLTAGE		_IQ(200.0f)		// in V
