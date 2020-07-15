@@ -48,6 +48,12 @@ void ZbGPIO_Init()
 }
 // ----------------------------------------
 
+void ZbGPIO_SwitchFan(Boolean Set)
+{
+	ZwGPIO_WritePin(PIN_FAN, Set);
+}
+// ----------------------------------------
+
 void ZbGPIO_SwitchLED1(Boolean Set)
 {
 	ZwGPIO_WritePin(PIN_LED_1, Set);

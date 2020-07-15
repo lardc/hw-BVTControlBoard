@@ -14,6 +14,7 @@
 //
 // Initialize board GPIO
 void ZbGPIO_Init();
+void ZbGPIO_SwitchFan(Boolean Set);
 // Switch LED 1
 void ZbGPIO_SwitchLED1(Boolean Set);
 // Toggle LED 1

@@ -14,6 +14,8 @@
 #define ACT_DBG_POWER_EN_LOW		13	// Enable low voltage range power supply
 #define ACT_DBG_POWER_EN_HIGH		14	// Enable high voltage range power supply
 #define ACT_DBG_POWER_DIS			15	// Power off
+#define ACT_DBG_FAN_ON				16	// Turn on case fan
+#define ACT_DBG_FAN_OFF				17	// Turn off case fan
 //
 #define ACT_DBG_GENERATE_SYNC		20	// Generate SYNC sugnal
 //

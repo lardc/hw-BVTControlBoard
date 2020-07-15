@@ -525,6 +525,14 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U UserError)
 				*UserError = ERR_OPERATION_BLOCKED;
 			break;
 			
+		case ACT_DBG_FAN_ON:
+			ZbGPIO_SwitchFan(TRUE);
+			break;
+
+		case ACT_DBG_FAN_OFF:
+			ZbGPIO_SwitchFan(FALSE);
+			break;
+
 		case ACT_DBG_POWER_EN_LOW:
 			DRIVER_SwitchPowerLow();
 			break;
