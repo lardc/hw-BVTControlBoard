@@ -55,9 +55,9 @@ static _iq DesiredAmplitudeV, DesiredAmplitudeVHistory, ControlledAmplitudeV, De
 static _iq ActualMaxPosVoltage, ActualMaxPosCurrent;
 static _iq MaxPosVoltage, MaxPosCurrent, MaxPosInstantCurrent, PeakThresholdDetect;
 static DataSample ActualSecondarySample;
-static Boolean TripCurrentDetected, UseInstantMethod, FrequencyRateSwitch;
+static Boolean TripConditionDetected, UseInstantMethod, FrequencyRateSwitch;
 static Boolean DbgDualPolarity, DbgSRAM, DbgMutePWM, SkipRegulation, SkipLoggingVoids;
-static Int16U MeasurementType, Problem, Warning, Fault;
+static Int16U Problem, Warning, Fault;
 
 #pragma DATA_SECTION(PeakDetectorData, "data_mem");
 static DataSampleIQ PeakDetectorData[PEAK_DETECTOR_SIZE], PeakSample;
@@ -75,7 +75,7 @@ static void MEASURE_AC_CacheVariables();
 static Boolean MEASURE_AC_PIControllerSequence(_iq DesiredV);
 static Int16S MEASURE_AC_PredictControl(_iq DesiredV);
 static void MEASURE_AC_HandleVI();
-static void MEASURE_AC_HandleTripCondition();
+static void MEASURE_AC_HandleTripCondition(Boolean UsePeakValues);
 static void MEASURE_AC_HandleNonTripCondition();
 static _iq MEASURE_AC_GetCurrentLimit();
 
@@ -83,8 +83,6 @@ static _iq MEASURE_AC_GetCurrentLimit();
 //
 Boolean MEASURE_AC_StartProcess(Int16U Type, pInt16U pDFReason, pInt16U pProblem)
 {
-	MeasurementType = Type;
-	
 	// Cache data
 	MEASURE_AC_CacheVariables();
 	// Enable RT cycle
@@ -94,7 +92,7 @@ Boolean MEASURE_AC_StartProcess(Int16U Type, pInt16U pDFReason, pInt16U pProblem
 	Problem = PROBLEM_NONE;
 	Warning = WARNING_NONE;
 	Fault = DF_NONE;
-	TripCurrentDetected = FALSE;
+	TripConditionDetected = FALSE;
 	OptoConnectionMon = 0;
 	TimeCounter = VRateCounter = 0;
 	VPrePlateTimeCounter = VPlateTimeCounter = BrakeTimeCounter = 0;
@@ -105,7 +103,6 @@ Boolean MEASURE_AC_StartProcess(Int16U Type, pInt16U pDFReason, pInt16U pProblem
 	SkipRegulation = TRUE;
 	SIVAerr = 0;
 	//
-	ActualSecondarySample.IQFields.VoltageRaw = 0;
 	ActualSecondarySample.IQFields.Voltage = 0;
 	ActualSecondarySample.IQFields.Current = 0;
 	ActualMaxPosVoltage = 0;
@@ -121,8 +118,6 @@ Boolean MEASURE_AC_StartProcess(Int16U Type, pInt16U pDFReason, pInt16U pProblem
 	//
 	FIR_Reset();
 	
-	// Make proper commutation
-	SS_Commutate((MeasurementType == MEASUREMENT_TYPE_AC) ? SwitchConfig_AC : SwitchConfig_BV);
 	// Configure samplers
 	SS_ConfigureSensingCircuits(LimitCurrent, LimitVoltage, FALSE);
 	// Start sampling
@@ -179,7 +174,7 @@ Int16S inline MEASURE_AC_SetPWM(Int16S Duty)
 	static Boolean InvertPolarity = TRUE;
 	
 	Int16S PWMOutput = 0;
-
+	
 	if(Duty >= 0 && PrevDuty < 0)
 		InvertPolarity = !InvertPolarity;
 	
@@ -196,15 +191,24 @@ Int16S inline MEASURE_AC_SetPWM(Int16S Duty)
 
 void MEASURE_AC_Stop(Int16U Reason)
 {
-	if(Reason == DF_INTERNAL)
+	TripConditionDetected = TRUE;
+	
+	switch (Reason)
 	{
-		TripCurrentDetected = TRUE;
-		MEASURE_AC_HandleTripCondition();
+		case DF_INTERNAL:
+			MEASURE_AC_HandleTripCondition(UseInstantMethod);
+			break;
+			
+		case PROBLEM_OUTPUT_SHORT:
+			MEASURE_AC_HandleTripCondition(FALSE);
+		case DF_NONE:
+			Problem = Reason;
+			break;
+			
+		default:
+			Fault = Reason;
+			break;
 	}
-	else if(Reason == DF_NONE || Reason == PROBLEM_OUTPUT_SHORT)
-		Problem = Reason;
-	else
-		Fault = Reason;
 	
 	MEASURE_AC_SwitchToBrake();
 }
@@ -301,7 +305,7 @@ static Boolean MEASURE_AC_PIControllerSequence(_iq DesiredV)
 				DesiredAmplitudeVHistory = DesiredAmplitudeV;
 				p = _IQmpy(err, KpVAC);
 				SIVAerr += _IQmpy(err, KiVAC);
-				
+
 				ControlledAmplitudeV = DesiredAmplitudeV + (SIVAerr + p);
 			}
 			else
@@ -346,13 +350,8 @@ void inline MEASURE_AC_DoSampling()
 #endif
 static void MEASURE_AC_HandleVI()
 {
-	_iq absVoltage, absCurrent;
-	
-	absVoltage = ABS(ActualSecondarySample.IQFields.Voltage);
-	absCurrent = ABS(ActualSecondarySample.IQFields.Current);
-	
 	// Connectivity monitoring
-	if(OptoConnectionMonMax)
+	if(OptoConnectionMonMax && DBG_USE_OPTO_TIMEOUT)
 	{
 		if(!SS_DataValid)
 		{
@@ -370,38 +369,35 @@ static void MEASURE_AC_HandleVI()
 	if(TimeCounter > StartPauseTimeCounterTop)
 	{
 		// Handle values
-		if(absCurrent > MaxPosCurrent)
-			MaxPosCurrent = absCurrent;
+		if(ActualSecondarySample.IQFields.Current > MaxPosCurrent)
+			MaxPosCurrent = ActualSecondarySample.IQFields.Current;
 	}
 	
 	// Detect maximum voltage for AC period
-	if(absVoltage > MaxPosVoltage)
+	if(ActualSecondarySample.IQFields.Voltage > MaxPosVoltage)
 	{
-		MaxPosVoltage = absVoltage;
-		MaxPosInstantCurrent = absCurrent;
+		MaxPosVoltage = ActualSecondarySample.IQFields.Voltage;
+		MaxPosInstantCurrent = ActualSecondarySample.IQFields.Current;
 	}
 	
 	// Check current conditions
 	if(UseInstantMethod)
 	{
-		if(absCurrent >= LimitCurrentHaltLevel)
-		{
+		if(ActualSecondarySample.IQFields.Current >= LimitCurrentHaltLevel)
 			MEASURE_AC_Stop(PROBLEM_OUTPUT_SHORT);
-		}
 	}
 	else
 	{
-		if(absCurrent >= MEASURE_AC_GetCurrentLimit())
-		{
+		if(ActualSecondarySample.IQFields.Current >= MEASURE_AC_GetCurrentLimit())
 			MEASURE_AC_Stop(DF_INTERNAL);
-		}
 	}
 	
 	// Store data for peak detection
-	if((absVoltage > _IQmpy(DesiredAmplitudeV, PEAK_THR_COLLECT)) && (PeakDetectorCounter < PEAK_DETECTOR_SIZE))
+	if((ActualSecondarySample.IQFields.Voltage > _IQmpy(DesiredAmplitudeV, PEAK_THR_COLLECT))
+			&& (PeakDetectorCounter < PEAK_DETECTOR_SIZE))
 	{
-		PeakDetectorData[PeakDetectorCounter].Current = absCurrent;
-		PeakDetectorData[PeakDetectorCounter].Voltage = absVoltage;
+		PeakDetectorData[PeakDetectorCounter].Current = ActualSecondarySample.IQFields.Current;
+		PeakDetectorData[PeakDetectorCounter].Voltage = ActualSecondarySample.IQFields.Voltage;
 		++PeakDetectorCounter;
 	}
 }
@@ -416,9 +412,9 @@ static _iq MEASURE_AC_GetCurrentLimit()
 }
 // ----------------------------------------
 
-static void MEASURE_AC_HandleTripCondition()
+static void MEASURE_AC_HandleTripCondition(Boolean UsePeakValues)
 {
-	if(UseInstantMethod)
+	if(UsePeakValues)
 	{
 		ResultI = PeakSample.Current;
 		ResultV = PeakSample.Voltage;
@@ -507,7 +503,7 @@ static void MEASURE_AC_ControlCycle()
 				VPlateTimeCounter++;
 				
 				correction = MEASURE_AC_CCSub_Regulator(&trig_flag);
-
+				
 				if(VPlateTimeCounter > VPlateTimeCounterTop && trig_flag)
 					MEASURE_AC_SwitchToBrake();
 				else
@@ -531,12 +527,7 @@ static void MEASURE_AC_ControlCycle()
 				{
 					CONTROL_SubcribeToCycle(NULL);
 					
-					if(TripCurrentDetected)
-					{
-						if(!UseInstantMethod)
-							MEASURE_AC_HandlePeakLogic();
-					}
-					else
+					if(!TripConditionDetected)
 						MEASURE_AC_HandleNonTripCondition();
 					
 					CONTROL_NotifyEndTest(ResultV, ResultI, Fault, Problem, Warning);
@@ -627,19 +618,19 @@ static void MEASURE_AC_CacheVariables()
 	TransCoffInv = _FPtoIQ2(1, DataTable[REG_TRANSFORMER_COFF]);
 	PWMCoff = _IQdiv(_IQ(ZW_PWM_DUTY_BASE), _IQI(DataTable[REG_PRIM_VOLTAGE_CTRL]));
 	MaxSafePWM = DataTable[REG_SAFE_MAX_PWM];
-	//
+
 	StartPauseTimeCounterTop = (CONTROL_FREQUENCY / DataTable[REG_VOLTAGE_FREQUENCY]) * 2;
 	NormalizedFrequency = _IQdiv(_IQ(1.0f), _IQI(CONTROL_FREQUENCY / DataTable[REG_VOLTAGE_FREQUENCY]));
 	VoltageRateStep = _IQmpy(_IQdiv(_IQ(1000.0f), _IQI(DataTable[REG_VOLTAGE_FREQUENCY])),
 			_IQmpyI32(_IQ(0.1f), DataTable[REG_VOLTAGE_AC_RATE]));
 	MinSafePWM = (PWM_FREQUENCY / 1000L) * PWM_TH * ZW_PWM_DUTY_BASE / 1000000L;
 	
-	UseInstantMethod = (DataTable[REG_USE_INST_METHOD] && (MeasurementType != MEASUREMENT_TYPE_AC)) ? TRUE : FALSE;
+	UseInstantMethod = DataTable[REG_USE_INST_METHOD] ? TRUE : FALSE;
 	PeakThresholdDetect = _FPtoIQ2(DataTable[REG_PEAK_SEARCH_ZONE], 100);
 	
 	DbgSRAM = DataTable[REG_DBG_SRAM] ? TRUE : FALSE;
 	DbgMutePWM = DataTable[REG_DBG_MUTE_PWM] ? TRUE : FALSE;
-	DbgDualPolarity = (DataTable[REG_DBG_DUAL_POLARITY] || (MeasurementType == MEASUREMENT_TYPE_AC)) ? TRUE : FALSE;
+	DbgDualPolarity = DataTable[REG_DBG_DUAL_POLARITY] ? TRUE : FALSE;
 	
 	SkipLoggingVoids = DataTable[REG_SKIP_LOGGING_VOIDS] ? TRUE : FALSE;
 	
