@@ -9,10 +9,6 @@
 #include "stdinc.h"
 #include "IQmathLib.h"
 
-// Variables
-//
-extern volatile _iq PSAMPLING_CapacitorVoltage;
-
 // Functions
 //
 // Init monitor
@@ -21,5 +17,6 @@ void PSAMPLING_Init();
 void PSAMPLING_ConfigureSamplingVCap();
 // Sample capacitor voltage
 void PSAMPLING_DoSamplingVCap();
+Int16U PSAMPLING_ReadCapVoltage();
 
 #endif // __PRIMARY_SAMPLING_H
