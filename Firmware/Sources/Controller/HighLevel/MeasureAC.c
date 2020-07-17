@@ -274,8 +274,6 @@ static void MEASURE_AC_HandlePeakLogic()
 #endif
 static Boolean MEASURE_AC_PIControllerSequence(_iq DesiredV)
 {
-	static _iq PrevActualMaxPosVoltage = 0;
-	
 	// Every even zero
 	if((DesiredV >= 0) && (DesiredVoltageHistory < 0))
 	{
@@ -300,15 +298,12 @@ static Boolean MEASURE_AC_PIControllerSequence(_iq DesiredV)
 			
 			if(!SkipRegulation)
 			{
-				err = DesiredAmplitudeVHistory
-						- ((State == ACPS_VPlate) ?
-								MAX(ActualMaxPosVoltage, PrevActualMaxPosVoltage) : ActualMaxPosVoltage);
+				err = DesiredAmplitudeVHistory - ActualMaxPosVoltage;
 				DesiredAmplitudeVHistory = DesiredAmplitudeV;
 				p = _IQmpy(err, KpVAC);
 				SIVAerr += _IQmpy(err, KiVAC);
 				
 				ControlledAmplitudeV = DesiredAmplitudeV + (SIVAerr + p);
-				PrevActualMaxPosVoltage = ActualMaxPosVoltage;
 			}
 			else
 				SkipRegulation = FALSE;
