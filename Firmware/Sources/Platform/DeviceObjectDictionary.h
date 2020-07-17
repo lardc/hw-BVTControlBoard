@@ -10,7 +10,7 @@
 #define ACT_CLR_WARNING				4	// Clear warning flag
 //
 #define ACT_DBG_OPTO_DIGITIZER		11	// Test digitizer optical connection
-#define ACT_DBG_SET_PWM				12	// Set PMW
+// 12
 #define ACT_DBG_FAN_ON				13	// Turn on case fan
 #define ACT_DBG_FAN_OFF				14	// Turn off case fan
 #define ACT_DBG_POWER_DIS			15	// Power off
@@ -73,14 +73,7 @@
 // 48
 #define REG_OPTO_CONNECTION_MON		49	// Optical connection error when N packets lost (0 to disable)
 #define REG_SKIP_LOGGING_VOIDS		50	// Don't log empty zones in case of using frequency divisor
-// 51 - 53
-#define REG_KP_VDC_N				54	// DC voltage amplitude controller P coefficient (N)
-#define REG_KP_VDC_D				55	// DC voltage amplitude controller P coefficient (D)
-#define REG_KI_VDC_N				56	// DC voltage amplitude controller I coefficient (N)
-#define REG_KI_VDC_D				57	// DC voltage amplitude controller I coefficient (D)
-#define REG_RES_VOLTAGE_RATE		58	// Resistance measure rise rate (in kV/s * 10)
-// 59 - 78
-#define REG_SAFE_MAX_PWM_DC			79	// Maximum PWM (DC mode)
+// 51 - 79
 #define REG_SAFE_MAX_PWM			80	// Maximum PWM (AC mode)
 #define REG_USE_INST_METHOD			81	// Measurement method
 #define REG_REPLACE_CURVES			82	// Replace output V/I curves by peak measurement
@@ -137,8 +130,6 @@
 #define REG_DBG_MUTE_PWM			171	// Mute PWM output
 #define REG_DBG_DUAL_POLARITY		172	// Use data points of both signs
 #define REG_DBG_READ_XY_FRAGMENT	173	// Fragment length for XY plot
-#define REG_DBG_SET_DC_PWM			174	// Set PWM for DC module
-#define REG_DBG_PULSE_LENGTH		175
 //
 #define REG_PWD_1					180	// Unlock password location 1
 #define REG_PWD_2					181	// Unlock password location 2
@@ -188,12 +179,10 @@
 // MEASUREMENT TYPE
 //
 #define MEASUREMENT_TYPE_NONE		0	// None
-#define MEASUREMENT_TYPE_AC			1	// AC full wave
+// 1
 #define MEASUREMENT_TYPE_AC_D		2	// AC positive polarity
 #define MEASUREMENT_TYPE_AC_R		3	// AC negative polarity
-#define MEASUREMENT_TYPE_DC			4	// DC general test
-#define MEASUREMENT_TYPE_DC_STEP	5	// DC general test
-#define MEASUREMENT_TYPE_DC_RES		6	// Resistance test
+// 4 - 6
 #define MEASUREMENT_TYPE_TEST		7	// Test sine wave
 
 // OPERATION RESULTS

@@ -68,11 +68,11 @@ const TableItemConstraint NVConstraint[DATA_TABLE_NV_SIZE] =
 										   {0, 0, 0},																// 51
 										   {0, 0, 0},																// 52
 										   {0, 0, 0},																// 53
-										   {0, INT16U_MAX, 0},														// 54
-										   {1, X_D_DEF3, X_D_DEF1},													// 55
-										   {0, INT16U_MAX, 0},														// 56
-										   {1, X_D_DEF3, X_D_DEF1},													// 57
-										   {RATE_VDC_MIN, RATE_VDC_MAX, RATE_VDC_DEF},								// 58
+										   {0, 0, 0},																// 54
+										   {0, 0, 0},																// 55
+										   {0, 0, 0},																// 56
+										   {0, 0, 0},																// 57
+										   {0, 0, 0},																// 58
 										   {0, 0, 0},																// 59
 										   {0, 0, 0},																// 60
 										   {0, 0, 0},																// 61
@@ -93,7 +93,7 @@ const TableItemConstraint NVConstraint[DATA_TABLE_NV_SIZE] =
 										   {0, 0, 0},																// 76
 										   {0, 0, 0},																// 77
 										   {0, 0, 0},																// 78
-										   {0, PWM_DC_LIMIT_MAX, 0},												// 79
+										   {0, 0, 0},																// 79
 										   {0, ZW_PWM_DUTY_BASE, ZW_PWM_DUTY_BASE},									// 80
 										   {NO, YES, YES},															// 81
 										   {NO, YES, NO},															// 82
@@ -156,13 +156,13 @@ const TableItemConstraint VConstraint[DATA_TABLE_WP_START - DATA_TABLE_WR_START]
 										   {VOLTAGE_FREQUENCY_MIN, VOLTAGE_FREQUENCY_MAX, VOLTAGE_FREQUENCY_DEF},	// 135
 										   {VOLTAGE_DIV_MIN, VOLTAGE_DIV_MAX, VOLTAGE_DIV_DEF},						// 136
 										   {0, SCOPE_RATE_MAX, SCOPE_RATE_DEF},										// 137
-										   {0, VPLATE_TIME_MAX, 0},													// 138
-										   {0, TEST_CURRENT_DC_MAX, 0},												// 139
-										   {LIMIT_VOLTAGE_MIN, LIMIT_VOLTAGE_MAX, LIMIT_VOLTAGE_DEF},				// 140
-										   {RATE_VDC_MIN, RATE_VDC_MAX, RATE_VDC_DEF},								// 141
-										   {STEP_DC_V_MIN, STEP_DC_V_MAX, STEP_DC_V_DEF},							// 142
-										   {STEP_DC_T_MIN, STEP_DC_T_MAX, STEP_DC_T_DEF},							// 143
-										   {RES_VOLTAGE_MIN, RES_VOLTAGE_MAX, RES_VOLTAGE_DEF},						// 144
+										   {0, 0, 0},																// 138
+										   {0, 0, 0},																// 139
+										   {0, 0, 0},																// 140
+										   {0, 0, 0},																// 141
+										   {0, 0, 0},																// 142
+										   {0, 0, 0},																// 143
+										   {0, 0, 0},																// 144
 										   {0, 0, 0},																// 145
 										   {0, 0, 0},																// 146
 										   {0, 0, 0},																// 147
@@ -192,8 +192,8 @@ const TableItemConstraint VConstraint[DATA_TABLE_WP_START - DATA_TABLE_WR_START]
 										   {NO, YES, NO},															// 171
 										   {NO, YES, NO},															// 172
 										   {0, INT16S_MAX, LAST_FRAG_SIZE_DEF},										// 173
-										   {0, PWM_DC_LIMIT_MAX, 0},												// 174
-										   {1, INT16U_MAX, 1},														// 175
+										   {0, 0, 0},																// 174
+										   {0, 0, 0},																// 175
 										   {0, 0, 0},																// 176
 										   {0, 0, 0},																// 177
 										   {0, 0, 0},																// 178

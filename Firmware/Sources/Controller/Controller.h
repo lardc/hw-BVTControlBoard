@@ -12,7 +12,6 @@
 #include "Global.h"
 #include "DeviceObjectDictionary.h"
 #include "MeasureAC.h"
-#include "MeasureDC.h"
 
 
 // Types

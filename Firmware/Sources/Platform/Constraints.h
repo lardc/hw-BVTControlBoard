@@ -32,14 +32,6 @@ typedef struct __TableItemConstraint
 //
 #define VPLATE_TIME_MAX			60000	// (in ms)
 //
-#define STEP_DC_V_MIN			50		// in V
-#define STEP_DC_V_MAX			200		// in V
-#define STEP_DC_V_DEF			50		// in V
-//
-#define STEP_DC_T_MIN			50		// in ms
-#define STEP_DC_T_MAX			200		// in ms
-#define STEP_DC_T_DEF			100		// in ms
-//
 #define RES_VOLTAGE_MIN			1000	// in V
 #define RES_VOLTAGE_MAX			2500	// in V
 #define RES_VOLTAGE_DEF			1000	// in V
@@ -47,10 +39,6 @@ typedef struct __TableItemConstraint
 #define RATE_VAC_MIN			1		// (x100 V/s)
 #define RATE_VAC_MAX			100		// (x100 V/s)
 #define RATE_VAC_DEF			20		// (x100 V/s)
-//
-#define RATE_VDC_MIN			1		// (x100 V/s)
-#define RATE_VDC_MAX			100		// (x100 V/s)
-#define RATE_VDC_DEF			20		// (x100 V/s)
 //
 #define START_VAC_MIN			LIMIT_VOLTAGE_MIN
 #define START_VAC_MAX			5000	// (in V)
@@ -79,8 +67,6 @@ typedef struct __TableItemConstraint
 #define OPTO_MON_MIN			0
 #define OPTO_MON_MAX			50
 #define OPTO_MON_DEF			10
-//
-#define PWM_DC_LIMIT_MAX		5000
 //
 #define VOLTAGE_DIV_MIN			1		// Pulse rate 1:1
 #define VOLTAGE_DIV_MAX			100		// Pulse rate 1:100

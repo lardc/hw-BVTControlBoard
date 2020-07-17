@@ -206,15 +206,9 @@ void CONTROL_RequestStop(Int16U Reason, Boolean HWSignal)
 	{
 		switch (CurrentMeasurementType)
 		{
-			case MEASUREMENT_TYPE_AC:
 			case MEASUREMENT_TYPE_AC_R:
 			case MEASUREMENT_TYPE_AC_D:
 				MEASURE_AC_Stop(Reason);
-				break;
-			case MEASUREMENT_TYPE_DC:
-			case MEASUREMENT_TYPE_DC_STEP:
-			case MEASUREMENT_TYPE_DC_RES:
-				MEASURE_DC_Stop(Reason);
 				break;
 			case MEASUREMENT_TYPE_TEST:
 				MEASURE_TEST_Stop(Reason);
@@ -239,16 +233,8 @@ void CONTROL_NotifyEndTest(_iq BVTResultV, _iq BVTResultI, Int16U DFReason, Int1
 	// Save values for further processing
 	EndXDPCArgument.SavedResultV = _IQint(BVTResultV);
 	
-	if(CurrentMeasurementType == MEASUREMENT_TYPE_DC || CurrentMeasurementType == MEASUREMENT_TYPE_DC_STEP
-			|| CurrentMeasurementType == MEASUREMENT_TYPE_DC_RES)
-	{
-		EndXDPCArgument.SavedResultI = _IQint(BVTResultI);
-	}
-	else
-	{
-		EndXDPCArgument.SavedResultI = _IQmpyI32int(BVTResultI, 10);
-		DataTable[REG_RESULT_I_UA_R] = (BVTResultI > 0) ? _IQmpyI32int(_IQfrac(BVTResultI), 1000) : 0;
-	}
+	EndXDPCArgument.SavedResultI = _IQmpyI32int(BVTResultI, 10);
+	DataTable[REG_RESULT_I_UA_R] = (BVTResultI > 0) ? _IQmpyI32int(_IQfrac(BVTResultI), 1000) : 0;
 	
 	EndXDPCArgument.SavedDFReason = DFReason;
 	EndXDPCArgument.SavedProblem = Problem;
@@ -273,15 +259,9 @@ static void CONTROL_EndTestDPC()
 	
 	switch (CurrentMeasurementType)
 	{
-		case MEASUREMENT_TYPE_AC:
 		case MEASUREMENT_TYPE_AC_R:
 		case MEASUREMENT_TYPE_AC_D:
 			MEASURE_AC_FinishProcess();
-			break;
-		case MEASUREMENT_TYPE_DC:
-		case MEASUREMENT_TYPE_DC_STEP:
-		case MEASUREMENT_TYPE_DC_RES:
-			MEASURE_DC_FinishProcess();
 			break;
 		case MEASUREMENT_TYPE_TEST:
 			MEASURE_TEST_FinishProcess();
@@ -516,13 +496,6 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U UserError)
 				*UserError = ERR_OPERATION_BLOCKED;
 			break;
 			
-		case ACT_DBG_SET_PWM:
-			if(CONTROL_State == DS_Powered)
-				SS_SetPWM(DataTable[REG_DBG_SET_DC_PWM]);
-			else
-				*UserError = ERR_OPERATION_BLOCKED;
-			break;
-			
 		case ACT_DBG_FAN_ON:
 			ZbGPIO_SwitchFan(TRUE);
 			break;
@@ -599,15 +572,9 @@ static void CONTROL_TriggerMeasurementDPC()
 		case MEASUREMENT_TYPE_TEST:
 			success = MEASURE_TEST_StartProcess(CurrentMeasurementType, &DFReason, &problem);
 			break;
-		case MEASUREMENT_TYPE_AC:
 		case MEASUREMENT_TYPE_AC_D:
 		case MEASUREMENT_TYPE_AC_R:
 			success = MEASURE_AC_StartProcess(CurrentMeasurementType, &DFReason, &problem);
-			break;
-		case MEASUREMENT_TYPE_DC:
-		case MEASUREMENT_TYPE_DC_STEP:
-		case MEASUREMENT_TYPE_DC_RES:
-			success = MEASURE_DC_StartProcess(CurrentMeasurementType, &DFReason, &problem);
 			break;
 	}
 	
