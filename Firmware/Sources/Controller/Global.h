@@ -37,9 +37,7 @@
 
 // --- Capacitor battery
 #define CAP_DELTA				3				// Detection voltage delta (in V)
-#define CAP_SW_VOLTAGE			800				// Output voltage switch limit (in V)
-#define CAP_SW_POWER			100				// Output power switch limit (in W)
-
+#define CAP_POW_VOLT_MARGIN		20				// Power and voltage margin for primary side (in %)
 #define BAT_CHARGE_TIMEOUT		15000			// in ms
 // ----------------------------------------
 

@@ -11,11 +11,13 @@
 //
 #define ACT_DBG_OPTO_DIGITIZER		11	// Test digitizer optical connection
 #define ACT_DBG_SET_PWM				12	// Set PMW
-#define ACT_DBG_POWER_EN_LOW		13	// Enable low voltage range power supply
-#define ACT_DBG_POWER_EN_HIGH		14	// Enable high voltage range power supply
+#define ACT_DBG_FAN_ON				13	// Turn on case fan
+#define ACT_DBG_FAN_OFF				14	// Turn off case fan
 #define ACT_DBG_POWER_DIS			15	// Power off
-#define ACT_DBG_FAN_ON				16	// Turn on case fan
-#define ACT_DBG_FAN_OFF				17	// Turn off case fan
+#define ACT_DBG_POWER_24V			16	// Turn on primary 24V voltage
+#define ACT_DBG_POWER_50V			17	// Turn on primary 50V voltage
+#define ACT_DBG_POWER_100V			18	// Turn on primary 100V voltage
+#define ACT_DBG_POWER_150V			19	// Turn on primary 150V voltage
 //
 #define ACT_DBG_GENERATE_SYNC		20	// Generate SYNC sugnal
 //
@@ -65,8 +67,7 @@
 // 41
 #define REG_BRAKE_TIME				42	// Brake time (in ms)
 #define REG_TRANSFORMER_COFF		43	// Transformer V transfer ratio (secondary/primary)
-#define REG_PRIM_V_LOW_RANGE		44	// Low range voltage on primary side (in V)
-#define REG_PRIM_V_FULL_RANGE		45	// Full range voltage on primary side (in V)
+// 44 - 45
 #define REG_USE_CUSTOM_PRIM_V		46	// Switch to custom voltage value on primary side
 #define REG_PRIM_V_CUSTOM			47	// Custom voltage on primary side (in V)
 // 48

@@ -15,14 +15,16 @@
 //
 // Init driver
 void DRIVER_Init();
-// Connect/disconnect capacitors battery
-void DRIVER_SwitchPowerHigh();
-void DRIVER_SwitchPowerLow();
+void DRIVER_SwitchPower24V();
+void DRIVER_SwitchPower50V();
+void DRIVER_SwitchPower100V();
+void DRIVER_SwitchPower150V();
 void DRIVER_SwitchPowerOff();
-// Clear TZ condition
+void DRIVER_PowerDischarge(Boolean State);
+Int16U DRIVER_SwitchToTargetVoltage(Int16U SecondaryVoltage, Int16U Power, Int16U CurrentPrimaryVoltage,
+		Int16U TransformerRatio);
 void DRIVER_ClearTZFault();
-// Get TZ pin state for bridge short circuit
-Boolean DRIVER_GetSHPinState();
+Boolean DRIVER_GetShortPinState();
 
 
 // Inline functions

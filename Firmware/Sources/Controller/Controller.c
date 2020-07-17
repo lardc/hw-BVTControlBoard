@@ -38,9 +38,8 @@ typedef struct __EndTestDPCClosure
 typedef enum __BatteryVoltageState
 {
 	BVS_None = 0,
-	BVS_WaitRise = 1,
-	BVS_WaitFall = 2,
-	BVS_Ready = 3
+	BVS_WaitVoltage = 1,
+	BVS_Ready = 2
 } BatteryVoltageState;
 
 // Variables
@@ -54,9 +53,10 @@ static CONTROL_FUNC_RealTimeRoutine RealTimeRoutine = NULL;
 static EndTestDPCClosure EndXDPCArgument = {FALSE, 0, 0, DF_NONE, WARNING_NONE,
 PROBLEM_NONE};
 //
-static volatile Boolean CycleActive = FALSE, BatteryVoltageIsReady;
+static volatile Boolean CycleActive = FALSE;
 static volatile FUNC_AsyncDelegate DPCDelegate = NULL;
 static volatile Int16U CurrentMeasurementType = MEASUREMENT_TYPE_NONE;
+static Int16U TargetPrimaryVoltage = 0;
 //
 // Boot-loader flag
 #pragma DATA_SECTION(CONTROL_BootLoaderRequest, "bl_flag");
@@ -158,6 +158,7 @@ void inline CONTROL_RequestDPC(FUNC_AsyncDelegate Action)
 void CONTROL_UpdateLow()
 {
 	// Update capacitor state
+	DataTable[REG_ACTUAL_PRIM_VOLTAGE] = PSAMPLING_ReadCapVoltage();
 	PSAMPLING_DoSamplingVCap();
 }
 // ----------------------------------------
@@ -420,10 +421,7 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U UserError)
 		case ACT_ENABLE_POWER:
 			{
 				if(CONTROL_State == DS_None)
-				{
-					DRIVER_SwitchPowerHigh();
 					CONTROL_SwitchStateToPowered();
-				}
 				else
 					*UserError = ERR_DEVICE_NOT_READY;
 			}
@@ -533,16 +531,28 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U UserError)
 			ZbGPIO_SwitchFan(FALSE);
 			break;
 
-		case ACT_DBG_POWER_EN_LOW:
-			DRIVER_SwitchPowerLow();
-			break;
-			
-		case ACT_DBG_POWER_EN_HIGH:
-			DRIVER_SwitchPowerHigh();
-			break;
-			
 		case ACT_DBG_POWER_DIS:
 			DRIVER_SwitchPowerOff();
+			break;
+			
+		case ACT_DBG_POWER_24V:
+			DRIVER_PowerDischarge(FALSE);
+			DRIVER_SwitchPower24V();
+			break;
+
+		case ACT_DBG_POWER_50V:
+			DRIVER_PowerDischarge(FALSE);
+			DRIVER_SwitchPower50V();
+			break;
+
+		case ACT_DBG_POWER_100V:
+			DRIVER_PowerDischarge(FALSE);
+			DRIVER_SwitchPower100V();
+			break;
+
+		case ACT_DBG_POWER_150V:
+			DRIVER_PowerDischarge(FALSE);
+			DRIVER_SwitchPower150V();
 			break;
 			
 		case ACT_DBG_GENERATE_SYNC:
@@ -625,33 +635,12 @@ static void CONTROL_BatteryVoltagePrepare()
 	
 	// For custom configured voltage
 	if(DataTable[REG_USE_CUSTOM_PRIM_V])
-	{
 		CONTROL_BatteryVoltageReady(DataTable[REG_PRIM_V_CUSTOM]);
-	}
 	else
 	{
-		if((OutputPower > CAP_SW_POWER) || (DataTable[REG_LIMIT_VOLTAGE] > CAP_SW_VOLTAGE)
-				|| CurrentMeasurementType == MEASUREMENT_TYPE_DC || CurrentMeasurementType == MEASUREMENT_TYPE_DC_STEP
-				|| CurrentMeasurementType == MEASUREMENT_TYPE_DC_RES)
-		{
-			// Turn all power supplies in this case
-			DRIVER_SwitchPowerHigh();
-			CONTROL_BatteryVoltageConfig(BVS_WaitRise);
-		}
-		else
-		{
-			// For low voltage operation
-			if(DataTable[REG_ACTUAL_PRIM_VOLTAGE] > (DataTable[REG_PRIM_V_LOW_RANGE] + CAP_DELTA))
-			{
-				DRIVER_SwitchPowerOff();
-				CONTROL_BatteryVoltageConfig(BVS_WaitFall);
-			}
-			else
-			{
-				DRIVER_SwitchPowerLow();
-				CONTROL_BatteryVoltageReady(DataTable[REG_ACTUAL_PRIM_VOLTAGE]);
-			}
-		}
+		TargetPrimaryVoltage = DRIVER_SwitchToTargetVoltage(DataTable[REG_LIMIT_VOLTAGE], OutputPower,
+				PSAMPLING_ReadCapVoltage(), DataTable[REG_TRANSFORMER_COFF]);
+		CONTROL_BatteryVoltageConfig(BVS_WaitVoltage);
 	}
 }
 // ----------------------------------------
@@ -666,27 +655,14 @@ static void CONTROL_BatteryVoltageConfig(BatteryVoltageState NewState)
 
 static void CONTROL_BatteryVoltageCheck()
 {
-	Int16U FullRangeVoltage =
-			(DataTable[REG_USE_CUSTOM_PRIM_V]) ? DataTable[REG_PRIM_V_CUSTOM] : DataTable[REG_PRIM_V_FULL_RANGE];
-	
-	switch (CONTROL_Battery)
+	if(CONTROL_Battery == BVS_WaitVoltage)
 	{
-		case BVS_WaitRise:
-			{
-				if(DataTable[REG_ACTUAL_PRIM_VOLTAGE] >= (FullRangeVoltage - CAP_DELTA))
-					CONTROL_BatteryVoltageReady(DataTable[REG_ACTUAL_PRIM_VOLTAGE]);
-			}
-			break;
-			
-		case BVS_WaitFall:
-			{
-				if(DataTable[REG_ACTUAL_PRIM_VOLTAGE] <= (DataTable[REG_PRIM_V_LOW_RANGE] + CAP_DELTA))
-				{
-					DRIVER_SwitchPowerLow();
-					CONTROL_BatteryVoltageReady(DataTable[REG_ACTUAL_PRIM_VOLTAGE]);
-				}
-			}
-			break;
+		Int16U ActualVoltage = PSAMPLING_ReadCapVoltage();
+		if((TargetPrimaryVoltage - CAP_DELTA) < ActualVoltage && ActualVoltage < (TargetPrimaryVoltage + CAP_DELTA))
+		{
+			DRIVER_PowerDischarge(FALSE);
+			CONTROL_BatteryVoltageReady(ActualVoltage);
+		}
 	}
 	
 	if(CONTROL_TimeCounter > CONTROL_BatteryTimeout)
@@ -703,5 +679,3 @@ static void CONTROL_BatteryVoltageReady(Int16U Voltage)
 	CONTROL_RequestDPC(&CONTROL_TriggerMeasurementDPC);
 }
 // ----------------------------------------
-
-// No more.
