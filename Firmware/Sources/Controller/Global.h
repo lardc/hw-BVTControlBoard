@@ -36,7 +36,7 @@
 // ----------------------------------------
 
 // --- Capacitor battery
-#define CAP_DELTA				3				// Detection voltage delta (in V)
+#define CAP_VOLTAGE_DELTA		10				// Detection voltage delta (in %)
 #define CAP_POW_VOLT_MARGIN		20				// Power and voltage margin for primary side (in %)
 #define BAT_CHARGE_TIMEOUT		15000			// in ms
 // ----------------------------------------

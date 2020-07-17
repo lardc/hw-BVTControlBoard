@@ -84,8 +84,8 @@ void DRIVER_SwitchPower100V()
 {
 	ZwGPIO_WritePin(PIN_POWER_1, FALSE);
 	ZwGPIO_WritePin(PIN_POWER_2, TRUE);
-	ZwGPIO_WritePin(PIN_POWER_3, TRUE);
-	ZwGPIO_WritePin(PIN_POWER_4, FALSE);
+	ZwGPIO_WritePin(PIN_POWER_3, FALSE);
+	ZwGPIO_WritePin(PIN_POWER_4, TRUE);
 }
 // ----------------------------------------
 
@@ -130,7 +130,7 @@ Int16U DRIVER_SwitchToTargetVoltage(Int16U SecondaryVoltage, Int16U Power, Int16
 			PrimaryVoltage = MWPowerSettingsArray[i].Voltage;
 			MWPowerSettingsArray[i].Function();
 
-			if(CurrentPrimaryVoltage > (PrimaryVoltage + CAP_DELTA))
+			if(CurrentPrimaryVoltage >= (Int32U)PrimaryVoltage * (100 + CAP_VOLTAGE_DELTA) / 100)
 				DRIVER_PowerDischarge(TRUE);
 			break;
 		}

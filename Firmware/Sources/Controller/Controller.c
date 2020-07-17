@@ -625,7 +625,9 @@ static void CONTROL_BatteryVoltageCheck()
 	if(CONTROL_Battery == BVS_WaitVoltage)
 	{
 		Int16U ActualVoltage = PSAMPLING_ReadCapVoltage();
-		if((TargetPrimaryVoltage - CAP_DELTA) < ActualVoltage && ActualVoltage < (TargetPrimaryVoltage + CAP_DELTA))
+		Int16U Vmin = (Int32U)TargetPrimaryVoltage * (100 - CAP_VOLTAGE_DELTA) / 100;
+		Int16U Vmax = (Int32U)TargetPrimaryVoltage * (100 + CAP_VOLTAGE_DELTA) / 100;
+		if(Vmin <= ActualVoltage && ActualVoltage <= Vmax)
 		{
 			DRIVER_PowerDischarge(FALSE);
 			CONTROL_BatteryVoltageReady(ActualVoltage);
