@@ -149,12 +149,6 @@ void MEASURE_AC_FinishProcess()
 }
 // ----------------------------------------
 
-void inline MEASURE_AC_SwitchToBrake()
-{
-	State = ACPS_Brake;
-}
-// ----------------------------------------
-
 Int16S inline MEASURE_AC_PredictControl(_iq DesiredV)
 {
 	return _IQint(_IQmpy(_IQmpy(DesiredV, TransCoffInv), PWMCoff));
@@ -200,6 +194,7 @@ void MEASURE_AC_Stop(Int16U Reason)
 	switch (Reason)
 	{
 		case DF_INTERNAL:
+			ZbGPIO_SwitchSYNC(TRUE);
 			MEASURE_AC_HandleTripCondition(UseInstantMethod);
 			break;
 			
@@ -214,7 +209,7 @@ void MEASURE_AC_Stop(Int16U Reason)
 			break;
 	}
 	
-	MEASURE_AC_SwitchToBrake();
+	State = ACPS_Brake;
 }
 // ----------------------------------------
 
@@ -490,7 +485,6 @@ static void MEASURE_AC_ControlCycle()
 								|| VPrePlateTimeCounter >= VPrePlateTimeCounterTop))
 				{
 					State = ACPS_VPlate;
-					ZbGPIO_SwitchSYNC(TRUE);
 				}
 				
 				MEASURE_AC_CCSub_CorrectionAndLog(correction);
@@ -505,7 +499,7 @@ static void MEASURE_AC_ControlCycle()
 				correction = MEASURE_AC_CCSub_Regulator(&trig_flag);
 				
 				if(VPlateTimeCounter > VPlateTimeCounterTop && trig_flag)
-					MEASURE_AC_SwitchToBrake();
+					State = ACPS_Brake;
 				else
 					MEASURE_AC_CCSub_CorrectionAndLog(correction);
 			}
