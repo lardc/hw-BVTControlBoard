@@ -119,7 +119,11 @@ Boolean MEASURE_AC_StartProcess(Int16U Type, pInt16U pDFReason, pInt16U pProblem
 	FIR_Reset();
 	
 	// Configure samplers
-	SS_ConfigureSensingCircuits(LimitCurrent, LimitVoltage, FALSE);
+	if(LimitCurrent <= HVD_IL_DCM_TH)
+		SS_ConfigureSensingCircuits(HVD_DC_IH_TH, LimitVoltage, TRUE);
+	else
+		SS_ConfigureSensingCircuits(LimitCurrent, LimitVoltage, FALSE);
+
 	// Start sampling
 	SS_StartSampling();
 	SS_Dummy(TRUE);
@@ -637,7 +641,19 @@ static void MEASURE_AC_CacheVariables()
 	ControlledAmplitudeV = DesiredAmplitudeV = DesiredAmplitudeVHistory = _IQI(DataTable[REG_START_VOLTAGE_AC]);
 	
 	CurrentMultiply = 10;
-	if(LimitCurrent <= HVD_IL_TH)
+	if(LimitCurrent <= HVD_IL_DCM_TH)
+	{
+		CurrentMultiply = 1000;
+		LimitCurrentHaltLevel = HVD_IL_DCM_TH;
+
+		SSCurrentCoff = _FPtoIQ2(DataTable[REG_SCURRENT_DCM_COFF_N], DataTable[REG_SCURRENT_DCM_COFF_D]);
+		SSCurrentCoff = _IQdiv(SSCurrentCoff, _IQ(100.0f));
+
+		SSCurrentP2 = (Int16S)DataTable[REG_SCURRENT_DCM_FINE_P2];
+		SSCurrentP1 = _FPtoIQ2(DataTable[REG_SCURRENT_DCM_FINE_P1], 1000);
+		SSCurrentP0 = _FPtoIQ2((Int16S)DataTable[REG_SCURRENT_DCM_FINE_P0], 1000);
+	}
+	else if(LimitCurrent <= HVD_IL_TH)
 	{
 		LimitCurrentHaltLevel = HVD_IL_TH;
 		
