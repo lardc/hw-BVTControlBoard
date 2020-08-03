@@ -606,7 +606,7 @@ static void CONTROL_BatteryVoltagePrepare()
 	else
 	{
 		TargetPrimaryVoltage = DRIVER_SwitchToTargetVoltage(DataTable[REG_LIMIT_VOLTAGE], OutputPower,
-				PSAMPLING_ReadCapVoltage(), DataTable[REG_TRANSFORMER_COFF]);
+				PSAMPLING_ReadCapVoltage(), DataTable[REG_TRANSFORMER_COFF], DataTable[REG_POWER_OPT_COUNT]);
 		CONTROL_BatteryVoltageConfig(BVS_WaitVoltage);
 	}
 }

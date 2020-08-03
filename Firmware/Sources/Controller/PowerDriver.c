@@ -14,7 +14,6 @@
 #define TZ_MASK_CBC_BRIDGE		0
 #define TZ_MASK_OST_BRIDGE		(DBG_USE_BRIDGE_SHORT ? BIT0 : 0)
 
-#define POWER_OPTIONS_COUNT		4
 typedef void (*PSFunction)();
 typedef struct __MWPowerSettings
 {
@@ -23,7 +22,7 @@ typedef struct __MWPowerSettings
 	PSFunction Function;
 } MWPowerSettings;
 
-MWPowerSettings MWPowerSettingsArray[POWER_OPTIONS_COUNT] = {
+MWPowerSettings MWPowerSettingsArray[POWER_OPTIONS_MAXNUM] = {
 		{24,	150,	DRIVER_SwitchPower24V},
 		{50,	500,	DRIVER_SwitchPower50V},
 		{100,	1000,	DRIVER_SwitchPower100V},
@@ -116,16 +115,20 @@ void DRIVER_SwitchPowerOff()
 // ----------------------------------------
 
 Int16U DRIVER_SwitchToTargetVoltage(Int16U SecondaryVoltage, Int16U Power, Int16U CurrentPrimaryVoltage,
-		Int16U TransformerRatio)
+		Int16U TransformerRatio, Int16U PowerOptionsCount)
 {
 	Int16U i, PrimaryVoltage;
+
 	Int16U TargetPrimaryVoltage = (Int32U)SecondaryVoltage * (100 + CAP_POW_VOLT_MARGIN) / 100 / TransformerRatio;
 	Int16U TargetPower = (Int32U)Power * (100 + CAP_POW_VOLT_MARGIN) / 100;
 	
-	for(i = 0; i < POWER_OPTIONS_COUNT; i++)
+	if(PowerOptionsCount > POWER_OPTIONS_MAXNUM)
+		PowerOptionsCount = POWER_OPTIONS_MAXNUM;
+
+	for(i = 0; i < PowerOptionsCount; i++)
 	{
 		if((TargetPrimaryVoltage < MWPowerSettingsArray[i].Voltage && TargetPower < MWPowerSettingsArray[i].Power)
-				|| i == (POWER_OPTIONS_COUNT - 1))
+				|| i == (PowerOptionsCount - 1))
 		{
 			PrimaryVoltage = MWPowerSettingsArray[i].Voltage;
 			MWPowerSettingsArray[i].Function();

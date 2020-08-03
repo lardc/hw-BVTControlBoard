@@ -5,6 +5,7 @@
 // Header
 #include "Constraints.h"
 #include "DeviceObjectDictionary.h"
+#include "PowerDriver.h"
 #include "ZwPWM.h"
 
 #define NO		0	// equal to FALSE
@@ -99,7 +100,7 @@ const TableItemConstraint NVConstraint[DATA_TABLE_NV_SIZE] =
 										   {NO, YES, NO},															// 82
 										   {VPEAK_DETECT_MIN, VPEAK_DETECT_MAX, VPEAK_DETECT_DEF},					// 83
 										   {0, 0, 0},																// 84
-										   {0, 0, 0},																// 85
+										   {1, POWER_OPTIONS_MAXNUM, POWER_OPTIONS_MAXNUM},							// 85
 										   {0, 0, 0},																// 86
 										   {0, 0, 0},																// 87
 										   {0, 0, 0},																// 88
