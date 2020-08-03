@@ -43,7 +43,7 @@ static Int16U FollowingErrorCounter;
 static Int16S MaxSafePWM, MinSafePWM, SSVoltageP2, SSCurrentP2;
 static _iq SSVoltageCoff, SSCurrentCoff, SSVoltageP1, SSVoltageP0, SSCurrentP1, SSCurrentP0, TransCoffInv, PWMCoff;
 static _iq LimitCurrent, LimitCurrentHaltLevel, LimitVoltage, VoltageRateStep, NormalizedFrequency;
-static _iq KpVAC, KiVAC, SIVAerr;
+static _iq KpVAC, KiVAC, SIVAerr, SineValue;
 static _iq FollowingErrorFraction, FollowingErrorAbsolute;
 static _iq ResultV, ResultI;
 static _iq DesiredAmplitudeV, DesiredAmplitudeVHistory, ControlledAmplitudeV, DesiredVoltageHistory;
@@ -94,6 +94,7 @@ Boolean MEASURE_AC_StartProcess(Int16U Type, pInt16U pDFReason, pInt16U pProblem
 	//
 	SkipRegulation = TRUE;
 	SIVAerr = 0;
+	SineValue = 0;
 	//
 	ActualSecondarySample.IQFields.Voltage = 0;
 	ActualSecondarySample.IQFields.Current = 0;
@@ -522,9 +523,12 @@ static Int16S MEASURE_AC_CCSub_Regulator(Boolean *PeriodTrigger)
 	_iq desiredSecondaryVoltage;
 	
 	// Calculate desired amplitude
-	_iq SinValue = _IQsinPU(_IQmpyI32(NormalizedFrequency, TimeCounter));
-	desiredSecondaryVoltage = _IQmpy(SinValue, ControlledAmplitudeV);
-	//desiredSecondaryVoltage = _IQmpy(_IQmpy(SinValue, _IQexp(_IQ(1) - _IQabs(SinValue))), ControlledAmplitudeV);
+	SineValue = _IQsinPU(_IQmpyI32(NormalizedFrequency, TimeCounter));
+	if(ModifySine)
+		desiredSecondaryVoltage = _IQmpy(_IQmpy(SineValue, _IQexp(_IQ(1) - _IQabs(SineValue))), ControlledAmplitudeV);
+	else
+		desiredSecondaryVoltage = _IQmpy(SineValue, ControlledAmplitudeV);
+
 	// Calculate correction
 	ret = MEASURE_AC_PIControllerSequence(desiredSecondaryVoltage);
 	if(PeriodTrigger)
@@ -599,7 +603,7 @@ static void MEASURE_AC_CacheVariables()
 	CurrentMultiply = 10;
 	if(LimitCurrent <= HVD_IL_DCM_TH)
 	{
-		ModifySine = TRUE;
+		ModifySine = DataTable[REG_MODIFY_SINE];
 		CurrentMultiply = 1000;
 		LimitCurrentHaltLevel = HVD_IL_DCM_TH;
 
@@ -650,5 +654,3 @@ static void MEASURE_AC_CacheVariables()
 	}
 }
 // ----------------------------------------
-
-// No more.
