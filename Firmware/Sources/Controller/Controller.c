@@ -402,7 +402,7 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U UserError)
 			{
 				if(CONTROL_State == DS_None)
 					CONTROL_SwitchStateToPowered();
-				else if (CONTROL_State != DS_Powered)
+				else if(CONTROL_State != DS_Powered)
 					*UserError = ERR_DEVICE_NOT_READY;
 			}
 			break;
@@ -430,8 +430,9 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U UserError)
 					DataTable[REG_RESULT_V] = 0;
 					DataTable[REG_RESULT_I] = 0;
 					DataTable[REG_RESULT_I_UA_R] = 0;
+					DataTable[REG_VOLTAGE_ON_PLATE] = 0;
 					DEVPROFILE_ResetScopes(0,
-					IND_EP_I | IND_EP_V | IND_EP_DBG | IND_EP_ERR | IND_EP_PEAK_I | IND_EP_PEAK_V);
+							IND_EP_I | IND_EP_V | IND_EP_DBG | IND_EP_ERR | IND_EP_PEAK_I | IND_EP_PEAK_V);
 					DEVPROFILE_ResetEPReadState();
 					
 					CONTROL_RequestDPC(&CONTROL_StartSequence);
@@ -499,11 +500,11 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U UserError)
 		case ACT_DBG_FAN_ON:
 			ZbGPIO_SwitchFan(TRUE);
 			break;
-
+			
 		case ACT_DBG_FAN_OFF:
 			ZbGPIO_SwitchFan(FALSE);
 			break;
-
+			
 		case ACT_DBG_POWER_DIS:
 			DRIVER_SwitchPowerOff();
 			break;
@@ -512,17 +513,17 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U UserError)
 			DRIVER_PowerDischarge(FALSE);
 			DRIVER_SwitchPower24V();
 			break;
-
+			
 		case ACT_DBG_POWER_50V:
 			DRIVER_PowerDischarge(FALSE);
 			DRIVER_SwitchPower50V();
 			break;
-
+			
 		case ACT_DBG_POWER_100V:
 			DRIVER_PowerDischarge(FALSE);
 			DRIVER_SwitchPower100V();
 			break;
-
+			
 		case ACT_DBG_POWER_150V:
 			DRIVER_PowerDischarge(FALSE);
 			DRIVER_SwitchPower150V();

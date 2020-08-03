@@ -151,6 +151,7 @@
 #define REG_RESULT_V				198	// Test result (in V)
 #define REG_RESULT_I				199	// Test result (mA * 10 or uA)
 #define REG_RESULT_I_UA_R			200	// Resistance result R for DC-mode (in MOhm * 10) or Test result mA fraction for AC mode (in uA)
+#define REG_VOLTAGE_ON_PLATE		201	// Indicates voltage plate region
 //
 #define REG_ACTUAL_PRIM_VOLTAGE		210	// Primary side capacitor voltage based on sensing (in V)
 #define REG_PRIM_VOLTAGE_CTRL		211	// Primary side capacitor voltage used by control system (in V)
