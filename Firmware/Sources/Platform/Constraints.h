@@ -77,10 +77,6 @@ typedef struct __TableItemConstraint
 //
 #define LAST_FRAG_SIZE_DEF		1200
 //
-#define VPEAK_DETECT_MIN		95		// in %
-#define VPEAK_DETECT_MAX		100		// in %
-#define VPEAK_DETECT_DEF		98		// in %
-//
 #define X_D_DEF0				10
 #define X_D_DEF1				100
 #define X_D_DEF2				1000

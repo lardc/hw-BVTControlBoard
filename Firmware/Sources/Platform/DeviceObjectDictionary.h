@@ -77,8 +77,7 @@
 #define REG_SAFE_MAX_PWM			80	// Maximum PWM (AC mode)
 #define REG_USE_INST_METHOD			81	// Measurement method
 #define REG_REPLACE_CURVES			82	// Replace output V/I curves by peak measurement
-#define REG_PEAK_SEARCH_ZONE		83	// % of peak voltage to search max current (in %)
-// 84
+// 83 - 84
 #define REG_POWER_OPT_COUNT			85	// Actual count of power options
 // 86 - 95
 #define REG_SCURRENT1_FINE_P2		96	// Secondary current 1 tune quadratic coefficient P2 x1e6
