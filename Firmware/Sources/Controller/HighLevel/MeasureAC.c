@@ -213,10 +213,11 @@ static Int16S MEASURE_AC_CalculatePWM(_iq DesiredV)
 	Int16S correction;
 	correction = MEASURE_AC_PredictControl(DesiredV) * (FrequencyRateSwitch ? 1 : 0);
 	
-	if(correction < -MaxSafePWM)
-		correction = -MaxSafePWM;
-	else if(correction > MaxSafePWM)
-		correction = MaxSafePWM;
+	if(ABS(correction) > MaxSafePWM)
+	{
+		MEASURE_AC_Stop(DF_PWM_SATURATION);
+		return 0;
+	}
 	
 	return correction;
 }
@@ -430,6 +431,8 @@ static void MEASURE_AC_ControlCycle()
 				}
 				
 				correction = MEASURE_AC_CCSub_Regulator(NULL);
+				if(State == ACPS_Brake)
+					return;
 				MEASURE_AC_CCSub_CorrectionAndLog(correction);
 			}
 			break;
@@ -440,6 +443,8 @@ static void MEASURE_AC_ControlCycle()
 				VPrePlateTimeCounter++;
 				
 				correction = MEASURE_AC_CCSub_Regulator(&trig_flag);
+				if(State == ACPS_Brake)
+					return;
 				
 				if(trig_flag
 						&& (PRE_PLATE_MAX_ERR >= _IQabs(FollowingErrorAbsolute)
@@ -459,6 +464,8 @@ static void MEASURE_AC_ControlCycle()
 				VPlateTimeCounter++;
 				
 				correction = MEASURE_AC_CCSub_Regulator(&trig_flag);
+				if(State == ACPS_Brake)
+					return;
 				
 				if(VPlateTimeCounter > VPlateTimeCounterTop && trig_flag)
 					State = ACPS_Brake;

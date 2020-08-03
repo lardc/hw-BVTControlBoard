@@ -208,6 +208,7 @@
 #define DF_OPTO_CON_ERROR			202	// Optical connection error
 #define DF_LOW_SIDE_PS				203	// Low-side power supply fault
 #define DF_FOLLOWING_ERROR			204	// Voltage following error
+#define DF_PWM_SATURATION			205	// Detected PWM output saturation
 #define DF_INTERNAL					0xFFFF
 
 // Start-up check
