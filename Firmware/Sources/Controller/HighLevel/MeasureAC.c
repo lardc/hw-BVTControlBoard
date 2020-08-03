@@ -43,7 +43,7 @@ static Int16U FollowingErrorCounter;
 static Int16S MaxSafePWM, MinSafePWM, SSVoltageP2, SSCurrentP2;
 static _iq SSVoltageCoff, SSCurrentCoff, SSVoltageP1, SSVoltageP0, SSCurrentP1, SSCurrentP0, TransCoffInv, PWMCoff;
 static _iq LimitCurrent, LimitCurrentHaltLevel, LimitVoltage, VoltageRateStep, NormalizedFrequency;
-static _iq KpVAC, KiVAC, SIVAerr, SineValue, PrevSineValue;
+static _iq KpVAC, KiVAC, SIVAerr, SineValue;
 static _iq FollowingErrorFraction, FollowingErrorAbsolute;
 static _iq ResultV, ResultI;
 static _iq DesiredAmplitudeV, DesiredAmplitudeVHistory, ControlledAmplitudeV, DesiredVoltageHistory;
@@ -94,7 +94,7 @@ Boolean MEASURE_AC_StartProcess(Int16U Type, pInt16U pDFReason, pInt16U pProblem
 	//
 	SkipRegulation = TRUE;
 	SIVAerr = 0;
-	PrevSineValue = SineValue = 0;
+	SineValue = 0;
 	//
 	ActualSecondarySample.IQFields.Voltage = 0;
 	ActualSecondarySample.IQFields.Current = 0;
@@ -316,6 +316,8 @@ void inline MEASURE_AC_DoSampling()
 #endif
 static void MEASURE_AC_HandleVI()
 {
+	static _iq PrevSineValue = 0;
+
 	// Connectivity monitoring
 	if(OptoConnectionMonMax && DBG_USE_OPTO_TIMEOUT)
 	{
@@ -340,11 +342,12 @@ static void MEASURE_AC_HandleVI()
 	}
 	
 	// Detect maximum voltage for AC period
-	if(ActualSecondarySample.IQFields.Voltage > MaxPosVoltage)
+	if((SineValue > 0) && (PrevSineValue <= SineValue))
 	{
 		MaxPosVoltage = ActualSecondarySample.IQFields.Voltage;
 		MaxPosInstantCurrent = ActualSecondarySample.IQFields.Current;
 	}
+	PrevSineValue = SineValue;
 	
 	// Check current conditions
 	if(UseInstantMethod)
@@ -531,7 +534,6 @@ static Int16S MEASURE_AC_CCSub_Regulator(Boolean *PeriodTrigger)
 	_iq desiredSecondaryVoltage;
 	
 	// Calculate desired amplitude
-	PrevSineValue = SineValue;
 	SineValue = _IQsinPU(_IQmpyI32(NormalizedFrequency, TimeCounter));
 	if(ModifySine)
 		desiredSecondaryVoltage = _IQmpy(_IQmpy(SineValue, _IQexp(_IQ(1) - _IQabs(SineValue))), ControlledAmplitudeV);
