@@ -103,8 +103,6 @@
 #define REG_SCURRENT_DCL_FINE_P0	118	// Secondary current DC low tune quadratic coefficient P0 (in nA)
 #define REG_RES_CURR_OFFSET			119	// Offset current for resistor measurement (in uA x10)
 //
-#define REG_SP__1					127
-//
 // ----------------------------------------
 //
 #define REG_MEASUREMENT_TYPE		128	// Measurement type
@@ -138,8 +136,6 @@
 #define REG_PWD_3					182	// Unlock password location 3
 #define REG_PWD_4					183	// Unlock password location 4
 //
-#define REG_SP__2					191
-//
 // ----------------------------------------
 //
 #define REG_DEV_STATE				192	// Device state
@@ -167,7 +163,13 @@
 //
 #define REG_QUADRATIC_CORR			254	// Use quadratic correction for block
 //
-#define REG_SP__3					255
+// ----------------------------------------
+//
+#define REG_FWINFO_SLAVE_NID		256	// Device CAN slave node ID
+#define REG_FWINFO_MASTER_NID		257	// Device CAN master node ID (if presented)
+// 258 - 259
+#define REG_FWINFO_STR_LEN			260	// Length of the information string record
+#define REG_FWINFO_STR_BEGIN		261	// Begining of the information string record
 
 
 // ENDPOINTS
