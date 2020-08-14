@@ -56,6 +56,10 @@ typedef struct __TableItemConstraint
 #define BRAKE_TIME_MAX			1000	// (in ms)
 #define BRAKE_TIME_DEF			10		// (in ms)
 //
+#define FAN_TIME_MIN			10		// (in s)
+#define FAN_TIME_MAX			600		// (in s)
+#define FAN_TIME_DEF			30		// (in s)
+//
 #define TRANSFORMER_COFF_MIN	10		// 10:1
 #define TRANSFORMER_COFF_MAX	200		// 200:1
 #define TRANSFORMER_COFF_DEF	100		// 100:1
@@ -86,7 +90,6 @@ typedef struct __TableItemConstraint
 // Voltage
 #define	SVOLTAGE1_COFF_N_DEF	183		//  183 / 1000 = 0.183
 #define	SVOLTAGE2_COFF_N_DEF	2015	// 2015 / 1000 = 2.015
-//#define CAP_V_COFF_N_DEF		48		// 48 / 1000 = 0.048
 #define CAP_V_COFF_N_DEF		37		// 37 / 1000 = 0.037
 //
 // Current AC mode

@@ -80,6 +80,7 @@ static void CONTROL_BatteryVoltagePrepare();
 static void CONTROL_BatteryVoltageConfig(BatteryVoltageState NewState);
 static void CONTROL_BatteryVoltageCheck();
 static void CONTROL_BatteryVoltageReady(Int16U Voltage);
+static Int32U CONTROL_GetPulseMaxTime();
 
 // Functions
 //
@@ -436,6 +437,7 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U UserError)
 							IND_EP_I | IND_EP_V | IND_EP_DBG | IND_EP_ERR | IND_EP_PEAK_I | IND_EP_PEAK_V);
 					DEVPROFILE_ResetEPReadState();
 					
+					CONTROL_HandleFanLogic(TRUE);
 					CONTROL_RequestDPC(&CONTROL_StartSequence);
 				}
 				else
@@ -648,5 +650,48 @@ static void CONTROL_BatteryVoltageReady(Int16U Voltage)
 	CONTROL_Battery = BVS_Ready;
 	DataTable[REG_PRIM_VOLTAGE_CTRL] = Voltage;
 	CONTROL_RequestDPC(&CONTROL_TriggerMeasurementDPC);
+}
+// ----------------------------------------
+
+void CONTROL_HandleFanLogic(Boolean IsImpulse)
+{
+	static Int32U IncrementCounter = 0;
+	static Int64U FanOnTimeout = 0;
+	
+	// Idle counter increment
+	if(!IsImpulse)
+		IncrementCounter++;
+	
+	// Fan turn on
+	if((IncrementCounter > ((Int32U)DataTable[REG_FAN_OPERATE_PERIOD] * 1000)) || IsImpulse)
+	{
+		// Doubled pulse time
+		Int32U PulseFanTime = CONTROL_GetPulseMaxTime() * 2;
+		
+		// Configured time
+		Int32U ConfigFanTime = (Int32U)DataTable[REG_FAN_OPERATE_MIN_TIME] * 1000;
+		
+		IncrementCounter = 0;
+		FanOnTimeout = CONTROL_TimeCounter + MAX(PulseFanTime, ConfigFanTime);
+		ZbGPIO_SwitchFan(TRUE);
+	}
+	
+	// Fan turn off
+	if(FanOnTimeout && (CONTROL_TimeCounter > FanOnTimeout))
+	{
+		FanOnTimeout = 0;
+		ZbGPIO_SwitchFan(FALSE);
+	}
+}
+// ----------------------------------------
+
+static Int32U CONTROL_GetPulseMaxTime()
+{
+	Int32U RiseTime = 0;
+	if(DataTable[REG_LIMIT_VOLTAGE] > DataTable[REG_START_VOLTAGE_AC])
+		RiseTime = (Int32U)(DataTable[REG_LIMIT_VOLTAGE] - DataTable[REG_START_VOLTAGE_AC]) * 10
+				/ (Int32U)DataTable[REG_VOLTAGE_AC_RATE];
+	
+	return RiseTime + DataTable[REG_VOLTAGE_PLATE_TIME];
 }
 // ----------------------------------------

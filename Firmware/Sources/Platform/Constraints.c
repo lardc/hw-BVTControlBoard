@@ -66,8 +66,8 @@ const TableItemConstraint NVConstraint[DATA_TABLE_NV_SIZE] =
 										   {0, 0, 0},																// 48
 										   {OPTO_MON_MIN, OPTO_MON_MAX, OPTO_MON_DEF},								// 49
 										   {NO, YES, NO},															// 50
-										   {0, 0, 0},																// 51
-										   {0, 0, 0},																// 52
+										   {FAN_TIME_MIN, FAN_TIME_MAX, FAN_TIME_DEF},								// 51
+										   {FAN_TIME_MIN, FAN_TIME_MAX, FAN_TIME_DEF},								// 52
 										   {0, 0, 0},																// 53
 										   {0, 0, 0},																// 54
 										   {0, 0, 0},																// 55

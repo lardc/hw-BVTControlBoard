@@ -73,7 +73,9 @@
 // 48
 #define REG_OPTO_CONNECTION_MON		49	// Optical connection error when N packets lost (0 to disable)
 #define REG_SKIP_LOGGING_VOIDS		50	// Don't log empty zones in case of using frequency divisor
-// 51 - 79
+#define REG_FAN_OPERATE_PERIOD		51	// Default fan turn on period (in s)
+#define REG_FAN_OPERATE_MIN_TIME	52	// Minimum fan turn on time (in s)
+// 53 - 79
 #define REG_SAFE_MAX_PWM			80	// Maximum PWM (AC mode)
 #define REG_USE_INST_METHOD			81	// Measurement method
 #define REG_REPLACE_CURVES			82	// Replace output V/I curves by peak measurement

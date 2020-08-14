@@ -59,6 +59,6 @@ void CONTROL_NotifyEndTest(_iq BVTResultV, _iq BVTResultI, Int16U DFReason, Int1
 void CONTROL_NotifyCANFault(ZwCAN_SysFlags Flag);
 // Re-init RX SPI channels
 void CONTROL_ReInitSPI_Rx();
-
+void CONTROL_HandleFanLogic(Boolean IsImpulse);
 
 #endif // __CONTROLLER_H

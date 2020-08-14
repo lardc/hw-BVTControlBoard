@@ -269,6 +269,8 @@ ISRCALL Timer2_ISR(void)
 		ZbWatchDog_Strobe();
 	}
 	
+	CONTROL_HandleFanLogic(FALSE);
+
 	++dbgCounter;
 	if(dbgCounter == DBG_COUNTER_PERIOD)
 	{
