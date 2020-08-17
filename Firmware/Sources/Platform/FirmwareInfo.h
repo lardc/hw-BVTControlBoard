@@ -5,6 +5,6 @@
 #include "stdinc.h"
 
 // Functions
-Int16U FWINF_Compose(unsigned char *OutputString, Int16U MaxLength);
+Int16U FWINF_Compose(pInt16U DataTable, Int16U MaxLength);
 
 #endif // __FIRMWARE_INFO_H
