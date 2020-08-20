@@ -52,7 +52,7 @@ void IBP_TimeoutFunction()
 	else
 	{
 		IBP_SubcribeToTimeoutCycle(NULL);
-		CONTROL_RequestStop(DF_OPTO_CON_ERROR, FALSE);
+		CONTROL_RequestStop(DF_OPTO_CON_ERROR, TRUE);
 	}
 }
 // ----------------------------------------
