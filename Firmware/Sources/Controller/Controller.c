@@ -590,6 +590,7 @@ static void CONTROL_TriggerMeasurementDPC()
 static void CONTROL_StartSequence()
 {
 	ZbGPIO_SwitchIndicator(TRUE);
+	ZbGPIO_ResetShortCircuit();
 	
 	CurrentMeasurementType = DataTable[REG_MEASUREMENT_TYPE];
 	DRIVER_ClearTZFault();

@@ -4,6 +4,7 @@
 
 // Header
 #include "ZbGPIO.h"
+#include "ZwUtils.h"
 
 
 // Functions
@@ -75,5 +76,13 @@ void ZbGPIO_SwitchIndicator(Boolean Set)
 void ZbGPIO_SwitchSYNC(Boolean Set)
 {
 	ZwGPIO_WritePin(PIN_SYNC, Set);
+}
+// ----------------------------------------
+
+void ZbGPIO_ResetShortCircuit()
+{
+	ZwGPIO_WritePin(PIN_SHORT_CLR, TRUE);
+	DELAY_US(100);
+	ZwGPIO_WritePin(PIN_SHORT_CLR, FALSE);
 }
 // ----------------------------------------

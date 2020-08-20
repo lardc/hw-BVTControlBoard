@@ -21,9 +21,9 @@ void ZbGPIO_SwitchLED1(Boolean Set);
 void ZbGPIO_ToggleLED1();
 // Switch external indicator
 void ZbGPIO_SwitchIndicator(Boolean Set);
-
 // Switch SYNC
 void ZbGPIO_SwitchSYNC(Boolean Set);
+void ZbGPIO_ResetShortCircuit();
 
 
 #endif // __ZBGPIO_H
