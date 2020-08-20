@@ -1,7 +1,3 @@
-// -----------------------------------------
-// Power driver
-// ----------------------------------------
-
 // Header
 #include "PowerDriver.h"
 //
@@ -33,31 +29,8 @@ MWPowerSettings MWPowerSettingsArray[POWER_OPTIONS_MAXNUM] = {
 //
 void DRIVER_Init()
 {
-	// Enable TZ
-	ZwPWM_SetTZPullup(PFDisable, PFDontcare, PFDontcare, PFDontcare, PFDontcare, PFDontcare);
-	ZwPWM_ConfigTZ1(TRUE, PQ_Sample6);
-	
-	// Post TZ init delay
-	DELAY_US(1000);
-	
 	// Init PWM outputs
-	ZwPWMB_InitBridgeA12(CPU_FRQ, PWM_FREQUENCY, TZ_MASK_CBC_BRIDGE, TZ_MASK_OST_BRIDGE, PWM_SATURATION);
-	ZwPWM3_Init(PWMUp, CPU_FRQ, PWM_FREQUENCY, FALSE, FALSE, TZ_MASK_CBC_BRIDGE, TZ_MASK_OST_BRIDGE, TRUE, TRUE, TRUE,
-			FALSE, FALSE);
-	
-	// Clear possible faults
-	DRIVER_ClearTZFault();
-	
-	// Configure TZ interrupts
-	ZwPWM_ConfigTZIntOST(FALSE, FALSE, DBG_USE_BRIDGE_SHORT, FALSE, FALSE, FALSE);
-}
-// ----------------------------------------
-
-void DRIVER_ClearTZFault()
-{
-	ZwPWM1_ClearTZ();
-	ZwPWM2_ClearTZ();
-	ZwPWM3_ClearTZ();
+	ZwPWMB_InitBridgeA12(CPU_FRQ, PWM_FREQUENCY, 0, 0, PWM_SATURATION);
 }
 // ----------------------------------------
 
@@ -143,8 +116,8 @@ Int16U DRIVER_SwitchToTargetVoltage(Int16U SecondaryVoltage, Int16U Power, Int16
 }
 // ----------------------------------------
 
-Boolean DRIVER_GetShortPinState()
+Boolean DRIVER_IsShortCircuit()
 {
-	return ZwGPIO_ReadPin(PIN_SHORT);
+	return !ZwGPIO_ReadPin(PIN_SHORT);
 }
 // ----------------------------------------

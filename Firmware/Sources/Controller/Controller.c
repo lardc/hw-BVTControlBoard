@@ -50,8 +50,7 @@ volatile DeviceState CONTROL_State = DS_None;
 volatile BatteryVoltageState CONTROL_Battery = BVS_None;
 //
 static CONTROL_FUNC_RealTimeRoutine RealTimeRoutine = NULL;
-static EndTestDPCClosure EndXDPCArgument = {FALSE, 0, 0, DF_NONE, WARNING_NONE,
-PROBLEM_NONE};
+static EndTestDPCClosure EndXDPCArgument = {FALSE, 0, 0, DF_NONE, WARNING_NONE, PROBLEM_NONE};
 //
 static volatile Boolean CycleActive = FALSE;
 static volatile FUNC_AsyncDelegate DPCDelegate = NULL;
@@ -198,12 +197,8 @@ void CONTROL_SubcribeToCycle(CONTROL_FUNC_RealTimeRoutine Routine)
 #endif
 void CONTROL_RequestStop(Int16U Reason, Boolean HWSignal)
 {
-	if(HWSignal)
-		DRIVER_EnableTZandInt(FALSE);
-	
 	ZbGPIO_SwitchIndicator(FALSE);
-	
-	// Call stop process or switch to fault immediately
+
 	if(CONTROL_State == DS_InProcess)
 	{
 		switch (CurrentMeasurementType)
@@ -217,16 +212,14 @@ void CONTROL_RequestStop(Int16U Reason, Boolean HWSignal)
 				break;
 		}
 	}
-	else if(HWSignal)
+
+	if(HWSignal)
 	{
 		EndXDPCArgument.SavedRequestToDisable = TRUE;
 		EndXDPCArgument.SavedDFReason = Reason;
 		
 		CONTROL_RequestDPC(&CONTROL_EndPassiveDPC);
 	}
-	
-	CurrentMeasurementType = MEASUREMENT_TYPE_NONE;
-	DRIVER_ClearTZFault();
 }
 // ----------------------------------------
 
@@ -289,9 +282,7 @@ static void CONTROL_EndTestDPC()
 	}
 	
 	CurrentMeasurementType = MEASUREMENT_TYPE_NONE;
-	
 	CONTROL_ReInitSPI_Rx();
-	DRIVER_ClearTZFault();
 }
 // ----------------------------------------
 
@@ -331,11 +322,7 @@ static void CONTROL_SetDeviceState(DeviceState NewState)
 
 static void CONTROL_SwitchStateToNone()
 {
-	// Switch off TZ interrupt
-	DRIVER_EnableTZandInt(FALSE);
-	// Switch off LED indicator
 	ZbGPIO_SwitchIndicator(FALSE);
-	// Switch off power supply
 	DRIVER_SwitchPowerOff();
 	
 	DataTable[REG_FAULT_REASON] = DF_NONE;
@@ -348,9 +335,6 @@ static void CONTROL_SwitchStateToNone()
 
 static void CONTROL_SwitchStateToPowered()
 {
-	// Enable power and protection signals
-	DRIVER_EnableTZandInt(TRUE);
-	// Configure monitor
 	PSAMPLING_ConfigureSamplingVCap();
 	CONTROL_SetDeviceState(DS_Powered);
 	
@@ -369,8 +353,6 @@ static void CONTROL_SwitchStateToInProcess()
 
 static void CONTROL_SwitchStateToFault(Int16U FaultReason)
 {
-	// Switch off TZ interrupt
-	DRIVER_EnableTZandInt(FALSE);
 	ZbGPIO_SwitchIndicator(FALSE);
 	DRIVER_SwitchPowerOff();
 	
@@ -384,9 +366,8 @@ static void CONTROL_SwitchStateToFault(Int16U FaultReason)
 
 static void CONTROL_SwitchStateToDisabled(Int16U DisableReason)
 {
-	// Switch off TZ interrupt
-	DRIVER_EnableTZandInt(FALSE);
 	ZbGPIO_SwitchIndicator(FALSE);
+	DRIVER_SwitchPowerOff();
 	
 	DataTable[REG_DISABLE_REASON] = DisableReason;
 	CONTROL_SetDeviceState(DS_Disabled);
@@ -593,9 +574,8 @@ static void CONTROL_StartSequence()
 	ZbGPIO_ResetShortCircuit();
 	
 	CurrentMeasurementType = DataTable[REG_MEASUREMENT_TYPE];
-	DRIVER_ClearTZFault();
+
 	CONTROL_SwitchStateToInProcess();
-	
 	CONTROL_BatteryVoltagePrepare();
 }
 // ----------------------------------------

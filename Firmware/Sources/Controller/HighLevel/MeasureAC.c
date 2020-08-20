@@ -410,6 +410,9 @@ static void MEASURE_AC_ControlCycle()
 	MEASURE_AC_DoSampling();
 	TimeCounter++;
 	
+	if(DRIVER_IsShortCircuit())
+		CONTROL_RequestStop(DF_BRIDGE_SHORT, TRUE);
+
 	switch (State)
 	{
 		case ACPS_Ramp:
