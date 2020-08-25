@@ -1,4 +1,4 @@
-// -----------------------------------------
+// ----------------------------------------
 // Constraints for tunable parameters
 // ----------------------------------------
 
@@ -67,6 +67,10 @@ typedef struct __TableItemConstraint
 #define NOMINAL_PRIMARY_V_MIN	10		// (in V)
 #define NOMINAL_PRIMARY_V_MAX	400		// (in V)
 #define NOMINAL_PRIMARY_V_DEF	150		// (in V)
+//
+#define DEMAG_OFF_MIN			1		// (in %)
+#define DEMAG_OFF_MAX			99		// (in %)
+#define DEMAG_OFF_DEF			50		// (in %)
 //
 #define OPTO_MON_MIN			0
 #define OPTO_MON_MAX			50

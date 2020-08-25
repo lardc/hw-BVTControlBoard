@@ -23,7 +23,7 @@ void ZbGPIO_ToggleLED1();
 void ZbGPIO_SwitchIndicator(Boolean Set);
 // Switch SYNC
 void ZbGPIO_SwitchSYNC(Boolean Set);
-void ZbGPIO_ResetShortCircuit();
+void ZbGPIO_ResetShortCircuit(Boolean Set);
 
 
 #endif // __ZBGPIO_H

@@ -79,10 +79,8 @@ void ZbGPIO_SwitchSYNC(Boolean Set)
 }
 // ----------------------------------------
 
-void ZbGPIO_ResetShortCircuit()
+void ZbGPIO_ResetShortCircuit(Boolean Set)
 {
-	ZwGPIO_WritePin(PIN_SHORT_CLR, TRUE);
-	DELAY_US(100);
-	ZwGPIO_WritePin(PIN_SHORT_CLR, FALSE);
+	ZwGPIO_WritePin(PIN_SHORT_CLR, Set);
 }
 // ----------------------------------------

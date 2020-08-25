@@ -524,6 +524,14 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U UserError)
 				*UserError = ERR_OPERATION_BLOCKED;
 			break;
 			
+		case ACT_DBG_SC_RESET_ON:
+			ZbGPIO_ResetShortCircuit(TRUE);
+			break;
+
+		case ACT_DBG_SC_RESET_OFF:
+			ZbGPIO_ResetShortCircuit(FALSE);
+			break;
+
 		default:
 			return FALSE;
 	}
@@ -571,8 +579,11 @@ static void CONTROL_TriggerMeasurementDPC()
 static void CONTROL_StartSequence()
 {
 	ZbGPIO_SwitchIndicator(TRUE);
-	ZbGPIO_ResetShortCircuit();
 	
+	ZbGPIO_ResetShortCircuit(TRUE);
+	DELAY_US(100);
+	ZbGPIO_ResetShortCircuit(FALSE);
+
 	CurrentMeasurementType = DataTable[REG_MEASUREMENT_TYPE];
 
 	CONTROL_SwitchStateToInProcess();
