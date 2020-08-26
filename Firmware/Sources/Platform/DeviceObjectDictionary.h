@@ -18,10 +18,8 @@
 #define ACT_DBG_POWER_50V			17	// Turn on primary 50V voltage
 #define ACT_DBG_POWER_100V			18	// Turn on primary 100V voltage
 #define ACT_DBG_POWER_150V			19	// Turn on primary 150V voltage
-#define ACT_DBG_SC_RESET_ON			20	// Turn on short circuit reset
-#define ACT_DBG_SC_RESET_OFF		21	// Turn off short circuit reset
 //
-#define ACT_DBG_GENERATE_SYNC		30	// Generate SYNC sugnal
+#define ACT_DBG_GENERATE_SYNC		20	// Generate SYNC sugnal
 //
 #define ACT_START_TEST				100	// Start test with defined parameters
 #define ACT_STOP					101	// Stop test sequence
@@ -77,7 +75,6 @@
 #define REG_SKIP_LOGGING_VOIDS		50	// Don't log empty zones in case of using frequency divisor
 #define REG_FAN_OPERATE_PERIOD		51	// Default fan turn on period (in s)
 #define REG_FAN_OPERATE_MIN_TIME	52	// Minimum fan turn on time (in s)
-#define REG_DEMAG_OFF_PWM_THR		53	// Demagnitization turn off PWM threshold (in %)
 // 53 - 79
 #define REG_SAFE_MAX_PWM			80	// Maximum PWM (AC mode)
 #define REG_USE_INST_METHOD			81	// Measurement method

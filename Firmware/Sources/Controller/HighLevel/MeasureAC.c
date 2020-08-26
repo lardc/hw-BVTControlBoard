@@ -1,3 +1,7 @@
+// -----------------------------------------
+// Measuring logic AC
+// ----------------------------------------
+
 // Header
 #include "MeasureAC.h"
 //
@@ -35,7 +39,7 @@ static Int32U VRateCounter, VRateCounterTop;
 static Int32U VPlateTimeCounter, VPlateTimeCounterTop, VPrePlateTimeCounter, VPrePlateTimeCounterTop;
 static Int32U BrakeTimeCounter, BrakeTimeCounterTop, FrequencyDivisorCounter, FrequencyDivisorCounterTop;
 static Int16U OptoConnectionMon, OptoConnectionMonMax, CurrentMultiply;
-static Int16U FollowingErrorCounter, DemagnetizationOffPwmLevel;
+static Int16U FollowingErrorCounter;
 static Int16S MaxSafePWM, MinSafePWM, SSVoltageP2, SSCurrentP2;
 static _iq SSVoltageCoff, SSCurrentCoff, SSVoltageP1, SSVoltageP0, SSCurrentP1, SSCurrentP0, TransCoffInv, PWMCoff;
 static _iq LimitCurrent, LimitCurrentHaltLevel, LimitVoltage, VoltageRateStep, NormalizedFrequency;
@@ -156,35 +160,19 @@ Int16S inline MEASURE_AC_TrimPWM(Int16S Duty)
 Int16S inline MEASURE_AC_SetPWM(Int16S Duty)
 {
 	static Int16S PrevDuty = 0;
-	static Int16S MinDuty = 0;
-
-	Int16S PWMOutput = MEASURE_AC_TrimPWM(Duty);
-	ZwPWMB_SetValue12(DbgMutePWM ? 0 : PWMOutput);
-
-	if(!DbgMutePWM)
+	static Boolean InvertPolarity = TRUE;
+	
+	Int16S PWMOutput = 0;
+	
+	if(Duty >= 0 && PrevDuty < 0)
+		InvertPolarity = !InvertPolarity;
+	
+	if(Duty > 0)
 	{
-		// Zero crossing to negative
-		if(PrevDuty >= 0 && Duty < 0)
-		{
-			ZbGPIO_ResetShortCircuit(TRUE);
-			MinDuty = 0;
-		}
-
-		if((Duty < 0) && (PrevDuty < 0))
-		{
-			// Find minimum duty
-			if(MinDuty > Duty)
-				MinDuty = Duty;
-
-			// On negative rising edge
-			if(PrevDuty < Duty)
-			{
-				if((Int32S)MinDuty * DemagnetizationOffPwmLevel < (Int32S)Duty * 100)
-					ZbGPIO_ResetShortCircuit(FALSE);
-			}
-		}
+		PWMOutput = MEASURE_AC_TrimPWM(InvertPolarity ? -Duty : Duty);
+		ZwPWMB_SetValue12(DbgMutePWM ? 0 : PWMOutput);
 	}
-
+	
 	PrevDuty = Duty;
 	return PWMOutput;
 }
@@ -606,7 +594,6 @@ static void MEASURE_AC_CacheVariables()
 	VoltageRateStep = _IQmpy(_IQdiv(_IQ(1000.0f), _IQI(DataTable[REG_VOLTAGE_FREQUENCY])),
 			_IQmpyI32(_IQ(0.1f), DataTable[REG_VOLTAGE_AC_RATE]));
 	MinSafePWM = (PWM_FREQUENCY / 1000L) * PWM_TH * ZW_PWM_DUTY_BASE / 1000000L;
-	DemagnetizationOffPwmLevel = DataTable[REG_DEMAG_OFF_PWM_THR];
 	
 	UseInstantMethod = DataTable[REG_USE_INST_METHOD] ? TRUE : FALSE;
 	
