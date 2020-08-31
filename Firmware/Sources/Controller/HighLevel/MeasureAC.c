@@ -1,4 +1,4 @@
-// -----------------------------------------
+// ----------------------------------------
 // Measuring logic AC
 // ----------------------------------------
 
@@ -110,10 +110,7 @@ Boolean MEASURE_AC_StartProcess(Int16U Type, pInt16U pDFReason, pInt16U pProblem
 	FIR_Reset();
 	
 	// Configure samplers
-	if(LimitCurrent <= HVD_IL_DCM_TH)
-		SS_ConfigureSensingCircuits(HVD_DC_IH_TH, LimitVoltage, TRUE);
-	else
-		SS_ConfigureSensingCircuits(LimitCurrent, LimitVoltage, FALSE);
+	SS_ConfigureSensingCircuits(LimitCurrent, LimitVoltage, FALSE);
 
 	// Start sampling
 	SS_StartSampling();
@@ -617,7 +614,7 @@ static void MEASURE_AC_CacheVariables()
 		CurrentMultiply = 1000;
 		LimitCurrentHaltLevel = HVD_IL_DCM_TH;
 
-		SSCurrentCoff = _FPtoIQ2(DataTable[REG_SCURRENT_DCM_COFF_N], DataTable[REG_SCURRENT_DCM_COFF_D]);
+		SSCurrentCoff = _FPtoIQ2(DataTable[REG_SCURRENT1_COFF_N], DataTable[REG_SCURRENT1_COFF_D]);
 		SSCurrentCoff = _IQdiv(SSCurrentCoff, _IQ(100.0f));
 
 		SSCurrentP2 = (Int16S)DataTable[REG_SCURRENT_DCM_FINE_P2];
