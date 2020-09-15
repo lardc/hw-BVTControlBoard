@@ -149,9 +149,9 @@ const TableItemConstraint VConstraint[DATA_TABLE_WP_START - DATA_TABLE_WR_START]
 									 {
 										   {MEASUREMENT_TYPE_NONE, MEASUREMENT_TYPE_TEST, MEASUREMENT_TYPE_AC_D},	// 128
 										   {0, 1, 0},																// 129
-										   {0, TEST_CURRENT_MAX, 0},												// 130
+										   {TEST_CURRENT_MIN, TEST_CURRENT_MAX, TEST_CURRENT_DEF},					// 130
 										   {LIMIT_VOLTAGE_MIN, LIMIT_VOLTAGE_MAX, LIMIT_VOLTAGE_DEF},				// 131
-										   {0, VPLATE_TIME_MAX, 0},													// 132
+										   {VPLATE_TIME_MIN, VPLATE_TIME_MAX, VPLATE_TIME_DEF},						// 132
 										   {RATE_VAC_MIN, RATE_VAC_MAX, RATE_VAC_DEF},								// 133
 										   {START_VAC_MIN, START_VAC_MAX, START_VAC_DEF},							// 134
 										   {VOLTAGE_FREQUENCY_MIN, VOLTAGE_FREQUENCY_MAX, VOLTAGE_FREQUENCY_DEF},	// 135
