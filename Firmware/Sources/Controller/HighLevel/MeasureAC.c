@@ -177,7 +177,7 @@ Int16S inline MEASURE_AC_SetPWM(Int16S Duty)
 
 void MEASURE_AC_Stop(Int16U Reason)
 {
-	if(Reason == DF_INTERNAL || Reason == PROBLEM_OUTPUT_SHORT)
+	if(Reason == DF_INTERNAL || Reason == PROBLEM_OUTPUT_SHORT || Reason == DF_BRIDGE_SHORT)
 	{
 		ZbGPIO_SwitchSYNC(TRUE);
 		TripConditionDetected = TRUE;
@@ -188,11 +188,13 @@ void MEASURE_AC_Stop(Int16U Reason)
 		case DF_INTERNAL:
 			MEASURE_AC_HandleTripCondition(UseInstantMethod);
 			break;
-			
+
+		case DF_BRIDGE_SHORT:
 		case PROBLEM_OUTPUT_SHORT:
 			MEASURE_AC_HandleTripCondition(FALSE);
 		case DF_NONE:
-			Problem = Reason;
+			if (Reason != DF_BRIDGE_SHORT)
+				Problem = Reason;
 			break;
 			
 		default:
