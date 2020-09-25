@@ -313,6 +313,15 @@ void inline MEASURE_AC_DoSampling()
 	tmp2 = _IQdiv(tmp, _IQ(1000.0f));
 	ActualSecondarySample.IQFields.Current = _IQmpy(tmp2, _IQmpyI32(tmp2, SSCurrentP2)) + _IQmpy(tmp, SSCurrentP1)
 			+ SSCurrentP0;
+
+	if(!DbgDualPolarity)
+	{
+		if(ActualSecondarySample.IQFields.Voltage < 0)
+			ActualSecondarySample.IQFields.Voltage = 0;
+
+		if(ActualSecondarySample.IQFields.Current < 0)
+			ActualSecondarySample.IQFields.Current = 0;
+	}
 }
 // ----------------------------------------
 
