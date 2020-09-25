@@ -190,11 +190,15 @@ void MEASURE_AC_Stop(Int16U Reason)
 			break;
 
 		case DF_BRIDGE_SHORT:
+			MEASURE_AC_HandleTripCondition(FALSE);
+			Warning = WARNING_OUTPUT_OVERLOAD;
+			ZwPWMB_SetValue12(0);
+			break;
+
 		case PROBLEM_OUTPUT_SHORT:
 			MEASURE_AC_HandleTripCondition(FALSE);
 		case DF_NONE:
-			if (Reason != DF_BRIDGE_SHORT)
-				Problem = Reason;
+			Problem = Reason;
 			break;
 			
 		default:
@@ -413,7 +417,7 @@ static void MEASURE_AC_ControlCycle()
 	TimeCounter++;
 	
 	if(DRIVER_IsShortCircuit())
-		CONTROL_RequestStop(DF_BRIDGE_SHORT, TRUE);
+		CONTROL_RequestStop(DF_BRIDGE_SHORT, FALSE);
 
 	switch (State)
 	{
@@ -484,7 +488,7 @@ static void MEASURE_AC_ControlCycle()
 				correction =
 						(ABS(PrevCorrection) >= PWM_REDUCE_RATE) ?
 								(PrevCorrection - SIGN(PrevCorrection) * PWM_REDUCE_RATE) : 0;
-				MEASURE_AC_CCSub_CorrectionAndLog(correction);
+				MEASURE_AC_CCSub_CorrectionAndLog((Warning == WARNING_OUTPUT_OVERLOAD) ? 0 : correction);
 				
 				// Increase timer only when PWM reduced to zero
 				if(correction == 0)
