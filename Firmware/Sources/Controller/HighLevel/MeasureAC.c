@@ -190,7 +190,7 @@ void MEASURE_AC_Stop(Int16U Reason)
 			break;
 
 		case DF_BRIDGE_SHORT:
-			MEASURE_AC_HandleTripCondition(FALSE);
+			MEASURE_AC_HandleTripCondition(UseInstantMethod);
 			Warning = WARNING_OUTPUT_OVERLOAD;
 			ZwPWMB_SetValue12(0);
 			break;
