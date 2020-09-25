@@ -1,4 +1,4 @@
-#ifndef __POWER_DRIVER_H
+﻿#ifndef __POWER_DRIVER_H
 #define __POWER_DRIVER_H
 
 // Include

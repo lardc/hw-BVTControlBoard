@@ -1,4 +1,4 @@
-// -----------------------------------------
+﻿// -----------------------------------------
 // Declaration file for ZbBoard library for VTM-CB board family
 // 
 //		BASED ON 	- 	TI C/C++ Headers and Examples
