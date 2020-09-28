@@ -1,4 +1,4 @@
-// ----------------------------------------
+﻿// ----------------------------------------
 // Measuring logic AC
 // ----------------------------------------
 
@@ -177,7 +177,7 @@ Int16S inline MEASURE_AC_SetPWM(Int16S Duty)
 
 void MEASURE_AC_Stop(Int16U Reason)
 {
-	if(Reason == DF_INTERNAL || Reason == PROBLEM_OUTPUT_SHORT)
+	if(Reason == DF_INTERNAL || Reason == PROBLEM_OUTPUT_SHORT || Reason == DF_BRIDGE_SHORT)
 	{
 		ZbGPIO_SwitchSYNC(TRUE);
 		TripConditionDetected = TRUE;
@@ -188,7 +188,13 @@ void MEASURE_AC_Stop(Int16U Reason)
 		case DF_INTERNAL:
 			MEASURE_AC_HandleTripCondition(UseInstantMethod);
 			break;
-			
+
+		case DF_BRIDGE_SHORT:
+			MEASURE_AC_HandleTripCondition(UseInstantMethod);
+			Warning = WARNING_OUTPUT_OVERLOAD;
+			ZwPWMB_SetValue12(0);
+			break;
+
 		case PROBLEM_OUTPUT_SHORT:
 			MEASURE_AC_HandleTripCondition(FALSE);
 		case DF_NONE:
@@ -307,6 +313,15 @@ void inline MEASURE_AC_DoSampling()
 	tmp2 = _IQdiv(tmp, _IQ(1000.0f));
 	ActualSecondarySample.IQFields.Current = _IQmpy(tmp2, _IQmpyI32(tmp2, SSCurrentP2)) + _IQmpy(tmp, SSCurrentP1)
 			+ SSCurrentP0;
+
+	if(!DbgDualPolarity)
+	{
+		if(ActualSecondarySample.IQFields.Voltage < 0)
+			ActualSecondarySample.IQFields.Voltage = 0;
+
+		if(ActualSecondarySample.IQFields.Current < 0)
+			ActualSecondarySample.IQFields.Current = 0;
+	}
 }
 // ----------------------------------------
 
@@ -411,7 +426,7 @@ static void MEASURE_AC_ControlCycle()
 	TimeCounter++;
 	
 	if(DRIVER_IsShortCircuit())
-		CONTROL_RequestStop(DF_BRIDGE_SHORT, TRUE);
+		CONTROL_RequestStop(DF_BRIDGE_SHORT, FALSE);
 
 	switch (State)
 	{
@@ -482,7 +497,7 @@ static void MEASURE_AC_ControlCycle()
 				correction =
 						(ABS(PrevCorrection) >= PWM_REDUCE_RATE) ?
 								(PrevCorrection - SIGN(PrevCorrection) * PWM_REDUCE_RATE) : 0;
-				MEASURE_AC_CCSub_CorrectionAndLog(correction);
+				MEASURE_AC_CCSub_CorrectionAndLog((Warning == WARNING_OUTPUT_OVERLOAD) ? 0 : correction);
 				
 				// Increase timer only when PWM reduced to zero
 				if(correction == 0)

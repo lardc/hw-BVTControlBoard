@@ -1,4 +1,4 @@
-#ifndef __DEV_OBJ_DIC_H
+﻿#ifndef __DEV_OBJ_DIC_H
 #define __DEV_OBJ_DIC_H
 
 
@@ -226,6 +226,7 @@
 #define WARNING_CURRENT_NOT_REACHED 401	// No trip condition detected in I-mode
 #define WARNING_VOLTAGE_NOT_REACHED 402	// Trip condition detected in V-mode
 #define WARNING_RES_OUT_OF_RANGE	403	// Resistance is too low or too high
+#define WARNING_OUTPUT_OVERLOAD		404	// Output overload
 //
 #define WARNING_WATCHDOG_RESET		1001	// System has been reseted by WD
 
