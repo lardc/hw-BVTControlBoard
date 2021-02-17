@@ -51,7 +51,7 @@ static _iq ActualMaxPosVoltage, ActualMaxPosCurrent;
 static _iq MaxPosVoltage, MaxPosCurrent, MaxPosInstantCurrent;
 static DataSample ActualSecondarySample;
 static Boolean TripConditionDetected, UseInstantMethod, FrequencyRateSwitch, ModifySine;
-static Boolean DbgDualPolarity, DbgSRAM, DbgMutePWM, SkipRegulation, SkipLoggingVoids;
+static Boolean DbgDualPolarity, DbgSRAM, DbgMutePWM, SkipRegulation, SkipLoggingVoids, SkipNegativeLogging;
 static Boolean InvertPolarity;
 static Int16S PrevDuty;
 static Int16U AmplitudePeriodCounter;
@@ -278,7 +278,12 @@ static Boolean MEASURE_AC_PIControllerSequence(_iq DesiredV)
 			MaxPosCurrent = 0;
 			MaxPosInstantCurrent = 0;
 			
-			if(!SkipRegulation)
+			if(SkipRegulation)
+			{
+				SkipRegulation = FALSE;
+				FollowingErrorAbsolute = FollowingErrorFraction = 0;
+			}
+			else
 			{
 				err = DesiredAmplitudeVHistory - ActualMaxPosVoltage;
 				DesiredAmplitudeVHistory = DesiredAmplitudeV;
@@ -286,12 +291,10 @@ static Boolean MEASURE_AC_PIControllerSequence(_iq DesiredV)
 				SIVAerr += _IQmpy(err, KiVAC);
 				
 				ControlledAmplitudeV = DesiredAmplitudeV + (SIVAerr + p);
+
+				FollowingErrorAbsolute = err;
+				FollowingErrorFraction = _IQdiv(_IQabs(err), DesiredAmplitudeV);
 			}
-			else
-				SkipRegulation = FALSE;
-			
-			FollowingErrorAbsolute = err;
-			FollowingErrorFraction = _IQdiv(_IQabs(err), DesiredAmplitudeV);
 			
 			return TRUE;
 		}
@@ -538,9 +541,12 @@ static void MEASURE_AC_CCSub_CorrectionAndLog(Int16S ActualCorrection)
 	Int16S PWMOutput = MEASURE_AC_SetPWM(ActualCorrection);
 	if(!SkipLoggingVoids || FrequencyRateSwitch)
 	{
-		MU_LogScope(&ActualSecondarySample, CurrentMultiply, DbgSRAM, DbgDualPolarity);
-		MU_LogScopeIV(ActualSecondarySample);
-		MU_LogScopeDIAG(PWMOutput);
+		if(!(SkipNegativeLogging && InvertPolarity))
+		{
+			MU_LogScope(&ActualSecondarySample, CurrentMultiply, DbgSRAM, DbgDualPolarity);
+			MU_LogScopeIV(ActualSecondarySample);
+			MU_LogScopeDIAG(PWMOutput);
+		}
 	}
 }
 // ----------------------------------------
@@ -624,6 +630,7 @@ static void MEASURE_AC_CacheVariables()
 	DbgDualPolarity = DataTable[REG_DBG_DUAL_POLARITY] ? TRUE : FALSE;
 	
 	SkipLoggingVoids = DataTable[REG_SKIP_LOGGING_VOIDS] ? TRUE : FALSE;
+	SkipNegativeLogging = DataTable[REG_SKIP_NEG_LOGGING] ? TRUE : FALSE;
 	
 	// Optical connection monitor
 	OptoConnectionMonMax = DataTable[REG_OPTO_CONNECTION_MON];

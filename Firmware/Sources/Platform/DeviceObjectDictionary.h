@@ -82,7 +82,8 @@
 // 83 - 84
 #define REG_POWER_OPT_COUNT			85	// Actual count of power options
 #define REG_MODIFY_SINE				86	// Enable sine modification at low currents
-// 87 - 95
+#define REG_SKIP_NEG_LOGGING		87	// Skip negative pulses logging
+// 88 - 95
 #define REG_SCURRENT1_FINE_P2		96	// Secondary current 1 tune quadratic coefficient P2 x1e6
 #define REG_SCURRENT1_FINE_P1		97	// Secondary current 1 tune quadratic coefficient P1 x1000
 #define REG_SCURRENT2_FINE_P2		98	// Secondary current 2 tune quadratic coefficient P2 x1e6
