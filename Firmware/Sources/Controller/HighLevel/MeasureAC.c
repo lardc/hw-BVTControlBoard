@@ -52,6 +52,7 @@ static _iq MaxPosVoltage, MaxPosCurrent, MaxPosInstantCurrent;
 static DataSample ActualSecondarySample;
 static Boolean TripConditionDetected, UseInstantMethod, FrequencyRateSwitch, ModifySine;
 static Boolean DbgDualPolarity, DbgSRAM, DbgMutePWM, SkipRegulation, SkipLoggingVoids;
+static Boolean InvertPolarity;
 static Int16U Problem, Warning, Fault;
 static DataSampleIQ PeakSample;
 //
@@ -92,6 +93,7 @@ Boolean MEASURE_AC_StartProcess(Int16U Type, pInt16U pDFReason, pInt16U pProblem
 	FollowingErrorFraction = FollowingErrorAbsolute = 0;
 	FollowingErrorCounter = 0;
 	//
+	InvertPolarity = TRUE;
 	SkipRegulation = TRUE;
 	SIVAerr = 0;
 	//
@@ -157,8 +159,6 @@ Int16S inline MEASURE_AC_TrimPWM(Int16S Duty)
 Int16S inline MEASURE_AC_SetPWM(Int16S Duty)
 {
 	static Int16S PrevDuty = 0;
-	static Boolean InvertPolarity = TRUE;
-	
 	Int16S PWMOutput = 0;
 	
 	if(Duty >= 0 && PrevDuty < 0)
@@ -606,7 +606,7 @@ static void MEASURE_AC_CacheVariables()
 	
 	StartPauseTimeCounterTop = (CONTROL_FREQUENCY / DataTable[REG_VOLTAGE_FREQUENCY]) * 2;
 	NormalizedFrequency = _IQdiv(_IQ(1.0f), _IQI(CONTROL_FREQUENCY / DataTable[REG_VOLTAGE_FREQUENCY]));
-	VoltageRateStep = _IQmpy(_IQdiv(_IQ(1000.0f), _IQI(DataTable[REG_VOLTAGE_FREQUENCY])),
+	VoltageRateStep = _IQmpy(_IQdiv(_IQI((PWM_SKIP_NEG_PULSES ? 2 : 1) * 1000.0f), _IQI(DataTable[REG_VOLTAGE_FREQUENCY])),
 			_IQmpyI32(_IQ(0.1f), DataTable[REG_VOLTAGE_AC_RATE]));
 	MinSafePWM = (PWM_FREQUENCY / 1000L) * PWM_TH * ZW_PWM_DUTY_BASE / 1000000L;
 	
