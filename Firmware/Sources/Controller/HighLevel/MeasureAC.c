@@ -53,6 +53,7 @@ static DataSample ActualSecondarySample;
 static Boolean TripConditionDetected, UseInstantMethod, FrequencyRateSwitch, ModifySine;
 static Boolean DbgDualPolarity, DbgSRAM, DbgMutePWM, SkipRegulation, SkipLoggingVoids;
 static Boolean InvertPolarity;
+static Int16S PrevDuty;
 static Int16U AmplitudePeriodCounter;
 static Int16U Problem, Warning, Fault;
 static DataSampleIQ PeakSample;
@@ -106,7 +107,8 @@ Boolean MEASURE_AC_StartProcess(Int16U Type, pInt16U pDFReason, pInt16U pProblem
 	MaxPosVoltage = 0;
 	MaxPosCurrent = 0;
 	MaxPosInstantCurrent = 0;
-	DesiredVoltageHistory = 0;
+	DesiredVoltageHistory = -1;
+	PrevDuty = -1;
 	//
 	ResultV = ResultI = 0;
 	State = ACPS_Ramp;
@@ -160,7 +162,6 @@ Int16S inline MEASURE_AC_TrimPWM(Int16S Duty)
 
 Int16S inline MEASURE_AC_SetPWM(Int16S Duty)
 {
-	static Int16S PrevDuty = 0;
 	Int16S PWMOutput = 0;
 	
 	if(Duty >= 0 && PrevDuty < 0)
