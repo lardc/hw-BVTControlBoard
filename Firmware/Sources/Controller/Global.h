@@ -25,6 +25,7 @@
 
 // Regulator parameters
 #define PWM_REDUCE_RATE			50				// in ticks per regulator cycle
+#define PWM_SKIP_NEG_PULSES		TRUE			// Skip logging and measurement at negative primary pulses
 
 // --- Debug modes
 #define DBG_USE_BRIDGE_SHORT	TRUE
