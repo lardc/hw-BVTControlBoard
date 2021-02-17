@@ -53,6 +53,7 @@ static DataSample ActualSecondarySample;
 static Boolean TripConditionDetected, UseInstantMethod, FrequencyRateSwitch, ModifySine;
 static Boolean DbgDualPolarity, DbgSRAM, DbgMutePWM, SkipRegulation, SkipLoggingVoids;
 static Boolean InvertPolarity;
+static Int16U AmplitudePeriodCounter;
 static Int16U Problem, Warning, Fault;
 static DataSampleIQ PeakSample;
 //
@@ -93,6 +94,7 @@ Boolean MEASURE_AC_StartProcess(Int16U Type, pInt16U pDFReason, pInt16U pProblem
 	FollowingErrorFraction = FollowingErrorAbsolute = 0;
 	FollowingErrorCounter = 0;
 	//
+	AmplitudePeriodCounter = 0;
 	InvertPolarity = TRUE;
 	SkipRegulation = TRUE;
 	SIVAerr = 0;
@@ -259,7 +261,11 @@ static Boolean MEASURE_AC_PIControllerSequence(_iq DesiredV)
 			FrequencyDivisorCounter = FrequencyDivisorCounterTop;
 		
 		if(FrequencyRateSwitch)
+			++AmplitudePeriodCounter;
+
+		if((PWM_SKIP_NEG_PULSES && AmplitudePeriodCounter > 1) || (!PWM_SKIP_NEG_PULSES && AmplitudePeriodCounter > 0))
 		{
+			AmplitudePeriodCounter = 0;
 			_iq err = 0, p;
 			
 			MEASURE_AC_HandlePeakLogic();
