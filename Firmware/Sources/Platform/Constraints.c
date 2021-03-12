@@ -102,7 +102,7 @@ const TableItemConstraint NVConstraint[DATA_TABLE_NV_SIZE] =
 										   {0, 0, 0},																// 84
 										   {1, POWER_OPTIONS_MAXNUM, POWER_OPTIONS_MAXNUM},							// 85
 										   {NO, YES, NO},															// 86
-										   {0, 0, 0},																// 87
+										   {NO, YES, NO},															// 87
 										   {0, 0, 0},																// 88
 										   {0, 0, 0},																// 89
 										   {0, 0, 0},																// 90

@@ -51,7 +51,10 @@ static _iq ActualMaxPosVoltage, ActualMaxPosCurrent;
 static _iq MaxPosVoltage, MaxPosCurrent, MaxPosInstantCurrent;
 static DataSample ActualSecondarySample;
 static Boolean TripConditionDetected, UseInstantMethod, FrequencyRateSwitch, ModifySine;
-static Boolean DbgDualPolarity, DbgSRAM, DbgMutePWM, SkipRegulation, SkipLoggingVoids;
+static Boolean DbgDualPolarity, DbgSRAM, DbgMutePWM, SkipRegulation, SkipLoggingVoids, SkipNegativeLogging;
+static Boolean InvertPolarity;
+static Int16S PrevDuty;
+static Int16U AmplitudePeriodCounter;
 static Int16U Problem, Warning, Fault;
 static DataSampleIQ PeakSample;
 //
@@ -92,6 +95,8 @@ Boolean MEASURE_AC_StartProcess(Int16U Type, pInt16U pDFReason, pInt16U pProblem
 	FollowingErrorFraction = FollowingErrorAbsolute = 0;
 	FollowingErrorCounter = 0;
 	//
+	AmplitudePeriodCounter = 0;
+	InvertPolarity = TRUE;
 	SkipRegulation = TRUE;
 	SIVAerr = 0;
 	//
@@ -102,7 +107,8 @@ Boolean MEASURE_AC_StartProcess(Int16U Type, pInt16U pDFReason, pInt16U pProblem
 	MaxPosVoltage = 0;
 	MaxPosCurrent = 0;
 	MaxPosInstantCurrent = 0;
-	DesiredVoltageHistory = 0;
+	DesiredVoltageHistory = -1;
+	PrevDuty = -1;
 	//
 	ResultV = ResultI = 0;
 	State = ACPS_Ramp;
@@ -156,9 +162,6 @@ Int16S inline MEASURE_AC_TrimPWM(Int16S Duty)
 
 Int16S inline MEASURE_AC_SetPWM(Int16S Duty)
 {
-	static Int16S PrevDuty = 0;
-	static Boolean InvertPolarity = TRUE;
-	
 	Int16S PWMOutput = 0;
 	
 	if(Duty >= 0 && PrevDuty < 0)
@@ -259,7 +262,11 @@ static Boolean MEASURE_AC_PIControllerSequence(_iq DesiredV)
 			FrequencyDivisorCounter = FrequencyDivisorCounterTop;
 		
 		if(FrequencyRateSwitch)
+			++AmplitudePeriodCounter;
+
+		if((PWM_SKIP_NEG_PULSES && AmplitudePeriodCounter > 1) || (!PWM_SKIP_NEG_PULSES && AmplitudePeriodCounter > 0))
 		{
+			AmplitudePeriodCounter = 0;
 			_iq err = 0, p;
 			
 			MEASURE_AC_HandlePeakLogic();
@@ -271,7 +278,12 @@ static Boolean MEASURE_AC_PIControllerSequence(_iq DesiredV)
 			MaxPosCurrent = 0;
 			MaxPosInstantCurrent = 0;
 			
-			if(!SkipRegulation)
+			if(SkipRegulation)
+			{
+				SkipRegulation = FALSE;
+				FollowingErrorAbsolute = FollowingErrorFraction = 0;
+			}
+			else
 			{
 				err = DesiredAmplitudeVHistory - ActualMaxPosVoltage;
 				DesiredAmplitudeVHistory = DesiredAmplitudeV;
@@ -279,12 +291,10 @@ static Boolean MEASURE_AC_PIControllerSequence(_iq DesiredV)
 				SIVAerr += _IQmpy(err, KiVAC);
 				
 				ControlledAmplitudeV = DesiredAmplitudeV + (SIVAerr + p);
+
+				FollowingErrorAbsolute = err;
+				FollowingErrorFraction = _IQdiv(_IQabs(err), DesiredAmplitudeV);
 			}
-			else
-				SkipRegulation = FALSE;
-			
-			FollowingErrorAbsolute = err;
-			FollowingErrorFraction = _IQdiv(_IQabs(err), DesiredAmplitudeV);
 			
 			return TRUE;
 		}
@@ -531,9 +541,12 @@ static void MEASURE_AC_CCSub_CorrectionAndLog(Int16S ActualCorrection)
 	Int16S PWMOutput = MEASURE_AC_SetPWM(ActualCorrection);
 	if(!SkipLoggingVoids || FrequencyRateSwitch)
 	{
-		MU_LogScope(&ActualSecondarySample, CurrentMultiply, DbgSRAM, DbgDualPolarity);
-		MU_LogScopeIV(ActualSecondarySample);
-		MU_LogScopeDIAG(PWMOutput);
+		if(!(SkipNegativeLogging && InvertPolarity))
+		{
+			MU_LogScope(&ActualSecondarySample, CurrentMultiply, DbgSRAM, DbgDualPolarity);
+			MU_LogScopeIV(ActualSecondarySample);
+			MU_LogScopeDIAG(PWMOutput);
+		}
 	}
 }
 // ----------------------------------------
@@ -565,9 +578,9 @@ static Int16S MEASURE_AC_CCSub_Regulator(Boolean *PeriodTrigger)
 	// Following error detection
 	if(ret && !DbgMutePWM && DBG_USE_FOLLOWING_ERR)
 	{
-		if((FollowingErrorFraction > FE_MAX_FRACTION ) && (_IQabs(FollowingErrorAbsolute) > FE_MAX_ABSOLUTE ))
+		if((FollowingErrorFraction > FE_MAX_FRACTION) && (_IQabs(FollowingErrorAbsolute) > FE_MAX_ABSOLUTE))
 		{
-			if(FollowingErrorCounter++ > FE_MAX_COUNTER)
+			if(FollowingErrorCounter++ > (FE_MAX_COUNTER * (PWM_SKIP_NEG_PULSES ? 2 : 1)))
 			{
 				correction = 0;
 				MEASURE_AC_Stop(DF_FOLLOWING_ERROR);
@@ -606,7 +619,7 @@ static void MEASURE_AC_CacheVariables()
 	
 	StartPauseTimeCounterTop = (CONTROL_FREQUENCY / DataTable[REG_VOLTAGE_FREQUENCY]) * 2;
 	NormalizedFrequency = _IQdiv(_IQ(1.0f), _IQI(CONTROL_FREQUENCY / DataTable[REG_VOLTAGE_FREQUENCY]));
-	VoltageRateStep = _IQmpy(_IQdiv(_IQ(1000.0f), _IQI(DataTable[REG_VOLTAGE_FREQUENCY])),
+	VoltageRateStep = _IQmpy(_IQdiv(_IQI((PWM_SKIP_NEG_PULSES ? 2 : 1) * 1000.0f), _IQI(DataTable[REG_VOLTAGE_FREQUENCY])),
 			_IQmpyI32(_IQ(0.1f), DataTable[REG_VOLTAGE_AC_RATE]));
 	MinSafePWM = (PWM_FREQUENCY / 1000L) * PWM_TH * ZW_PWM_DUTY_BASE / 1000000L;
 	
@@ -617,6 +630,7 @@ static void MEASURE_AC_CacheVariables()
 	DbgDualPolarity = DataTable[REG_DBG_DUAL_POLARITY] ? TRUE : FALSE;
 	
 	SkipLoggingVoids = DataTable[REG_SKIP_LOGGING_VOIDS] ? TRUE : FALSE;
+	SkipNegativeLogging = DataTable[REG_SKIP_NEG_LOGGING] ? TRUE : FALSE;
 	
 	// Optical connection monitor
 	OptoConnectionMonMax = DataTable[REG_OPTO_CONNECTION_MON];

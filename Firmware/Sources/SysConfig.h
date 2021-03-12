@@ -66,7 +66,7 @@
 
 // SPI-B
 //--------------------------------------------------------
-#define SPIB_BAUDRATE		6250000L  	// SPI clock = 6.25 MHz
+#define SPIB_BAUDRATE		6250000L  	// SPI clock in MHz
 #define SPIB_PLR			TRUE		// CLK high in idle state
 #define SPIB_PHASE			FALSE
 //--------------------------------------------------------
