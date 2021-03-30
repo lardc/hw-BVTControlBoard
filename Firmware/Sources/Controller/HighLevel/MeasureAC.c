@@ -371,16 +371,16 @@ static void MEASURE_AC_HandleVI()
 	}
 	
 	// Check current conditions
-	if(UseInstantMethod)
-	{
-		if(ActualSecondarySample.IQFields.Current >= LimitCurrentHaltLevel)
-			MEASURE_AC_Stop(PROBLEM_OUTPUT_SHORT);
-	}
-	else
-	{
-		if(ActualSecondarySample.IQFields.Current >= MEASURE_AC_GetCurrentLimit())
-			MEASURE_AC_Stop(DF_INTERNAL);
-	}
+    if(UseInstantMethod)
+    {
+        if(ActualSecondarySample.IQFields.Current >= LimitCurrentHaltLevel && LimitCurrent > HVD_IL_DCM_TH)
+            MEASURE_AC_Stop(PROBLEM_OUTPUT_SHORT);
+    }
+    else
+    {
+        if(ActualSecondarySample.IQFields.Current >= MEASURE_AC_GetCurrentLimit())
+            MEASURE_AC_Stop(DF_INTERNAL);
+    }
 }
 // ----------------------------------------
 
