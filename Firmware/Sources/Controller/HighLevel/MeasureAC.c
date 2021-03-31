@@ -576,7 +576,7 @@ static Int16S MEASURE_AC_CCSub_Regulator(Boolean *PeriodTrigger)
 	DesiredVoltageHistory = desiredSecondaryVoltage;
 	
 	// Following error detection
-	if(ret && !DbgMutePWM && DBG_USE_FOLLOWING_ERR)
+	if(ret && !DbgMutePWM && DBG_USE_FOLLOWING_ERR && (KpVAC != 0) && (KiVAC != 0))
 	{
 		if((FollowingErrorFraction > FE_MAX_FRACTION) && (_IQabs(FollowingErrorAbsolute) > FE_MAX_ABSOLUTE))
 		{
