@@ -38,6 +38,8 @@ static Int32U TimeCounter, StartPauseTimeCounterTop;
 static Int32U VRateCounter, VRateCounterTop;
 static Int32U VPlateTimeCounter, VPlateTimeCounterTop, VPrePlateTimeCounter, VPrePlateTimeCounterTop;
 static Int32U BrakeTimeCounter, BrakeTimeCounterTop, FrequencyDivisorCounter, FrequencyDivisorCounterTop;
+static Int16U NormalizedPIdiv2Shift;
+static Int16S PeakShiftTicks;
 static Int16U OptoConnectionMon, OptoConnectionMonMax, CurrentMultiply;
 static Int16U FollowingErrorCounter;
 static Int16S MaxSafePWM, MinSafePWM, SSVoltageP2, SSCurrentP2;
@@ -73,6 +75,7 @@ static void MEASURE_AC_HandleVI();
 static void MEASURE_AC_HandleTripCondition(Boolean UsePeakValues);
 static void MEASURE_AC_HandleNonTripCondition();
 static _iq MEASURE_AC_GetCurrentLimit();
+static Boolean MEASURE_AC_PWMZeroDetector();
 
 // Functions
 //
@@ -172,6 +175,8 @@ Int16S inline MEASURE_AC_SetPWM(Int16S Duty)
 		PWMOutput = MEASURE_AC_TrimPWM(InvertPolarity ? -Duty : Duty);
 		ZwPWMB_SetValue12(DbgMutePWM ? 0 : PWMOutput);
 	}
+	else
+		ZwPWMB_SetValue12(0);
 	
 	PrevDuty = Duty;
 	return PWMOutput;
@@ -364,7 +369,8 @@ static void MEASURE_AC_HandleVI()
 	}
 	
 	// Detect maximum voltage for AC period
-	if(_IQint(ActualSecondarySample.IQFields.Voltage) >= _IQint(MaxPosVoltage))
+	if((!ModifySine && (_IQint(ActualSecondarySample.IQFields.Voltage) >= _IQint(MaxPosVoltage))) ||
+		(ModifySine && MEASURE_AC_PWMZeroDetector()))
 	{
 		MaxPosVoltage = ActualSecondarySample.IQFields.Voltage;
 		MaxPosInstantCurrent = ActualSecondarySample.IQFields.Current;
@@ -598,6 +604,20 @@ static Int16S MEASURE_AC_CCSub_Regulator(Boolean *PeriodTrigger)
 }
 // ----------------------------------------
 
+static Boolean MEASURE_AC_PWMZeroDetector()
+{
+	static _iq PrevSine = 0;
+	Boolean result = FALSE;
+	_iq CurrentSine = _IQsinPU(_IQmpyI32(NormalizedFrequency, TimeCounter + NormalizedPIdiv2Shift + PeakShiftTicks));
+
+	if(((PrevSine < 0 && CurrentSine >= 0) || (PrevSine > 0 && CurrentSine <= 0)) && PrevDuty > 0)
+		result = TRUE;
+
+	PrevSine = CurrentSine;
+	return result;
+}
+// ----------------------------------------
+
 static void MEASURE_AC_CacheVariables()
 {
 	// Current in mA
@@ -619,6 +639,7 @@ static void MEASURE_AC_CacheVariables()
 	
 	StartPauseTimeCounterTop = (CONTROL_FREQUENCY / DataTable[REG_VOLTAGE_FREQUENCY]) * 2;
 	NormalizedFrequency = _IQdiv(_IQ(1.0f), _IQI(CONTROL_FREQUENCY / DataTable[REG_VOLTAGE_FREQUENCY]));
+	NormalizedPIdiv2Shift = CONTROL_FREQUENCY / (4L * DataTable[REG_VOLTAGE_FREQUENCY]);
 	VoltageRateStep = _IQmpy(_IQdiv(_IQI((PWM_SKIP_NEG_PULSES ? 2 : 1) * 1000.0f), _IQI(DataTable[REG_VOLTAGE_FREQUENCY])),
 			_IQmpyI32(_IQ(0.1f), DataTable[REG_VOLTAGE_AC_RATE]));
 	MinSafePWM = (PWM_FREQUENCY / 1000L) * PWM_TH * ZW_PWM_DUTY_BASE / 1000000L;
@@ -643,6 +664,8 @@ static void MEASURE_AC_CacheVariables()
 	if(LimitCurrent <= HVD_IL_DCM_TH)
 	{
 		ModifySine = DataTable[REG_MODIFY_SINE];
+		PeakShiftTicks = (Int16S)DataTable[REG_MODIFY_SINE_SHIFT];
+
 		CurrentMultiply = 1000;
 		LimitCurrentHaltLevel = HVD_IL_DCM_TH;
 
