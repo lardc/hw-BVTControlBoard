@@ -98,7 +98,7 @@ const TableItemConstraint NVConstraint[DATA_TABLE_NV_SIZE] =
 										   {0, ZW_PWM_DUTY_BASE, ZW_PWM_DUTY_BASE},									// 80
 										   {NO, YES, YES},															// 81
 										   {NO, YES, NO},															// 82
-										   {0, 0, 0},																// 83
+										   {VPEAK_DETECT_MIN, VPEAK_DETECT_MAX, VPEAK_DETECT_DEF},					// 83
 										   {0, 0, 0},																// 84
 										   {1, POWER_OPTIONS_MAXNUM, POWER_OPTIONS_MAXNUM},							// 85
 										   {NO, YES, NO},															// 86
