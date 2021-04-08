@@ -418,7 +418,7 @@ static void MEASURE_AC_HandleVI()
 			MEASURE_AC_Stop(DF_INTERNAL);
 	}
 	
-	if(!ModifySine)
+	if(!ModifySine && !(SkipNegativeLogging && InvertPolarity))
 	{
 		// Store data for peak detection
 		if ((ActualSecondarySample.IQFields.Voltage > _IQmpy(DesiredAmplitudeV, PEAK_THR_COLLECT)) &&
