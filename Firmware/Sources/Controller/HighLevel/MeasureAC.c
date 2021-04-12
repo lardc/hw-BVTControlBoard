@@ -253,27 +253,35 @@ static void MEASURE_AC_HandlePeakLogic()
 	
 	if (UseInstantMethod)
 	{
-		if (PeakDetectorCounter)
+		if (ModifySine)
 		{
 			PeakSample.Current = MaxPosInstantCurrent;
 			PeakSample.Voltage = MaxPosVoltage;
-			
-			// Handle peak data
-			for (i = 0; i < PeakDetectorCounter; ++i)
-			{
-				if ((PeakDetectorData[i].Voltage > _IQmpy(MaxPosVoltage, PeakThresholdDetect)) &&
-					(PeakDetectorData[i].Current > PeakSample.Current))
-				{
-					PeakSample = PeakDetectorData[i];
-				}
-			}
 		}
 		else
 		{
-			PeakSample.Current = 0;
-			PeakSample.Voltage = 0;
+			if (PeakDetectorCounter)
+			{
+				PeakSample.Current = MaxPosInstantCurrent;
+				PeakSample.Voltage = MaxPosVoltage;
+			
+				// Handle peak data
+				for (i = 0; i < PeakDetectorCounter; ++i)
+				{
+					if ((PeakDetectorData[i].Voltage > _IQmpy(MaxPosVoltage, PeakThresholdDetect)) &&
+						(PeakDetectorData[i].Current > PeakSample.Current))
+					{
+						PeakSample = PeakDetectorData[i];
+					}
+				}
+			}
+			else
+			{
+				PeakSample.Current = 0;
+				PeakSample.Voltage = 0;
+			}
+			MU_LogScopeIVpeak(PeakSample);
 		}
-		MU_LogScopeIVpeak(PeakSample);
 		
 		// Handle overcurrent
 		if((State != ACPS_Brake) && (PeakSample.Current >= MEASURE_AC_GetCurrentLimit()))
