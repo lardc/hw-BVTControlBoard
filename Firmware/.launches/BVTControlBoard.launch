@@ -20,7 +20,7 @@
 <stringAttribute key="com.ti.ccstudio.debug.debugModel.ATTR_PROJECT.Texas Instruments XDS100v2 USB Emulator/C28xx" value="BVTControlBoard"/>
 <stringAttribute key="com.ti.ccstudio.debug.debugModel.ATTR_PROJECT.Texas Instruments XDS100v2 USB Emulator_0/C28xx" value="BVTControlBoard"/>
 <stringAttribute key="com.ti.ccstudio.debug.debugModel.ATTR_TARGET_CONFIG" value="${target_config_active_default:BVTControlBoard}"/>
-<stringAttribute key="com.ti.ccstudio.debug.debugModel.MRU_PROGRAM.Texas Instruments XDS100v2 USB Emulator/C28xx" value="D:/software\hw-BVTControlBoard\Firmware\Release\BVTControlBoard.out"/>
+<stringAttribute key="com.ti.ccstudio.debug.debugModel.MRU_PROGRAM.Texas Instruments XDS100v2 USB Emulator/C28xx" value="D:/proton\hw-Software\hw-BVTControlBoard\Firmware\Release\BVTControlBoard.out"/>
 <stringAttribute key="com.ti.ccstudio.debug.debugModel.MRU_PROGRAM.Texas Instruments XDS100v2 USB Emulator_0/C28xx" value="D:/proton\Test equipment\Blocking Voltage Tester\Controllers soft\Version 2.0\BVTMainBoard\Release\BVTControlBoard.out"/>
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
 <listEntry value="/BVTControlBoard"/>
