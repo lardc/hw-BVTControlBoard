@@ -260,6 +260,9 @@ static void MEASURE_AC_HandlePeakLogic()
 		}
 		else
 		{
+			// Пороговое значение перезаписи пика — половина от уставки
+			_iq CurrentThr = _IQdiv(MEASURE_AC_GetCurrentLimit(), _IQ(2));
+
 			if (PeakDetectorCounter)
 			{
 				PeakSample.Current = MaxPosInstantCurrent;
@@ -269,7 +272,8 @@ static void MEASURE_AC_HandlePeakLogic()
 				for (i = 0; i < PeakDetectorCounter; ++i)
 				{
 					if ((PeakDetectorData[i].Voltage > _IQmpy(MaxPosVoltage, PeakThresholdDetect)) &&
-						(PeakDetectorData[i].Current > PeakSample.Current))
+						(PeakDetectorData[i].Current > PeakSample.Current) &&
+						(PeakDetectorData[i].Current > CurrentThr))
 					{
 						PeakSample = PeakDetectorData[i];
 					}
