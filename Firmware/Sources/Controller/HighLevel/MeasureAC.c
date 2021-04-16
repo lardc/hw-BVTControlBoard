@@ -280,8 +280,8 @@ static void MEASURE_AC_HandlePeakLogic()
 				PeakSample.Current = 0;
 				PeakSample.Voltage = 0;
 			}
-			MU_LogScopeIVpeak(PeakSample);
 		}
+		MU_LogScopeIVpeak(PeakSample);
 		
 		// Handle overcurrent
 		if((State != ACPS_Brake) && (PeakSample.Current >= MEASURE_AC_GetCurrentLimit()))
