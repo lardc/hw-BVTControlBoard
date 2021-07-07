@@ -508,9 +508,9 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U UserError)
 			DRIVER_SwitchPower100V();
 			break;
 			
-		case ACT_DBG_POWER_150V:
+		case ACT_DBG_POWER_200V:
 			DRIVER_PowerDischarge(FALSE);
-			DRIVER_SwitchPower150V();
+			DRIVER_SwitchPower200V();
 			break;
 			
 		case ACT_DBG_GENERATE_SYNC:
