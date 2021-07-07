@@ -17,7 +17,7 @@
 #define ACT_DBG_POWER_24V			16	// Turn on primary 24V voltage
 #define ACT_DBG_POWER_50V			17	// Turn on primary 50V voltage
 #define ACT_DBG_POWER_100V			18	// Turn on primary 100V voltage
-#define ACT_DBG_POWER_150V			19	// Turn on primary 150V voltage
+#define ACT_DBG_POWER_200V			19	// Turn on primary 200V voltage
 //
 #define ACT_DBG_GENERATE_SYNC		20	// Generate SYNC sugnal
 //
