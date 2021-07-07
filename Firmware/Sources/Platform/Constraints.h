@@ -30,7 +30,7 @@ typedef struct __TableItemConstraint
 #define TEST_CURRENT_DC_MAX		10000	// in uA
 //
 #define LIMIT_VOLTAGE_MIN		100		// (in V)
-#define LIMIT_VOLTAGE_MAX		7000	// (in V)
+#define LIMIT_VOLTAGE_MAX		8000	// (in V)
 #define LIMIT_VOLTAGE_DEF		500		// (in V)
 //
 #define VPLATE_TIME_MIN			100		// (in ms)
