@@ -117,6 +117,9 @@ void CONTROL_Init()
 	// Use quadratic correction for block
 	DataTable[REG_QUADRATIC_CORR] = 1;
 	
+	// Configure sampling voltage capacitors on BVTSwitchBoard for voltage measurement
+	PSAMPLING_ConfigureSamplingVCap();
+
 	// Check connections
 	if(!ST_ValidateConnections(&Fault))
 		CONTROL_SwitchStateToDisabled(Fault);
@@ -335,7 +338,6 @@ static void CONTROL_SwitchStateToNone()
 
 static void CONTROL_SwitchStateToPowered()
 {
-	PSAMPLING_ConfigureSamplingVCap();
 	CONTROL_SetDeviceState(DS_Powered);
 	
 	// Mark cycle inactive
