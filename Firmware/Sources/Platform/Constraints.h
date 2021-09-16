@@ -77,6 +77,10 @@ typedef struct __TableItemConstraint
 #define OPTO_MON_MAX			50
 #define OPTO_MON_DEF			10
 //
+#define SPIKE_FILTER_MIN		0
+#define SPIKE_FILTER_MAX		50
+#define SPIKE_FILTER_DEF		5
+//
 #define VOLTAGE_DIV_MIN			1		// Pulse rate 1:1
 #define VOLTAGE_DIV_MAX			100		// Pulse rate 1:100
 #define VOLTAGE_DIV_DEF			1		// Pulse rate 1:1

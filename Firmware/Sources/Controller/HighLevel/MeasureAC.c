@@ -65,7 +65,7 @@ static Int16U AmplitudePeriodCounter;
 static Int16U Problem, Warning, Fault;
 #pragma DATA_SECTION(PeakDetectorData, "data_mem");
 static DataSampleIQ PeakDetectorData[PEAK_DETECTOR_SIZE], PeakSample;
-static Int16U PeakDetectorCounter;
+static Int16U PeakDetectorCounter, SpikeFilterMax, SpikeFilter;
 //
 static volatile ACProcessState State = ACPS_None;
 
@@ -120,6 +120,7 @@ Boolean MEASURE_AC_StartProcess(Int16U Type, pInt16U pDFReason, pInt16U pProblem
 	DesiredVoltageHistory = -1;
 	PrevDuty = -1;
 	PeakDetectorCounter = 0;
+	SpikeFilter = 0;
 	//
 	ResultV = ResultI = 0;
 	State = ACPS_Ramp;
@@ -427,7 +428,14 @@ static void MEASURE_AC_HandleVI()
 	else
 	{
 		if(ActualSecondarySample.IQFields.Current >= MEASURE_AC_GetCurrentLimit())
-			MEASURE_AC_Stop(DF_INTERNAL);
+		{
+			if(SpikeFilter < SpikeFilterMax)
+				++SpikeFilter;
+			else
+				MEASURE_AC_Stop(DF_INTERNAL);
+		}
+		else
+			SpikeFilter = 0;
 	}
 	
 	if(!ModifySine && !(SkipNegativeLogging && InvertPolarity))
@@ -700,6 +708,7 @@ static void MEASURE_AC_CacheVariables()
 	
 	UseInstantMethod = DataTable[REG_USE_INST_METHOD] ? TRUE : FALSE;
 	PeakThresholdDetect = _FPtoIQ2(DataTable[REG_PEAK_SEARCH_ZONE], 100);
+	SpikeFilterMax = DataTable[REG_NON_INST_FILTER_LEN];
 	
 	DbgSRAM = DataTable[REG_DBG_SRAM] ? TRUE : FALSE;
 	DbgMutePWM = DataTable[REG_DBG_MUTE_PWM] ? TRUE : FALSE;

@@ -80,7 +80,7 @@
 #define REG_USE_INST_METHOD			81	// Measurement method
 #define REG_REPLACE_CURVES			82	// Replace output V/I curves by peak measurement
 #define REG_PEAK_SEARCH_ZONE		83	// % of peak voltage to search max current (in %)
-// 84
+#define REG_NON_INST_FILTER_LEN		84	// Filter length to skip current spikes in non-instant mode
 #define REG_POWER_OPT_COUNT			85	// Actual count of power options
 #define REG_MODIFY_SINE				86	// Enable sine modification at low currents
 #define REG_SKIP_NEG_LOGGING		87	// Skip negative pulses logging
