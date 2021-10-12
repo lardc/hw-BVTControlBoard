@@ -26,7 +26,6 @@ void IBP_SendData(pInt16U DataBuffer, Boolean UseTimeout)
 	// Timeout for non-realtime opeations
 	if (UseTimeout && DBG_USE_OPTO_TIMEOUT)
 	{
-		EINT;
 		while (HighSpeedTimeoutRoutine);
 
 		// Init timeout
@@ -52,7 +51,7 @@ void IBP_TimeoutFunction()
 	else
 	{
 		IBP_SubcribeToTimeoutCycle(NULL);
-		CONTROL_RequestStop(DF_OPTO_CON_ERROR, TRUE);
+		CONTROL_RequestStop(DF_OPTO_CON_ERROR, FALSE);
 	}
 }
 // ----------------------------------------

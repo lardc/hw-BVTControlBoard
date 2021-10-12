@@ -20,7 +20,6 @@ typedef struct __DataSample
 {
 	struct
 	{
-		_iq VoltageRaw;
 		_iq Voltage;
 		_iq Current;
 	} IQFields;

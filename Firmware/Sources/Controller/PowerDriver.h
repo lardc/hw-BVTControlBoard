@@ -1,4 +1,8 @@
-﻿#ifndef __POWER_DRIVER_H
+﻿// -----------------------------------------
+// Power driver
+// ----------------------------------------
+
+#ifndef __POWER_DRIVER_H
 #define __POWER_DRIVER_H
 
 // Include
@@ -6,19 +10,32 @@
 #include "ZwDSP.h"
 #include "Global.h"
 
-// Definitions
-#define POWER_OPTIONS_MAXNUM		4
 
 // Functions
+//
+// Init driver
 void DRIVER_Init();
-void DRIVER_SwitchPower24V();
-void DRIVER_SwitchPower50V();
-void DRIVER_SwitchPower100V();
-void DRIVER_SwitchPower150V();
-void DRIVER_SwitchPowerOff();
-void DRIVER_PowerDischarge(Boolean State);
-Int16U DRIVER_SwitchToTargetVoltage(Int16U SecondaryVoltage, Int16U Power, Int16U CurrentPrimaryVoltage,
-		Int16U TransformerRatio, Int16U PowerOptionsCount);
-Boolean DRIVER_IsShortCircuit();
+// Connect/disconnect capacitors battery
+void DRIVER_SwitchPower(Boolean Enable1, Boolean Enable2);
+// Clear TZ condition
+void DRIVER_ClearTZFault();
+// Check temperature lines state
+Boolean DRIVER_ReadTemperatureFault();
+// Get TZ pin state for bridge short circuit
+Boolean DRIVER_GetSHPinState();
+
+
+// Inline functions
+//
+// Switch generation of TZ interrupts by line
+void inline DRIVER_EnableTZandInt(Boolean EnableSCProtection)
+{
+	ZwPWM_EnableTZInterruptsGlobal(FALSE);
+	ZwPWM_ConfigTZ1(EnableSCProtection, PQ_Sample6);
+	ZwPWM_EnableTZInterrupts(FALSE, FALSE, EnableSCProtection, FALSE, FALSE, FALSE);
+	//
+	ZwPWM_EnableTZInterruptsGlobal(EnableSCProtection);
+}
+// ----------------------------------------
 
 #endif // __POWER_DRIVER_H

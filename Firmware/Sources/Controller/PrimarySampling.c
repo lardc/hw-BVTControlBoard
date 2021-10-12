@@ -21,8 +21,10 @@ static const Int16U ADCChannelVC[16] = { AIN_V_CAP, AIN_V_CAP, AIN_V_CAP, AIN_V_
 
 // Variables
 //
+volatile _iq PSAMPLING_CapacitorVoltage;
+//
 static Int16U SamplesVCounter;
-static _iq CapacitorVCoefficient, CapacitorVoltage = 0;
+static _iq CapacitorVCoefficient;
 static Int16U SamplesV[SAMPLE_V_FILTER_LENGTH];
 //
 static volatile Boolean IPCalCompletedFlag = FALSE;
@@ -55,12 +57,6 @@ void PSAMPLING_DoSamplingVCap()
 }
 // ----------------------------------------
 
-Int16U PSAMPLING_ReadCapVoltage()
-{
-	return _IQint(CapacitorVoltage);
-}
-// ----------------------------------------
-
 #ifdef BOOT_FROM_FLASH
 	#pragma CODE_SECTION(PSAMPLING_MonitoringVCRoutine, "ramfuncs");
 #endif
@@ -87,7 +83,8 @@ static void PSAMPLING_MonitoringVCRoutine(Int16U * const restrict aSampleVector)
 	filteredV = sum >> SAMPLE_V_FILTER_2ORDER;
 
 	// Convert to IQ values
-	CapacitorVoltage = _IQmpyI32(CapacitorVCoefficient, filteredV);
+	PSAMPLING_CapacitorVoltage = _IQmpyI32(CapacitorVCoefficient, filteredV);
+	DataTable[REG_ACTUAL_PRIM_VOLTAGE] = _IQint(PSAMPLING_CapacitorVoltage);
 }
 // ----------------------------------------
 

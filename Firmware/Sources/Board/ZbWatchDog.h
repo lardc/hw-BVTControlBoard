@@ -19,7 +19,7 @@ void ZbWatchDog_Init();
 // Clear watch-dog timer
 void inline ZbWatchDog_Strobe()
 {
-	//ZwGPIO_TogglePin(PIN_WD_RST);
+	ZwGPIO_TogglePin(PIN_WD_RST);
 }
 
 #endif // __ZBWD_H

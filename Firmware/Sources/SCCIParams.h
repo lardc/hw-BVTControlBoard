@@ -13,7 +13,6 @@
 //
 #define	SCCI_BLOCK_MAX_VAL_16_R		4
 #define	SCCI_BLOCK_MAX_VAL_16_W		3
-
 //
 #define SCCI_USE_CRC_IN_STREAM		TRUE
 

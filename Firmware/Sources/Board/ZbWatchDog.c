@@ -10,9 +10,9 @@
 //
 void ZbWatchDog_Init()
 {
-//	// Init LDAC pins
-//	//ZwGPIO_WritePin(PIN_WD_RST, FALSE);
-////	ZwGPIO_PinToOutput(PIN_WD_RST);
+	// Init LDAC pins
+	ZwGPIO_WritePin(PIN_WD_RST, FALSE);
+	ZwGPIO_PinToOutput(PIN_WD_RST);
 }
 
 // No more.

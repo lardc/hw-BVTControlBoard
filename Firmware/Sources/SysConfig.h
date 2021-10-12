@@ -25,7 +25,7 @@
 //--------------------------------------------------------
 #define SYS_PUMOD			ZW_POWER_ADC_CLK  | \
 							ZW_POWER_SPIA_CLK | ZW_POWER_SPIB_CLK | \
-							ZW_POWER_SPIC_CLK | ZW_POWER_SCIA_CLK | \
+							ZW_POWER_SPIC_CLK | ZW_POWER_SCIB_CLK | \
 							ZW_POWER_PWM1_CLK | ZW_POWER_PWM2_CLK | \
 							ZW_POWER_PWM3_CLK | ZW_POWER_PWM4_CLK | \
 							ZW_POWER_CANA_CLK
@@ -46,10 +46,10 @@
 
 // TIMERs
 //--------------------------------------------------------
-#define CONTROL_FREQUENCY	20000L		// in Hz
+#define CONTROL_FREQUENCY	20000L		// 20 kHz
 
 #define CS_T0_FREQ			CONTROL_FREQUENCY
-#define CS_T2_FREQ			1000		// in Hz
+#define CS_T2_FREQ			1000		// 1 kHz
 
 #define TIMER0_PERIOD		(1000000L / CS_T0_FREQ)
 #define TIMER2_PERIOD		(1000000L / CS_T2_FREQ)
@@ -66,7 +66,7 @@
 
 // SPI-B
 //--------------------------------------------------------
-#define SPIB_BAUDRATE		6250000L  	// SPI clock in MHz
+#define SPIB_BAUDRATE		6250000L  	// SPI clock = 6.25 MHz
 #define SPIB_PLR			TRUE		// CLK high in idle state
 #define SPIB_PHASE			FALSE
 //--------------------------------------------------------
@@ -79,12 +79,12 @@
 #define MEM_PHASE			TRUE
 //--------------------------------------------------------
 
-// SCI-A
+// SCI-B
 //--------------------------------------------------------
-#define SCIA_BR				115200L		// UART baudrate = 115200 bps
-#define SCIA_DB				8			// 8 bit
-#define SCIA_SB				FALSE		// 1 stop bit
-#define SCIA_PARITY			ZW_PAR_NONE	// No parity
+#define SCIB_BR				115200L		// UART baudrate = 115200 bps
+#define SCIB_DB				8			// 8 bit
+#define SCIB_SB				FALSE		// 1 stop bit
+#define SCIB_PARITY			ZW_PAR_NONE	// No parity
 //--------------------------------------------------------
 
 // CAN-A
@@ -105,7 +105,7 @@
 
 // PWM
 //--------------------------------------------------------
-#define PWM_FREQUENCY		20000L      // in Hz
+#define PWM_FREQUENCY		20000L      // 20 kHz
 #define PWM_TH				1000	    // 1000 ns
 #define PWM_SATURATION		((Int16S)(ZW_PWM_DUTY_BASE * 0.95f))
 //--------------------------------------------------------

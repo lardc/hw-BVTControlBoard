@@ -20,9 +20,15 @@
 Boolean ST_ValidateConnections(pInt16U pFault)
 {
 
-	if(DBG_USE_BRIDGE_SHORT && DRIVER_IsShortCircuit())
+	if(DBG_USE_BRIDGE_SHORT && !DRIVER_GetSHPinState())
 	{
 		*pFault = DISABLE_NO_SHORT_SIGNAL;
+		return FALSE;
+	}
+
+	if(DBG_USE_TEMP_MON && DRIVER_ReadTemperatureFault())
+	{
+		*pFault = DISABLE_NO_TEMP_SIGNAL;
 		return FALSE;
 	}
 

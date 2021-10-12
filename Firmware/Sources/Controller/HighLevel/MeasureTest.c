@@ -62,14 +62,11 @@ Boolean MEASURE_TEST_StartProcess(Int16U Type, pInt16U pDFReason, pInt16U pProbl
 	TimeCounter = 0;
 	State = TPS_Plate;
 
-	// Make proper commutation
-	SS_Commutate(SwitchConfig_BV);
 	// Configure samplers
-	SS_ConfigureSensingCircuits(LimitCurrent, LimitVoltage, FALSE);
+	SS_ConfigureSensingCircuits(LimitCurrent, LimitVoltage);
 	// Start sampling
 	SS_StartSampling();
 	SS_Dummy(TRUE);
-	DELAY_US(HV_SWITCH_DELAY);
 
 	// Enable control cycle
 	CONTROL_SubcribeToCycle(&MEASURE_TEST_ControlCycle);

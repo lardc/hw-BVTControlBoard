@@ -5,7 +5,6 @@
 // Header
 #include "Constraints.h"
 #include "DeviceObjectDictionary.h"
-#include "PowerDriver.h"
 #include "ZwPWM.h"
 
 #define NO		0	// equal to FALSE
@@ -52,22 +51,22 @@ const TableItemConstraint NVConstraint[DATA_TABLE_NV_SIZE] =
 										   {1, X_D_DEF3, X_D_DEF1},													// 34
 										   {0, INT16U_MAX, 0},														// 35
 										   {1, X_D_DEF3, X_D_DEF1},													// 36
-										   {0, INT16U_MAX, SCURRENT_DCL_COFF_N_DEF},								// 37
+										   {0, INT16U_MAX, SCURRENT3_COFF_N_DEF},									// 37
 										   {1, X_D_DEF3, X_D_DEF2},													// 38
-										   {0, INT16U_MAX, SCURRENT_DCM_COFF_N_DEF},								// 39
-										   {1, X_D_DEF3, X_D_DEF2},													// 40
+										   {0, 0, 0},																// 39
+										   {0, 0, 0},																// 40
 										   {0, 0, 0},																// 41
 										   {BRAKE_TIME_MIN, BRAKE_TIME_MAX, BRAKE_TIME_DEF},						// 42
 										   {TRANSFORMER_COFF_MIN, TRANSFORMER_COFF_MAX, TRANSFORMER_COFF_DEF}, 		// 43
-										   {0, 0, 0},																// 44
-										   {0, 0, 0},																// 45
+										   {NOMINAL_PRIMARY_V_MIN, NOMINAL_PRIMARY_V_MAX, NOMINAL_PRIMARY_V_DEF},	// 44
+										   {NOMINAL_PRIMARY_V_MIN, NOMINAL_PRIMARY_V_MAX, NOMINAL_PRIMARY_V_DEF},	// 45
 										   {NO, YES, NO},															// 46
 										   {NOMINAL_PRIMARY_V_MIN, NOMINAL_PRIMARY_V_MAX, NOMINAL_PRIMARY_V_DEF},	// 47
 										   {0, 0, 0},																// 48
 										   {OPTO_MON_MIN, OPTO_MON_MAX, OPTO_MON_DEF},								// 49
 										   {NO, YES, NO},															// 50
-										   {FAN_TIME_MIN, FAN_TIME_MAX, FAN_TIME_DEF},								// 51
-										   {FAN_TIME_MIN, FAN_TIME_MAX, FAN_TIME_DEF},								// 52
+										   {0, 0, 0},																// 51
+										   {0, 0, 0},																// 52
 										   {0, 0, 0},																// 53
 										   {0, 0, 0},																// 54
 										   {0, 0, 0},																// 55
@@ -100,10 +99,10 @@ const TableItemConstraint NVConstraint[DATA_TABLE_NV_SIZE] =
 										   {NO, YES, NO},															// 82
 										   {VPEAK_DETECT_MIN, VPEAK_DETECT_MAX, VPEAK_DETECT_DEF},					// 83
 										   {0, 0, 0},																// 84
-										   {1, POWER_OPTIONS_MAXNUM, POWER_OPTIONS_MAXNUM},							// 85
-										   {NO, YES, NO},															// 86
-										   {NO, YES, NO},															// 87
-										   {0, INT16U_MAX, 0},														// 88
+										   {0, 0, 0},																// 85
+										   {0, 0, 0},																// 86
+										   {0, 0, 0},																// 87
+										   {0, 0, 0},																// 88
 										   {0, 0, 0},																// 89
 										   {0, 0, 0},																// 90
 										   {0, 0, 0},																// 91
@@ -123,9 +122,9 @@ const TableItemConstraint NVConstraint[DATA_TABLE_NV_SIZE] =
 										   {0, INT16U_MAX, 1000},													// 105
 										   {0, INT16U_MAX, 0},														// 106
 										   {0, INT16U_MAX, 1000},													// 107
-										   {0, INT16U_MAX, 0},														// 108
-										   {0, INT16U_MAX, 1000},													// 109
-										   {0, INT16U_MAX, 0},														// 110
+										   {0, 0, 0},																// 108
+										   {0, 0, 0},																// 109
+										   {0, 0, 0},																// 110
 										   {0, 0, 0},																// 111
 										   {0, INT16U_MAX, 0},														// 112
 										   {0, INT16U_MAX, 1000},													// 113
@@ -134,7 +133,7 @@ const TableItemConstraint NVConstraint[DATA_TABLE_NV_SIZE] =
 										   {0, INT16U_MAX, 0},														// 116
 										   {0, INT16U_MAX, 0},														// 117
 										   {0, INT16U_MAX, 0},														// 118
-										   {0, INT16U_MAX, 0},														// 119
+										   {0, 0, 0},																// 119
 										   {0, 0, 0},																// 120
 										   {0, 0, 0},																// 121
 										   {0, 0, 0},																// 122
@@ -142,16 +141,16 @@ const TableItemConstraint NVConstraint[DATA_TABLE_NV_SIZE] =
 										   {0, 0, 0},																// 124
 										   {0, 0, 0},																// 125
 										   {0, 0, 0},																// 126
-										   {0, 0, 0}																// 127
+										   {INT16U_MAX, 0, 0}														// 127
 									  };
 
 const TableItemConstraint VConstraint[DATA_TABLE_WP_START - DATA_TABLE_WR_START] =
 									 {
 										   {MEASUREMENT_TYPE_NONE, MEASUREMENT_TYPE_TEST, MEASUREMENT_TYPE_AC_D},	// 128
 										   {0, 1, 0},																// 129
-										   {TEST_CURRENT_MIN, TEST_CURRENT_MAX, TEST_CURRENT_DEF},					// 130
+										   {0, TEST_CURRENT_MAX, 0},												// 130
 										   {LIMIT_VOLTAGE_MIN, LIMIT_VOLTAGE_MAX, LIMIT_VOLTAGE_DEF},				// 131
-										   {VPLATE_TIME_MIN, VPLATE_TIME_MAX, VPLATE_TIME_DEF},						// 132
+										   {0, VPLATE_TIME_MAX, 0},													// 132
 										   {RATE_VAC_MIN, RATE_VAC_MAX, RATE_VAC_DEF},								// 133
 										   {START_VAC_MIN, START_VAC_MAX, START_VAC_DEF},							// 134
 										   {VOLTAGE_FREQUENCY_MIN, VOLTAGE_FREQUENCY_MAX, VOLTAGE_FREQUENCY_DEF},	// 135
@@ -194,7 +193,7 @@ const TableItemConstraint VConstraint[DATA_TABLE_WP_START - DATA_TABLE_WR_START]
 										   {NO, YES, NO},															// 172
 										   {0, INT16S_MAX, LAST_FRAG_SIZE_DEF},										// 173
 										   {0, 0, 0},																// 174
-										   {0, 0, 0},																// 175
+										   {1, INT16U_MAX, 1},														// 175
 										   {0, 0, 0},																// 176
 										   {0, 0, 0},																// 177
 										   {0, 0, 0},																// 178
@@ -212,3 +211,5 @@ const TableItemConstraint VConstraint[DATA_TABLE_WP_START - DATA_TABLE_WR_START]
 										   {0, 0, 0},																// 190
 										   {0, 0, 0},																// 191
 									 };
+
+// No more

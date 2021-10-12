@@ -1,4 +1,8 @@
-﻿#ifndef __DEV_PROFILE_H
+﻿// -----------------------------------------
+// Device profile
+// ----------------------------------------
+
+#ifndef __DEV_PROFILE_H
 #define __DEV_PROFILE_H
 
 // Include

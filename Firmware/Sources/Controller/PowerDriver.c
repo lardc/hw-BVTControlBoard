@@ -1,4 +1,8 @@
-﻿// Header
+﻿// -----------------------------------------
+// Power driver
+// ----------------------------------------
+
+// Header
 #include "PowerDriver.h"
 //
 // Includes
@@ -7,117 +11,78 @@
 #include "Global.h"
 
 // Definitions
-#define TZ_MASK_CBC_BRIDGE		0
 #define TZ_MASK_OST_BRIDGE		(DBG_USE_BRIDGE_SHORT ? BIT0 : 0)
-
-typedef void (*PSFunction)();
-typedef struct __MWPowerSettings
-{
-	Int16U Voltage;
-	Int16U Power;
-	PSFunction Function;
-} MWPowerSettings;
-
-MWPowerSettings MWPowerSettingsArray[POWER_OPTIONS_MAXNUM] = {
-		{24,	150,	DRIVER_SwitchPower24V},
-		{50,	500,	DRIVER_SwitchPower50V},
-		{100,	1000,	DRIVER_SwitchPower100V},
-		{150,	1500,	DRIVER_SwitchPower150V}
-};
+#define TZ_MASK_CBC				0
 
 // Functions
 //
 void DRIVER_Init()
 {
+	// Enable TZ
+	ZwPWM_SetTZPullup(PFDisable, PFDontcare, PFDisable, PFDontcare, PFDontcare, PFDontcare);
+	ZwPWM_ConfigTZ1(TRUE, PQ_Sample6);
+	ZwPWM_ConfigTZ3(TRUE, PQ_Sample6);
+
+	// Post TZ init delay
+	DELAY_US(1000);
+
 	// Init PWM outputs
-	ZwPWMB_InitBridgeA12(CPU_FRQ, PWM_FREQUENCY, 0, 0, PWM_SATURATION);
+	ZwPWMB_InitBridge12(CPU_FRQ, PWM_FREQUENCY, TZ_MASK_CBC, TZ_MASK_OST_BRIDGE, 0, PWM_SATURATION);
+	ZwPWM3_Init(PWMUp, CPU_FRQ, PWM_FREQUENCY, FALSE, FALSE, TZ_MASK_CBC, TZ_MASK_OST_BRIDGE, TRUE, TRUE, TRUE, FALSE, FALSE);
+
+	// Clear possible faults
+	DRIVER_ClearTZFault();
+
+	// Configure TZ interrupts
+	ZwPWM_ConfigTZIntOST(FALSE, FALSE, DBG_USE_BRIDGE_SHORT, FALSE, FALSE, FALSE);
+
+	// Configure temperature sensing pin
+	ZwGPIO_PinToInput(PIN_TFAULT, FALSE, PQ_Sample6);
 }
 // ----------------------------------------
 
-void DRIVER_SwitchPower24V()
+void DRIVER_ClearTZFault()
 {
-	ZwGPIO_WritePin(PIN_POWER_1, TRUE);
-	ZwGPIO_WritePin(PIN_POWER_2, FALSE);
-	ZwGPIO_WritePin(PIN_POWER_3, FALSE);
-	ZwGPIO_WritePin(PIN_POWER_4, FALSE);
+	ZwPWM1_ClearTZ();
+	ZwPWM2_ClearTZ();
+	ZwPWM3_ClearTZ();
+	ZwPWM4_ClearTZ();
 }
 // ----------------------------------------
 
-void DRIVER_SwitchPower50V()
+void DRIVER_SwitchPower(Boolean Enable1, Boolean Enable2)
 {
-	ZwGPIO_WritePin(PIN_POWER_1, FALSE);
-	ZwGPIO_WritePin(PIN_POWER_2, TRUE);
-	ZwGPIO_WritePin(PIN_POWER_3, FALSE);
-	ZwGPIO_WritePin(PIN_POWER_4, FALSE);
+   if (!Enable1 && !Enable2)
+      ZwGPIO_WritePin(PIN_POWER_EN3, FALSE);
+   else
+      ZwGPIO_WritePin(PIN_POWER_EN3, TRUE);
+
+   ZbGPIO_SwitchPower(Enable1, Enable2);
 }
 // ----------------------------------------
 
-void DRIVER_SwitchPower100V()
+Boolean DRIVER_ReadTemperatureFault()
 {
-	ZwGPIO_WritePin(PIN_POWER_1, FALSE);
-	ZwGPIO_WritePin(PIN_POWER_2, TRUE);
-	ZwGPIO_WritePin(PIN_POWER_3, FALSE);
-	ZwGPIO_WritePin(PIN_POWER_4, TRUE);
-}
-// ----------------------------------------
+	static Int16U FilterCounter = 0;
 
-void DRIVER_SwitchPower150V()
-{
-	ZwGPIO_WritePin(PIN_POWER_1, FALSE);
-	ZwGPIO_WritePin(PIN_POWER_2, TRUE);
-	ZwGPIO_WritePin(PIN_POWER_3, TRUE);
-	ZwGPIO_WritePin(PIN_POWER_4, TRUE);
-}
-// ----------------------------------------
-
-void DRIVER_PowerDischarge(Boolean State)
-{
-	ZwGPIO_WritePin(PIN_DIS, !State);
-}
-// ----------------------------------------
-
-void DRIVER_SwitchPowerOff()
-{
-	DRIVER_PowerDischarge(TRUE);
-	
-	ZwGPIO_WritePin(PIN_POWER_1, FALSE);
-	ZwGPIO_WritePin(PIN_POWER_2, FALSE);
-	ZwGPIO_WritePin(PIN_POWER_3, FALSE);
-	ZwGPIO_WritePin(PIN_POWER_4, FALSE);
-}
-// ----------------------------------------
-
-Int16U DRIVER_SwitchToTargetVoltage(Int16U SecondaryVoltage, Int16U Power, Int16U CurrentPrimaryVoltage,
-		Int16U TransformerRatio, Int16U PowerOptionsCount)
-{
-	Int16U i, PrimaryVoltage;
-
-	Int16U TargetPrimaryVoltage = (Int32U)SecondaryVoltage * (100 + CAP_POW_VOLT_MARGIN) / 100 / TransformerRatio;
-	Int16U TargetPower = (Int32U)Power * (100 + CAP_POW_VOLT_MARGIN) / 100;
-	
-	if(PowerOptionsCount > POWER_OPTIONS_MAXNUM)
-		PowerOptionsCount = POWER_OPTIONS_MAXNUM;
-
-	for(i = 0; i < PowerOptionsCount; i++)
+	if (!ZwGPIO_ReadPin(PIN_TFAULT))
 	{
-		if((TargetPrimaryVoltage < MWPowerSettingsArray[i].Voltage && TargetPower < MWPowerSettingsArray[i].Power)
-				|| i == (PowerOptionsCount - 1))
-		{
-			PrimaryVoltage = MWPowerSettingsArray[i].Voltage;
-			MWPowerSettingsArray[i].Function();
-
-			if(CurrentPrimaryVoltage >= (Int32U)PrimaryVoltage * (100 + CAP_VOLTAGE_DELTA) / 100)
-				DRIVER_PowerDischarge(TRUE);
-			break;
-		}
+		if (FilterCounter < 100)
+			FilterCounter++;
+		else
+			return TRUE;
 	}
+	else
+		FilterCounter = 0;
 
-	return PrimaryVoltage;
+	return FALSE;
 }
 // ----------------------------------------
 
-Boolean DRIVER_IsShortCircuit()
+Boolean DRIVER_GetSHPinState()
 {
-	return !ZwGPIO_ReadPin(PIN_SHORT);
+	return ZwGPIO_ReadPin(PIN_SHORT);
 }
 // ----------------------------------------
+
+// No more.

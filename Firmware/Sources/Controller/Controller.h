@@ -21,7 +21,7 @@ typedef enum __DeviceState
 	DS_None				= 0,
 	DS_Fault			= 1,
 	DS_Disabled			= 2,
-	DS__dummy			= 3,
+	DS_Stopping			= 3,
 	DS_Powered			= 4,
 	DS_InProcess		= 5
 } DeviceState;
@@ -59,6 +59,6 @@ void CONTROL_NotifyEndTest(_iq BVTResultV, _iq BVTResultI, Int16U DFReason, Int1
 void CONTROL_NotifyCANFault(ZwCAN_SysFlags Flag);
 // Re-init RX SPI channels
 void CONTROL_ReInitSPI_Rx();
-void CONTROL_HandleFanLogic(Boolean IsImpulse);
+
 
 #endif // __CONTROLLER_H

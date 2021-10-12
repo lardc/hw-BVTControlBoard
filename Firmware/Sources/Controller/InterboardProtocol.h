@@ -27,9 +27,7 @@ typedef void (*IBP_FUNC_HighSpeedTimeoutRoutine)();
 // Commands
 #define IBP_GET_DATA				0
 #define IBP_CMD_SAMPLING			1
-// 2-4
-#define IBP_CMD_CFG_SWITCH			5
-#define IBP_CMD_SET_PWM				6
+// 2-6
 #define IBP_CMD_SET_ADC				7
 #define IBP_CMD_DUMMY				0xFE
 #define IBP_ACK						0xFF
@@ -41,8 +39,7 @@ typedef enum __CurrentInputs
 {
 	CurrentInput_Low = 0,
 	CurrentInput_High,
-	CurrentInput_DC_Low,
-	CurrentInput_DC_High
+	CurrentInput_High2
 } CurrentInputs;
 
 // Voltage sensing chain
@@ -51,14 +48,6 @@ typedef enum __VoltageInputs
 	VoltageInput_Low = 0,
 	VoltageInput_High
 } VoltageInputs;
-
-// Switch configuration
-typedef enum __SwitchConfig
-{
-	SwitchConfig_BV = 0,
-	SwitchConfig_AC,
-	SwitchConfig_DC
-} SwitchConfig;
 
 // Functions
 void IBP_SendData(pInt16U DataBuffer, Boolean UseTimeout);

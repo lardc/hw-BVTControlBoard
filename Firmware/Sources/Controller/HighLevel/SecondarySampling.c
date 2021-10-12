@@ -27,27 +27,19 @@ static volatile Boolean SamplingActive = FALSE;
 
 // Functions
 //
-void SS_ConfigureSensingCircuits(_iq CurrentSet, _iq VoltageSet, Boolean ModeDC)
+void SS_ConfigureSensingCircuits(_iq CurrentSet, _iq VoltageSet)
 {
 	Int16U tmp, cmdBuffer[IBP_PACKET_SIZE] = { 0 };
 
 	// Voltage configuration
 	cmdBuffer[0] = (IBP_PACKET_START_BYTE << 8) | IBP_CMD_SET_ADC;
 
-	if (ModeDC)
-	{
-		if (CurrentSet <= HVD_DC_IL_TH)
-			tmp = CurrentInput_DC_Low;
-		else
-			tmp = CurrentInput_DC_High;
-	}
+	if (CurrentSet <= HVD_IL_TH)
+		tmp = CurrentInput_Low;
+	else if (CurrentSet <= HVD_IH_TH)
+		tmp = CurrentInput_High;
 	else
-	{
-		if (CurrentSet <= HVD_IL_TH)
-			tmp = CurrentInput_Low;
-		else
-			tmp = CurrentInput_High;
-	}
+		tmp = CurrentInput_High2;
 	cmdBuffer[1] |= tmp;
 
 	if (VoltageSet < HVD_VL_TH)
@@ -57,24 +49,6 @@ void SS_ConfigureSensingCircuits(_iq CurrentSet, _iq VoltageSet, Boolean ModeDC)
 	cmdBuffer[1] |= tmp << 8;
 
 	IBP_SendData(cmdBuffer, TRUE);
-}
-// ----------------------------------------
-
-void SS_Commutate(SwitchConfig State)
-{
-	Int16U cmdBuffer[IBP_PACKET_SIZE] = { (IBP_PACKET_START_BYTE << 8) | IBP_CMD_CFG_SWITCH, State, 0, 0 };
-
-	IBP_SendData(cmdBuffer, TRUE);
-	SamplingActive = TRUE;
-}
-// ----------------------------------------
-
-void SS_SetPWM(Int16U Value)
-{
-	Int16U cmdBuffer[IBP_PACKET_SIZE] = { (IBP_PACKET_START_BYTE << 8) | IBP_CMD_SET_PWM, Value, 0, 0 };
-
-	IBP_SendData(cmdBuffer, TRUE);
-	SamplingActive = TRUE;
 }
 // ----------------------------------------
 

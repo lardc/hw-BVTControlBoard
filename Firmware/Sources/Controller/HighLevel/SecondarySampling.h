@@ -20,11 +20,7 @@ extern Boolean SS_DataValid;
 // Functions
 //
 // Configure current and voltage sensing
-void SS_ConfigureSensingCircuits(_iq CurrentSet, _iq VoltageSet, Boolean ModeDC);
-// Perform proper commutation
-void SS_Commutate(SwitchConfig State);
-// PWM value for digitizer flyback DC transformer
-void SS_SetPWM(Int16U Value);
+void SS_ConfigureSensingCircuits(_iq CurrentSet, _iq VoltageSet);
 // Start sampling
 void SS_StartSampling();
 // Stop sampling
@@ -35,7 +31,6 @@ void SS_HandleSlaveTransmission();
 void SS_Dummy(Boolean UseTimeout);
 // Ping digitizer
 Boolean SS_Ping();
-
 
 // Inline function
 //

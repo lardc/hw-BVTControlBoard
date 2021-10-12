@@ -26,8 +26,7 @@
 #define HWUSE_SPI_A
 #define HWUSE_SPI_B
 #define HWUSE_SPI_C
-
-#define HWUSE_SCI_A
+#define HWUSE_SCI_B
 
 // EPROM memory bank address
 #define SRAM_BANK_COUNT				7
@@ -56,33 +55,29 @@
 #define SPI_C_CLK			GPIO22
 #define SPI_C_CS			GPIO23
 //
-#define SCI_A_QSEL			GPAQSEL2
-#define SCI_A_MUX			GPAMUX2
-#define SCI_A_RX			GPIO28
-#define SCI_A_TX			GPIO29
-#define SCI_A_MUX_SELECTOR	1
+#define SCI_B_QSEL			GPAQSEL1
+#define SCI_B_MUX			GPAMUX1
+#define SCI_B_RX			GPIO11
+#define SCI_B_TX			GPIO9
+#define SCI_B_MUX_SELECTOR	2
 //
-
-#define PIN_LED_1			3
-
-#define PIN_POWER_1			5
-#define PIN_POWER_2			11
-#define PIN_POWER_3			9
-#define PIN_POWER_4			8
-#define PIN_EXT_IND			4
-#define PIN_FAN				17
-#define PIN_DIS				6
-#define PIN_SYNC			27
-#define PIN_SHORT			12
-#define PIN_SHORT_CLR		15
-#define PIN_PWM_1			0
-#define PIN_PWM_2			2
-
+#define PIN_LED_1			6
+#define PIN_POWER_EN1		8
+#define PIN_POWER_EN2		13
+#define PIN_POWER_EN3		17
+#define PIN_WD_RST			32
+#define PIN_DEBUG			33
 #define PIN_MEM_A			10
 #define PIN_MEM_B			25
 #define PIN_MEM_C			7
+#define PIN_TFAULT			15
+#define PIN_SHORT			12
+#define PIN_STOP			14
+#define PIN_EXT_IND			27
 
 // ADC placement
-#define AIN_V_CAP			0x00	// INA 0
+#define AIN_V_CAP			0x08	// 1000b = B IN0
+//
+#define AIN_LO				0x0D	// 1101b = B + IN5
 
 #endif // __BOARD_CONFIG_H
