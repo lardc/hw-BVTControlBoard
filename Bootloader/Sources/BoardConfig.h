@@ -24,19 +24,16 @@
 #define ZW_PWM_DUTY_BASE	5000
 
 // Peripheral options
-#define HWUSE_SCI_A
+#define HWUSE_SCI_B
 
 // IO debug LED
-#define DBG_LED				3
+#define DBG_LED				6
 
 // IO placement
-
-#define SCI_A_QSEL			GPAQSEL2
-#define SCI_A_MUX			GPAMUX2
-#define SCI_A_RX			GPIO28
-#define SCI_A_TX			GPIO29
-#define SCI_A_MUX_SELECTOR	1
-
-
+#define SCI_B_QSEL			GPAQSEL1
+#define SCI_B_MUX			GPAMUX1
+#define SCI_B_RX			GPIO11
+#define SCI_B_TX			GPIO9
+#define SCI_B_MUX_SELECTOR	2
 
 #endif // __BOARD_CONFIG_H

@@ -113,33 +113,24 @@ Boolean InitializeCPU()
 // GPIO init
 void InitializeBoard()
 {
-	ZwGPIO_PinToOutput(4);
-	ZwGPIO_PinToOutput(5);
-	ZwGPIO_PinToOutput(6);
+	// Power supply control
 	ZwGPIO_PinToOutput(8);
-	ZwGPIO_PinToOutput(9);
-	ZwGPIO_PinToOutput(11);
+	ZwGPIO_PinToOutput(13);
 	ZwGPIO_PinToOutput(17);
-	ZwGPIO_PinToOutput(27);
 	//
-	ZwGPIO_WritePin(4, FALSE);
-	ZwGPIO_WritePin(5, FALSE);
-	ZwGPIO_WritePin(6, FALSE);
 	ZwGPIO_WritePin(8, FALSE);
-	ZwGPIO_WritePin(9, FALSE);
-	ZwGPIO_WritePin(11, FALSE);
+	ZwGPIO_WritePin(13, FALSE);
 	ZwGPIO_WritePin(17, FALSE);
-	ZwGPIO_WritePin(27, FALSE);
 }
 // -----------------------------------------
 
 void InitializeSCI()
 {
 	// Initialize and prepare SCI modules
-	ZwSCIa_Init(SCIA_BR, SCIA_DB, SCIA_PARITY, SCIA_SB, FALSE);
-	ZwSCIa_InitFIFO(16, 0);
-	ZwSCIa_EnableInterrupts(FALSE, FALSE);
-	
+	ZwSCIb_Init(SCIB_BR, SCIB_DB, SCIB_PARITY, SCIB_SB, FALSE);
+	ZwSCIb_InitFIFO(16, 0);
+	ZwSCIb_EnableInterrupts(FALSE, FALSE);
+
 	ZwSCI_EnableInterruptsGlobal(FALSE);
 }
 // -----------------------------------------
