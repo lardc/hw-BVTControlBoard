@@ -23,13 +23,17 @@ typedef struct __TableItemConstraint
 
 // Restrictions
 //
+#define TEST_CURRENT_MIN		1		// in mA x10
 #define TEST_CURRENT_MAX		3000	// in mA x10
+#define TEST_CURRENT_DEF		50		// in mA x10
 //
 #define LIMIT_VOLTAGE_MIN		100		// (in V)
 #define LIMIT_VOLTAGE_MAX		8000	// (in V)
 #define LIMIT_VOLTAGE_DEF		500		// (in V)
 //
+#define VPLATE_TIME_MIN			100		// (in ms)
 #define VPLATE_TIME_MAX			60000	// (in ms)
+#define VPLATE_TIME_DEF			500		// (in ms)
 //
 #define RATE_VAC_MIN			1		// (x100 V/s)
 #define RATE_VAC_MAX			100		// (x100 V/s)
@@ -39,12 +43,8 @@ typedef struct __TableItemConstraint
 #define START_VAC_MAX			5000	// (in V)
 #define START_VAC_DEF			500		// (in V)
 //
-#define LOW_RANGE_TRIGGER_MIN	500		// (in V)
-#define LOW_RANGE_TRIGGER_MAX	4000	// (in V)
-#define LOW_RANGE_TRIGGER_DEF	3500	// (in V)
-//
-#define VOLTAGE_FREQUENCY_MIN	10		// (in Hz)
-#define VOLTAGE_FREQUENCY_MAX	200		// (in Hz)
+#define VOLTAGE_FREQUENCY_MIN	50		// (in Hz)
+#define VOLTAGE_FREQUENCY_MAX	60		// (in Hz)
 #define VOLTAGE_FREQUENCY_DEF	50		// (in Hz)
 //
 #define BRAKE_TIME_MIN			1		// (in ms)

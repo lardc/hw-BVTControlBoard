@@ -100,9 +100,9 @@ const TableItemConstraint NVConstraint[DATA_TABLE_NV_SIZE] =
 										   {VPEAK_DETECT_MIN, VPEAK_DETECT_MAX, VPEAK_DETECT_DEF},					// 83
 										   {0, 0, 0},																// 84
 										   {0, 0, 0},																// 85
-										   {0, 0, 0},																// 86
-										   {0, 0, 0},																// 87
-										   {0, 0, 0},																// 88
+										   {NO, YES, NO},															// 86
+										   {NO, YES, NO},															// 87
+										   {0, INT16U_MAX, 0},														// 88
 										   {0, 0, 0},																// 89
 										   {0, 0, 0},																// 90
 										   {0, 0, 0},																// 91
@@ -122,9 +122,9 @@ const TableItemConstraint NVConstraint[DATA_TABLE_NV_SIZE] =
 										   {0, INT16U_MAX, 1000},													// 105
 										   {0, INT16U_MAX, 0},														// 106
 										   {0, INT16U_MAX, 1000},													// 107
-										   {0, 0, 0},																// 108
-										   {0, 0, 0},																// 109
-										   {0, 0, 0},																// 110
+										   {0, INT16U_MAX, 0},														// 108
+										   {0, INT16U_MAX, 1000},													// 109
+										   {0, INT16U_MAX, 0},														// 110
 										   {0, 0, 0},																// 111
 										   {0, INT16U_MAX, 0},														// 112
 										   {0, INT16U_MAX, 1000},													// 113
@@ -141,16 +141,16 @@ const TableItemConstraint NVConstraint[DATA_TABLE_NV_SIZE] =
 										   {0, 0, 0},																// 124
 										   {0, 0, 0},																// 125
 										   {0, 0, 0},																// 126
-										   {INT16U_MAX, 0, 0}														// 127
+										   {0, 0, 0}																// 127
 									  };
 
 const TableItemConstraint VConstraint[DATA_TABLE_WP_START - DATA_TABLE_WR_START] =
 									 {
 										   {MEASUREMENT_TYPE_NONE, MEASUREMENT_TYPE_TEST, MEASUREMENT_TYPE_AC_D},	// 128
 										   {0, 1, 0},																// 129
-										   {0, TEST_CURRENT_MAX, 0},												// 130
+										   {TEST_CURRENT_MIN, TEST_CURRENT_MAX, TEST_CURRENT_DEF},					// 130
 										   {LIMIT_VOLTAGE_MIN, LIMIT_VOLTAGE_MAX, LIMIT_VOLTAGE_DEF},				// 131
-										   {0, VPLATE_TIME_MAX, 0},													// 132
+										   {VPLATE_TIME_MIN, VPLATE_TIME_MAX, VPLATE_TIME_DEF},						// 132
 										   {RATE_VAC_MIN, RATE_VAC_MAX, RATE_VAC_DEF},								// 133
 										   {START_VAC_MIN, START_VAC_MAX, START_VAC_DEF},							// 134
 										   {VOLTAGE_FREQUENCY_MIN, VOLTAGE_FREQUENCY_MAX, VOLTAGE_FREQUENCY_DEF},	// 135
@@ -193,7 +193,7 @@ const TableItemConstraint VConstraint[DATA_TABLE_WP_START - DATA_TABLE_WR_START]
 										   {NO, YES, NO},															// 172
 										   {0, INT16S_MAX, LAST_FRAG_SIZE_DEF},										// 173
 										   {0, 0, 0},																// 174
-										   {1, INT16U_MAX, 1},														// 175
+										   {0, 0, 0},																// 175
 										   {0, 0, 0},																// 176
 										   {0, 0, 0},																// 177
 										   {0, 0, 0},																// 178
@@ -211,5 +211,3 @@ const TableItemConstraint VConstraint[DATA_TABLE_WP_START - DATA_TABLE_WR_START]
 										   {0, 0, 0},																// 190
 										   {0, 0, 0},																// 191
 									 };
-
-// No more

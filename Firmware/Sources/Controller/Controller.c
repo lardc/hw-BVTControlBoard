@@ -179,9 +179,6 @@ static void CONTROL_UpdateIdle()
 		if(CONTROL_State == DS_Powered)
 			CONTROL_SwitchStateToFault(DF_TEMP_MON);
 	}
-
-	// Monitor debug pin
-	DataTable[REG_DBG_PIN_STATE] = ZwGPIO_ReadPin(PIN_DEBUG);
 }
 // ----------------------------------------
 
@@ -255,7 +252,7 @@ void CONTROL_NotifyEndTest(_iq BVTResultV, _iq BVTResultI, Int16U DFReason, Int1
 	// Save values for further processing
 	EndXDPCArgument.SavedResultV = _IQint(BVTResultV);
 	EndXDPCArgument.SavedResultI = _IQmpyI32int(BVTResultI, 10);
-	DataTable[REG_RESULT_I_UA] = (BVTResultI > 0) ? _IQmpyI32int(_IQfrac(BVTResultI), 1000) : 0;
+	DataTable[REG_RESULT_I_UA_R] = (BVTResultI > 0) ? _IQmpyI32int(_IQfrac(BVTResultI), 1000) : 0;
 	//
 	EndXDPCArgument.SavedDFReason = DFReason;
 	EndXDPCArgument.SavedProblem = Problem;
@@ -332,7 +329,7 @@ static void CONTROL_FillWPPartDefault()
 	DataTable[REG_FINISHED] = OPRESULT_OK;
 	DataTable[REG_RESULT_V] = 0;
 	DataTable[REG_RESULT_I] = 0;
-	DataTable[REG_RESULT_I_UA] = 0;
+	DataTable[REG_RESULT_I_UA_R] = 0;
 	//
 	DataTable[REG_ACTUAL_PRIM_VOLTAGE] = 0;
 }
@@ -452,7 +449,7 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U UserError)
 					DataTable[REG_WARNING] = WARNING_NONE;
 					DataTable[REG_RESULT_V] = 0;
 					DataTable[REG_RESULT_I] = 0;
-					DataTable[REG_RESULT_I_UA] = 0;
+					DataTable[REG_RESULT_I_UA_R] = 0;
 					DEVPROFILE_ResetScopes(0, IND_EP_I | IND_EP_V | IND_EP_DBG | IND_EP_ERR | IND_EP_PEAK_I | IND_EP_PEAK_V);
 					DEVPROFILE_ResetEPReadState();
 

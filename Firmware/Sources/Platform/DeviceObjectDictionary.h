@@ -66,11 +66,15 @@
 #define REG_OPTO_CONNECTION_MON		49	// Optical connection error when N packets lost (0 to disable)
 #define REG_SKIP_LOGGING_VOIDS		50	// Don't log empty zones in case of using frequency divisor
 // 51 - 79
-#define REG_SAFE_MAX_PWM			80	// Maximum PWM
-#define REG_USE_INST_METHOD			81	// Measurement mode
+#define REG_SAFE_MAX_PWM			80	// Maximum PWM (AC mode)
+#define REG_USE_INST_METHOD			81	// Measurement method
 #define REG_REPLACE_CURVES			82	// Replace output V/I curves by peak measurement
 #define REG_PEAK_SEARCH_ZONE		83	// % of peak voltage to search max current (in %)
-// 84 - 95
+// 84 - 85
+#define REG_MODIFY_SINE				86	// Enable sine modification at low currents
+#define REG_SKIP_NEG_LOGGING		87	// Skip negative pulses logging
+#define REG_MODIFY_SINE_SHIFT		88	// Modified sine sample point shift from pwm peak (in ticks)
+// 89 - 95
 #define REG_SCURRENT1_FINE_P2		96	// Secondary current 1 tune quadratic coefficient P2 x1e6
 #define REG_SCURRENT1_FINE_P1		97	// Secondary current 1 tune quadratic coefficient P1 x1000
 #define REG_SCURRENT2_FINE_P2		98	// Secondary current 2 tune quadratic coefficient P2 x1e6
@@ -89,34 +93,28 @@
 #define REG_SCURRENT2_FINE_P0		117	// Secondary current 2 tune quadratic coefficient P0 (in uA)
 #define REG_SCURRENT3_FINE_P0		118	// Secondary current 3 tune quadratic coefficient P0 (in uA)
 //
-#define REG_SP__1					127
-//
 // ----------------------------------------
 //
 #define REG_MEASUREMENT_TYPE		128	// Measurement type
 #define REG_MEASUREMENT_MODE		129	// Measurement mode (V-mode or I-mode)
 #define REG_LIMIT_CURRENT			130	// Threshold current (in mA * 10)
 #define REG_LIMIT_VOLTAGE			131	// Maximum or test voltage (in V)
-#define REG_VOLTAGE_PLATE_TIME		132	// Voltage plate time in DC or AC measurement mode (in ms)
+#define REG_VOLTAGE_PLATE_TIME		132	// Voltage plate time in AC measurement mode (in ms)
 #define REG_VOLTAGE_AC_RATE			133	// Rate of increasing AC voltage (in kV/s * 10)
 #define REG_START_VOLTAGE_AC		134	// Start voltage for AC modes (in V)
 #define REG_VOLTAGE_FREQUENCY		135	// Voltage frequency (in Hz)
 #define REG_FREQUENCY_DIVISOR		136	// Divisor for voltage pulses rate
 #define REG_SCOPE_RATE				137	// Scope rate divisor
 //
-#define REG_DBG_SRAM				170 // Write saw-shape debug sequence to SRAM
+#define REG_DBG_SRAM				170	// Write saw-shape debug sequence to SRAM
 #define REG_DBG_MUTE_PWM			171	// Mute PWM output
 #define REG_DBG_DUAL_POLARITY		172	// Use data points of both signs
 #define REG_DBG_READ_XY_FRAGMENT	173	// Fragment length for XY plot
-//
-#define REG_DBG_PULSE_LENGTH		175
 //
 #define REG_PWD_1					180	// Unlock password location 1
 #define REG_PWD_2					181	// Unlock password location 2
 #define REG_PWD_3					182	// Unlock password location 3
 #define REG_PWD_4					183	// Unlock password location 4
-//
-#define REG_SP__2					191
 //
 // ----------------------------------------
 //
@@ -127,26 +125,31 @@
 #define REG_PROBLEM					196	// Problem reason
 #define REG_FINISHED				197	// Indicates that test is done and there is result or fault
 #define REG_RESULT_V				198	// Test result (in V)
-#define REG_RESULT_I				199	// Test result (mA * 10)
-#define REG_RESULT_I_UA				200	// Test result mA fraction (in uA)
-//
-#define REG_DBG_PIN_STATE			209	// Debug pin state
+#define REG_RESULT_I				199	// Test result (mA * 10 or uA)
+#define REG_RESULT_I_UA_R			200	// Resistance result R for DC-mode (in MOhm * 10) or Test result mA fraction for AC mode (in uA)
+#define REG_VOLTAGE_ON_PLATE		201	// Indicates voltage plate region
 //
 #define REG_ACTUAL_PRIM_VOLTAGE		210	// Primary side capacitor voltage based on sensing (in V)
 #define REG_PRIM_VOLTAGE_CTRL		211	// Primary side capacitor voltage used by control system (in V)
 //
-#define REG_CAN_BUSOFF_COUNTER		220 // Counter of bus-off states
+#define REG_CAN_BUSOFF_COUNTER		220	// Counter of bus-off states
 #define REG_CAN_STATUS_REG			221	// CAN status register (32 bit)
 #define REG_CAN_STATUS_REG_32		222
 #define REG_CAN_DIAG_TEC			223	// CAN TEC
 #define REG_CAN_DIAG_REC			224	// CAN REC
-#define REG_SPI_RX_RESETS			225 // Counter for SPI Rx resets
+#define REG_SPI_RX_RESETS			225	// Counter for SPI Rx resets
 //
-#define REG_DIAG_PING_RESULT		250 // Digitizer ping result
+#define REG_DIAG_PING_RESULT		250	// Digitizer ping result
 //
 #define REG_QUADRATIC_CORR			254	// Use quadratic correction for block
 //
-#define REG_SP__3					255
+// ----------------------------------------
+//
+#define REG_FWINFO_SLAVE_NID		256	// Device CAN slave node ID
+#define REG_FWINFO_MASTER_NID		257	// Device CAN master node ID (if presented)
+// 258 - 259
+#define REG_FWINFO_STR_LEN			260	// Length of the information string record
+#define REG_FWINFO_STR_BEGIN		261	// Begining of the information string record
 
 
 // ENDPOINTS
@@ -180,12 +183,13 @@
 
 // FAULT & DISABLE
 //
-#define DF_NONE					    0	// No faults
-#define DF_BRIDGE_SHORT				200 // Bridge current overload
+#define DF_NONE						0	// No faults
+#define DF_BRIDGE_SHORT				200	// Bridge current overload
 #define DF_TEMP_MON					201	// Bridge temperature overload
 #define DF_OPTO_CON_ERROR			202	// Optical connection error
 #define DF_LOW_SIDE_PS				203	// Low-side power supply fault
 #define DF_FOLLOWING_ERROR			204	// Voltage following error
+#define DF_PWM_SATURATION			205	// Detected PWM output saturation
 #define DF_INTERNAL					0xFFFF
 
 // Start-up check
@@ -196,7 +200,10 @@
 // WARNING CODES
 //
 #define WARNING_NONE				0	// No warning
-#define WARNING_CURRENT_NOT_REACHED 401 // No trip condition detected
+#define WARNING_CURRENT_NOT_REACHED 401	// No trip condition detected in I-mode
+#define WARNING_VOLTAGE_NOT_REACHED 402	// Trip condition detected in V-mode
+#define WARNING_RES_OUT_OF_RANGE	403	// Resistance is too low or too high
+#define WARNING_OUTPUT_OVERLOAD		404	// Output overload
 //
 #define WARNING_WATCHDOG_RESET		1001	// System has been reseted by WD
 
@@ -209,4 +216,4 @@
 #define ERR_WRONG_PWD				4	// Wrong password - unlock failed
 
 
-#endif // __DEV_OBJ_DIC_H
+#endif	// __DEV_OBJ_DIC_H
