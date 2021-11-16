@@ -543,6 +543,16 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U UserError)
 			else
 				*UserError = ERR_OPERATION_BLOCKED;
 			break;
+		case ACT_DBG_SWITCH_INDICATOR:
+			if(CONTROL_State == DS_None)
+			{
+				ZbGPIO_SwitchIndicator(TRUE);
+				DELAY_US(1000000);
+				ZbGPIO_SwitchIndicator(FALSE);
+			}
+			else
+				*UserError = ERR_OPERATION_BLOCKED;
+			break;
 		default:
 			return FALSE;
 	}
