@@ -702,7 +702,7 @@ static void MEASURE_AC_CacheVariables()
 	StartPauseTimeCounterTop = (CONTROL_FREQUENCY / DataTable[REG_VOLTAGE_FREQUENCY]) * 2;
 	NormalizedFrequency = _IQdiv(_IQ(1.0f), _IQI(CONTROL_FREQUENCY / DataTable[REG_VOLTAGE_FREQUENCY]));
 	NormalizedPIdiv2Shift = CONTROL_FREQUENCY / (4L * DataTable[REG_VOLTAGE_FREQUENCY]);
-	VoltageRateStep = _IQmpy(_IQdiv(_IQI((PWM_SKIP_NEG_PULSES ? 2 : 1) * 1000.0f), _IQI(DataTable[REG_VOLTAGE_FREQUENCY])),
+	VoltageRateStep = _IQmpy(_IQdiv(_IQI(1000 / (PWM_SKIP_NEG_PULSES ? 2 : 1)), _IQI(DataTable[REG_VOLTAGE_FREQUENCY])),
 			_IQmpyI32(_IQ(0.1f), DataTable[REG_VOLTAGE_AC_RATE]));
 	MinSafePWM = (PWM_FREQUENCY / 1000L) * PWM_TH * ZW_PWM_DUTY_BASE / 1000000L;
 	
