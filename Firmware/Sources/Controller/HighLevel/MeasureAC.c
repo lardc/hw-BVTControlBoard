@@ -106,7 +106,7 @@ Boolean MEASURE_AC_StartProcess(Int16U Type, pInt16U pDFReason, pInt16U pProblem
 	FollowingErrorCounter = 0;
 	//
 	AmplitudePeriodCounter = 0;
-	InvertPolarity = TRUE;
+	InvertPolarity = PWM_USE_BRIDGE_RECTIF;
 	SkipRegulation = TRUE;
 	SIVAerr = 0;
 	//
@@ -171,21 +171,30 @@ Int16S inline MEASURE_AC_TrimPWM(Int16S Duty)
 
 Int16S inline MEASURE_AC_SetPWM(Int16S Duty)
 {
-	Int16S PWMOutput = 0;
-	
-	if(Duty >= 0 && PrevDuty < 0)
-		InvertPolarity = !InvertPolarity;
-	
-	if(Duty > 0)
+	if(PWM_USE_BRIDGE_RECTIF)
 	{
-		PWMOutput = MEASURE_AC_TrimPWM(InvertPolarity ? -Duty : Duty);
-		ZwPWMB_SetValue12(DbgMutePWM ? 0 : PWMOutput);
+		Int16S PWMOutput = 0;
+
+		if(Duty >= 0 && PrevDuty < 0)
+			InvertPolarity = !InvertPolarity;
+
+		if(Duty > 0)
+		{
+			PWMOutput = MEASURE_AC_TrimPWM(InvertPolarity ? -Duty : Duty);
+			ZwPWMB_SetValue12(DbgMutePWM ? 0 : PWMOutput);
+		}
+		else
+			ZwPWMB_SetValue12(0);
+
+		PrevDuty = Duty;
+		return PWMOutput;
 	}
 	else
-		ZwPWMB_SetValue12(0);
-	
-	PrevDuty = Duty;
-	return PWMOutput;
+	{
+		Int16S PWMOutput = MEASURE_AC_TrimPWM(Duty);
+		ZwPWMB_SetValue12(PWMOutput);
+		return PWMOutput;
+	}
 }
 // ----------------------------------------
 
