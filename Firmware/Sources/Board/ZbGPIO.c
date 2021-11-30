@@ -12,8 +12,8 @@ void ZbGPIO_Init()
 {
 	// Reset to default state
 	ZwGPIO_WritePin(PIN_LED_1, FALSE);
-   	ZwGPIO_WritePin(PIN_POWER_EN1, FALSE);
-   	ZwGPIO_WritePin(PIN_POWER_EN2, FALSE);
+   	ZwGPIO_WritePin(PIN_POWER_EN1, TRUE);
+   	ZwGPIO_WritePin(PIN_POWER_EN2, TRUE);
    	ZwGPIO_WritePin(PIN_POWER_EN3, FALSE);
    	ZwGPIO_WritePin(PIN_EXT_IND, FALSE);
    	// Configure pins
@@ -47,8 +47,8 @@ void ZbGPIO_ToggleLED1()
 
 void ZbGPIO_SwitchPower(Boolean Enabled1, Boolean Enabled2)
 {
-   	ZwGPIO_WritePin(PIN_POWER_EN1, Enabled1);
-   	ZwGPIO_WritePin(PIN_POWER_EN2, Enabled2);
+   	ZwGPIO_WritePin(PIN_POWER_EN1, !Enabled1);
+   	ZwGPIO_WritePin(PIN_POWER_EN2, !Enabled2);
 }
 // ----------------------------------------
 
