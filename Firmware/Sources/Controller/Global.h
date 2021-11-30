@@ -31,8 +31,15 @@
 
 // Regulator parameters
 #define PWM_REDUCE_RATE			50				// in ticks per regulator cycle
+#define PWM_USE_BRIDGE_RECTIF	FALSE			// Use full-bridge rectifier on secondary side
 #define PWM_SKIP_NEG_PULSES		FALSE			// Skip measurement at negative primary pulses
 #define USE_DIRTY_PATCH			TRUE			// Dirty patch for 300mA
+
+// Redefine skip pulses setting
+#if PWM_USE_BRIDGE_RECTIF == FALSE
+#undef PWM_SKIP_NEG_PULSES
+#define PWM_SKIP_NEG_PULSES FALSE
+#endif
 
 // Invert result values
 #define SCOPE_DATA_INVERT		TRUE
