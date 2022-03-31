@@ -181,9 +181,9 @@ Int16S inline MEASURE_AC_SetPWM(Int16S Duty)
 	
 	if(Duty > 0)
 	{
-		if(PWM_INVERT_POLARITY)
-			Duty = -Duty;
 		PWMOutput = MEASURE_AC_TrimPWM(InvertPolarity ? -Duty : Duty);
+		if(PWM_INVERT_POLARITY)
+			PWMOutput = -PWMOutput;
 		ZwPWMB_SetValue12(DbgMutePWM ? 0 : PWMOutput);
 	}
 	else
