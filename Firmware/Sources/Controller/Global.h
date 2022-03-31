@@ -26,6 +26,7 @@
 // Regulator parameters
 #define PWM_REDUCE_RATE			50				// in ticks per regulator cycle
 #define PWM_SKIP_NEG_PULSES		TRUE			// Skip measurement at negative primary pulses
+#define PWM_INVERT_POLARITY		TRUE			// PWM global polarity inversion
 
 // --- Debug modes
 #define DBG_USE_BRIDGE_SHORT	TRUE
