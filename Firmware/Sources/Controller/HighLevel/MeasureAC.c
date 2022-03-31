@@ -202,7 +202,7 @@ void MEASURE_AC_Stop(Int16U Reason)
 		TripConditionDetected = TRUE;
 	}
 	
-	switch (Reason)
+	switch(Reason)
 	{
 		case DF_INTERNAL:
 			MEASURE_AC_HandleTripCondition(UseInstantMethod);
@@ -254,30 +254,30 @@ static void MEASURE_AC_HandlePeakLogic()
 {
 	Int16U i;
 	
-	if (UseInstantMethod)
+	if(UseInstantMethod)
 	{
-		if (ModifySine)
+		if(ModifySine)
 		{
 			PeakSample.Current = MaxPosInstantCurrent;
 			PeakSample.Voltage = MaxPosVoltage;
 		}
 		else
 		{
-			if (PeakDetectorCounter)
+			if(PeakDetectorCounter)
 			{
 				Int16U ZoneCounter = 0;
 				_iq ZoneMaxVoltage = 0;
 				_iq ZoneAvgCurrent = 0;
 
-				for (i = 0; i < PeakDetectorCounter; ++i)
+				for(i = 0; i < PeakDetectorCounter; ++i)
 				{
-					if (PeakDetectorData[i].Voltage >= _IQmpy(MaxPosVoltage, PeakThresholdDetect))
+					if(PeakDetectorData[i].Voltage >= _IQmpy(MaxPosVoltage, PeakThresholdDetect))
 					{
 						// Усреднение тока
 						ZoneAvgCurrent += PeakDetectorData[i].Current;
 
 						// Поиск амплитуды напряжения
-						if (PeakDetectorData[i].Voltage > ZoneMaxVoltage)
+						if(PeakDetectorData[i].Voltage > ZoneMaxVoltage)
 							ZoneMaxVoltage = PeakDetectorData[i].Voltage;
 
 						++ZoneCounter;
@@ -285,7 +285,7 @@ static void MEASURE_AC_HandlePeakLogic()
 				}
 
 				// Сохранение значений
-				if (ZoneCounter)
+				if(ZoneCounter)
 				{
 					PeakSample.Current = _IQdiv(ZoneAvgCurrent, _IQI(ZoneCounter));
 					PeakSample.Voltage = ZoneMaxVoltage;
@@ -428,8 +428,8 @@ static void MEASURE_AC_HandleVI()
 	}
 	
 	// Detect maximum voltage for AC period
-	if((!ModifySine && (ActualSecondarySample.IQFields.Voltage >= MaxPosVoltage)) ||
-		(ModifySine && MEASURE_AC_PWMZeroDetector()))
+	if((!ModifySine && (ActualSecondarySample.IQFields.Voltage >= MaxPosVoltage))
+			|| (ModifySine && MEASURE_AC_PWMZeroDetector()))
 	{
 		MaxPosVoltage = ActualSecondarySample.IQFields.Voltage;
 		MaxPosInstantCurrent = ActualSecondarySample.IQFields.Current;
@@ -457,8 +457,8 @@ static void MEASURE_AC_HandleVI()
 	if(!ModifySine && !(SkipNegativeLogging && InvertPolarity))
 	{
 		// Store data for peak detection
-		if ((ActualSecondarySample.IQFields.Voltage > _IQmpy(DesiredAmplitudeV, PEAK_THR_COLLECT)) &&
-			(PeakDetectorCounter < PEAK_DETECTOR_SIZE))
+		if((ActualSecondarySample.IQFields.Voltage > _IQmpy(DesiredAmplitudeV, PEAK_THR_COLLECT))
+				&& (PeakDetectorCounter < PEAK_DETECTOR_SIZE))
 		{
 			PeakDetectorData[PeakDetectorCounter].Current = ActualSecondarySample.IQFields.Current;
 			PeakDetectorData[PeakDetectorCounter].Voltage = ActualSecondarySample.IQFields.Voltage;
@@ -522,7 +522,7 @@ static void MEASURE_AC_ControlCycle()
 	if(DRIVER_IsShortCircuit())
 		CONTROL_RequestStop(DF_BRIDGE_SHORT, FALSE);
 
-	switch (State)
+	switch(State)
 	{
 		case ACPS_Ramp:
 			{
@@ -662,7 +662,7 @@ static Int16S MEASURE_AC_CCSub_Regulator(Boolean *PeriodTrigger)
 	// Following error detection
 	if(ret && !DbgMutePWM && DBG_USE_FOLLOWING_ERR && (KpVAC != 0) && (KiVAC != 0))
 	{
-		if((FollowingErrorFraction > FE_MAX_FRACTION) && (_IQabs(FollowingErrorAbsolute) > FE_MAX_ABSOLUTE))
+		if((FollowingErrorFraction > FE_MAX_FRACTION ) && (_IQabs(FollowingErrorAbsolute) > FE_MAX_ABSOLUTE ))
 		{
 			if(FollowingErrorCounter++ > (FE_MAX_COUNTER * (PWM_SKIP_NEG_PULSES ? 2 : 1)))
 			{
