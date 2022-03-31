@@ -55,11 +55,11 @@ static _iq FollowingErrorFraction, FollowingErrorAbsolute;
 static _iq ResultV, ResultI;
 static _iq DesiredAmplitudeV, DesiredAmplitudeVHistory, ControlledAmplitudeV, DesiredVoltageHistory;
 static _iq ActualMaxPosVoltage, ActualMaxPosCurrent;
-static _iq MaxPosVoltage, MaxPosCurrent, MaxPosInstantCurrent, PeakThresholdDetect;
+static _iq MaxPosVoltage, MaxPosCurrent, MaxPosInstantCurrent, PeakThresholdDetect, CapResistance;
 static DataSample ActualSecondarySample;
 static Boolean TripConditionDetected, UseInstantMethod, FrequencyRateSwitch, ModifySine;
 static Boolean DbgDualPolarity, DbgSRAM, DbgMutePWM, SkipRegulation, SkipLoggingVoids, SkipNegativeLogging;
-static Boolean InvertPolarity;
+static Boolean InvertPolarity, CapCurrentCompensation;
 static Int16S PrevDuty;
 static Int16U AmplitudePeriodCounter;
 static Int16U Problem, Warning, Fault;
@@ -252,7 +252,7 @@ static Int16S MEASURE_AC_CalculatePWM(_iq DesiredV)
 #endif
 static void MEASURE_AC_HandlePeakLogic()
 {
-	Int16U i;
+	Int16S i;
 	
 	if(UseInstantMethod)
 	{
@@ -266,12 +266,12 @@ static void MEASURE_AC_HandlePeakLogic()
 			if(PeakDetectorCounter)
 			{
 				Int16U ZoneCounter = 0;
-				_iq ZoneMaxVoltage = 0;
-				_iq ZoneAvgCurrent = 0;
+				_iq ZoneMaxVoltage = 0, ZoneAvgCurrent = 0;
+				_iq ZoneThrVoltage = _IQmpy(MaxPosVoltage, PeakThresholdDetect);
 
 				for(i = 0; i < PeakDetectorCounter; ++i)
 				{
-					if(PeakDetectorData[i].Voltage >= _IQmpy(MaxPosVoltage, PeakThresholdDetect))
+					if(PeakDetectorData[i].Voltage >= ZoneThrVoltage)
 					{
 						// Усреднение тока
 						ZoneAvgCurrent += PeakDetectorData[i].Current;
@@ -287,7 +287,37 @@ static void MEASURE_AC_HandlePeakLogic()
 				// Сохранение значений
 				if(ZoneCounter)
 				{
-					PeakSample.Current = _IQdiv(ZoneAvgCurrent, _IQI(ZoneCounter));
+					_iq ZoneCurrent = _IQdiv(ZoneAvgCurrent, _IQI(ZoneCounter));
+
+					if(CapCurrentCompensation)
+					{
+						_iq ZoneStartCurrent, ZoneEndCurrent;
+
+						// Поиск тока начала искомой зоны
+						for(i = 0; i < PeakDetectorCounter; ++i)
+							if(PeakDetectorData[i].Voltage >= ZoneThrVoltage)
+							{
+								ZoneStartCurrent = (PeakDetectorData[i].Current > 0) ? PeakDetectorData[i].Current : 0;
+								break;
+							}
+
+						// Поиск тока конца искомой зоны
+						for(i = PeakDetectorCounter - 1; i >= 0; --i)
+							if(PeakDetectorData[i].Voltage >= ZoneThrVoltage)
+							{
+								ZoneEndCurrent = (PeakDetectorData[i].Current > 0) ? PeakDetectorData[i].Current : 0;
+								break;
+							}
+
+						// Определение существенного емкостного тока и его коррекция
+						_iq CurrentRatio = _IQdiv(_IQabs(ZoneStartCurrent - ZoneEndCurrent), ZoneStartCurrent + ZoneEndCurrent);
+						if((CurrentRatio > _IQ(0.5f)) && (MAX(ZoneStartCurrent, ZoneEndCurrent) > _IQmpy(ZoneCurrent, _IQ(0.5f))))
+						{
+							ZoneCurrent -= _IQdiv(ZoneMaxVoltage, CapResistance);
+						}
+					}
+
+					PeakSample.Current = (ZoneCurrent > 0) ? ZoneCurrent : 0;
 					PeakSample.Voltage = ZoneMaxVoltage;
 				}
 				else
@@ -722,6 +752,9 @@ static void MEASURE_AC_CacheVariables()
 			_IQmpyI32(_IQ(0.1f), DataTable[REG_VOLTAGE_AC_RATE]));
 	MinSafePWM = (PWM_FREQUENCY / 1000L) * PWM_TH * ZW_PWM_DUTY_BASE / 1000000L;
 	
+	CapCurrentCompensation = DataTable[REG_CAP_CURR_COMPENSATION] ? TRUE : FALSE;
+	CapResistance = _IQI(DataTable[REG_CAP_CURR_RESISTANCE]);
+
 	UseInstantMethod = DataTable[REG_USE_INST_METHOD] ? TRUE : FALSE;
 	PeakThresholdDetect = _FPtoIQ2(DataTable[REG_PEAK_SEARCH_ZONE], 100);
 	SpikeFilterMax = DataTable[REG_NON_INST_FILTER_LEN];

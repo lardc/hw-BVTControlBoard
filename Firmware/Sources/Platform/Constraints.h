@@ -90,6 +90,11 @@ typedef struct __TableItemConstraint
 //
 #define LAST_FRAG_SIZE_DEF		1200
 //
+// in kOhm
+#define CAP_RES_MIN				1000
+#define CAP_RES_MAX				60000
+#define CAP_RES_DEF				20000
+//
 #define X_D_DEF0				10
 #define X_D_DEF1				100
 #define X_D_DEF2				1000

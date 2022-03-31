@@ -85,7 +85,9 @@
 #define REG_MODIFY_SINE				86	// Enable sine modification at low currents
 #define REG_SKIP_NEG_LOGGING		87	// Skip negative pulses logging
 #define REG_MODIFY_SINE_SHIFT		88	// Modified sine sample point shift from pwm peak (in ticks)
-// 89 - 95
+#define REG_CAP_CURR_COMPENSATION	89	// Enable capacitive current compensation
+#define REG_CAP_CURR_RESISTANCE		90	// Relative capacitive current resistance (in kOhms)
+// 91 - 95
 #define REG_SCURRENT1_FINE_P2		96	// Secondary current 1 tune quadratic coefficient P2 x1e6
 #define REG_SCURRENT1_FINE_P1		97	// Secondary current 1 tune quadratic coefficient P1 x1000
 #define REG_SCURRENT2_FINE_P2		98	// Secondary current 2 tune quadratic coefficient P2 x1e6
