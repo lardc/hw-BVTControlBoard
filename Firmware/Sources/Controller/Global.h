@@ -24,7 +24,7 @@
 // ----------------------------------------
 
 // Regulator parameters
-#define PWM_REDUCE_RATE			50				// in ticks per regulator cycle
+#define PWM_REDUCE_RATE			100				// in ticks per regulator cycle
 #define PWM_SKIP_NEG_PULSES		TRUE			// Skip measurement at negative primary pulses
 #define PWM_INVERT_POLARITY		FALSE			// PWM global polarity inversion
 
@@ -51,7 +51,7 @@
 #define HVD_VL_TH				_IQ(1000)		// < 1000V		(low range)
 #define HVD_IL_DCM_TH			_IQ(5.0f)		// <= 5mA		(low range)
 #define HVD_IL_TH				_IQ(30.0f)		// <= 30mA		(low range)
-#define HVD_IH_TH				_IQ(500.0f)		// <= 500mA		(high range)
+#define HVD_IH_TH				_IQ(300.0f)		// <= 300mA		(high range)
 
 // Pre-plate parameters
 #define PRE_PLATE_MAX_TIME		300				// pre-plate max time for stabilization (in ms)
