@@ -24,7 +24,7 @@
 // ----------------------------------------
 
 // Regulator parameters
-#define PWM_REDUCE_RATE			100				// in ticks per regulator cycle
+#define PWM_REDUCE_RATE			ZW_PWM_DUTY_BASE	// in ticks per regulator cycle
 #define PWM_SKIP_NEG_PULSES		TRUE			// Skip measurement at negative primary pulses
 #define PWM_INVERT_POLARITY		FALSE			// PWM global polarity inversion
 
