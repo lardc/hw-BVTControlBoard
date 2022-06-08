@@ -28,7 +28,7 @@ typedef struct __TableItemConstraint
 #define VPEAK_DETECT_DEF		98		// in %
 
 #define TEST_CURRENT_MIN		1		// in mA x10
-#define TEST_CURRENT_MAX		5000	// in mA x10
+#define TEST_CURRENT_MAX		3000	// in mA x10
 #define TEST_CURRENT_DEF		50		// in mA x10
 //
 #define TEST_CURRENT_DC_MAX		10000	// in uA
