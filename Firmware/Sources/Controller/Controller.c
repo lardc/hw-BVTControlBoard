@@ -4,7 +4,7 @@
 
 // Header
 #include "Controller.h"
-//
+
 // Includes
 #include "SysConfig.h"
 #include "ZwDSP.h"
@@ -15,12 +15,9 @@
 #include "MemoryBuffers.h"
 #include "IQmathUtils.h"
 #include "PowerDriver.h"
-#include "SelfTest.h"
 #include "PrimarySampling.h"
 #include "SecondarySampling.h"
-#include "MeasureTest.h"
 #include "MeasureUtils.h"
-
 
 // Types
 //
@@ -44,7 +41,6 @@ typedef enum __BatteryVoltageState
 	BVS_Ready		= 3
 } BatteryVoltageState;
 
-
 // Variables
 //
 volatile Int64U CONTROL_TimeCounter = 0;
@@ -62,7 +58,6 @@ static volatile Int16U CurrentMeasurementType = MEASUREMENT_TYPE_NONE;
 // Boot-loader flag
 #pragma DATA_SECTION(CONTROL_BootLoaderRequest, "bl_flag");
 volatile Int16U CONTROL_BootLoaderRequest = 0;
-
 
 // Forward functions
 //
@@ -84,13 +79,10 @@ static void CONTROL_BatteryVoltageConfig(Boolean DriverParam1, Boolean DriverPar
 static void CONTROL_BatteryVoltageCheck();
 static void CONTROL_BatteryVoltageReady(Int16U Voltage);
 
-
 // Functions
 //
 void CONTROL_Init()
 {
-	Int16U Fault = DF_NONE;
-
 	Int16U EPIndexes[EP_COUNT] = { EP16_I, EP16_V, EP16_DIAG, EP16_ERR, EP16_PEAK_I, EP16_PEAK_V };
 	Int16U EPSized[EP_COUNT] = { VALUES_x_SIZE, VALUES_x_SIZE, VALUES_x_SIZE, VALUES_x_SIZE, VALUES_x_SIZE, VALUES_x_SIZE };
 	pInt16U EPCounters[EP_COUNT] = { (pInt16U)&MEMBUF_ValuesIV_Counter,		(pInt16U)&MEMBUF_ValuesIV_Counter,
@@ -121,10 +113,6 @@ void CONTROL_Init()
 
 	// Use quadratic correction for block
 	DataTable[REG_QUADRATIC_CORR] = 1;
-
-	// Check connections
-	if(!ST_ValidateConnections(&Fault))
-		CONTROL_SwitchStateToDisabled(Fault);
 
 	if(ZwSystem_GetDogAlarmFlag())
 	{
@@ -231,8 +219,7 @@ void CONTROL_RequestStop(Int16U Reason, Boolean HWSignal)
 			case MEASUREMENT_TYPE_AC_D:
 				MEASURE_AC_Stop(Reason);
 				break;
-			case MEASUREMENT_TYPE_TEST:
-				MEASURE_TEST_Stop(Reason);
+			default:
 				break;
 		}
 	}
@@ -281,8 +268,7 @@ static void CONTROL_EndTestDPC()
 		case MEASUREMENT_TYPE_AC_D:
 			MEASURE_AC_FinishProcess();
 			break;
-		case MEASUREMENT_TYPE_TEST:
-			MEASURE_TEST_FinishProcess();
+		default:
 			break;
 	}
 
@@ -572,13 +558,12 @@ static void CONTROL_TriggerMeasurementDPC()
 
 	switch(CurrentMeasurementType)
 	{
-		case MEASUREMENT_TYPE_TEST:
-			success = MEASURE_TEST_StartProcess(CurrentMeasurementType, &DFReason, &problem);
-			break;
 		case MEASUREMENT_TYPE_AC:
 		case MEASUREMENT_TYPE_AC_D:
 		case MEASUREMENT_TYPE_AC_R:
 			success = MEASURE_AC_StartProcess(CurrentMeasurementType, &DFReason, &problem);
+			break;
+		default:
 			break;
 	}
 

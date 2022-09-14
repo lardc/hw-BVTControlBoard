@@ -24,8 +24,8 @@
 // ----------------------------------------
 
 // Debug modes
-#define DBG_USE_BRIDGE_SHORT	TRUE
-#define DBG_USE_TEMP_MON		TRUE
+#define DBG_USE_BRIDGE_SHORT	FALSE
+#define DBG_USE_TEMP_MON		FALSE
 #define DBG_USE_OPTO_TIMEOUT	TRUE
 #define DBG_USE_FOLLOWING_ERR	TRUE
 

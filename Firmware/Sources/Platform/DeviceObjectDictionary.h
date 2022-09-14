@@ -30,13 +30,7 @@
 
 // REGISTERS
 //
-#define REG_TEST_PWM_AMPLITUDE		0	// Raw PWM amplitude
-#define REG_TEST_FREQUENCY			1	// Sine frequency
-#define REG_TEST_CONST_PWM_MODE		2	// Enable constant PWM mode
-#define REG_TEST_CURRENT			3	// Threshold current integer part (in mA x10) (for sensing configuration)
-#define REG_TEST_VOLTAGE			4	// Test voltage (for sensing configuration)
-//
-// 10 - 19
+// 0 - 19
 #define REG_CAP_V_COFF_N			20	// Capacitor voltage coefficient (N)
 #define REG_CAP_V_COFF_D			21	// Capacitor voltage coefficient (D)
 // 22 - 23
