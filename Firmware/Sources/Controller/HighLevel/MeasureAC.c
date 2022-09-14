@@ -670,7 +670,7 @@ static void MEASURE_AC_CacheVariables()
 	BrakeTimeCounterTop = (CONTROL_FREQUENCY * DataTable[REG_BRAKE_TIME]) / 1000;
 	
 	TransCoffInv = _FPtoIQ2(1, DataTable[REG_TRANSFORMER_COFF]);
-	PWMCoff = _IQdiv(_IQ(ZW_PWM_DUTY_BASE), _IQI(DataTable[REG_PRIM_VOLTAGE_CTRL]));
+	PWMCoff = _IQdiv(_IQ(ZW_PWM_DUTY_BASE), _IQI(DataTable[REG_PRIM_VOLTAGE]));
 	MaxSafePWM = DataTable[REG_SAFE_MAX_PWM];
 	
 	StartPauseTimeCounterTop = (CONTROL_FREQUENCY / DataTable[REG_VOLTAGE_FREQUENCY]) * 2;

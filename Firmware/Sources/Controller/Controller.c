@@ -1,4 +1,4 @@
-﻿// -----------------------------------------
+﻿// ----------------------------------------
 // Controller logic
 // ----------------------------------------
 
@@ -17,6 +17,8 @@
 #include "PrimarySampling.h"
 #include "SecondarySampling.h"
 #include "MeasureUtils.h"
+#include "DataTable.h"
+#include "DeviceObjectDictionary.h"
 
 // Types
 //
@@ -31,21 +33,11 @@ typedef struct __EndTestDPCClosure
 	Int16U SavedWarning;
 	Int16U SavedProblem;
 } EndTestDPCClosure;
-//
-typedef enum __BatteryVoltageState
-{
-	BVS_None		= 0,
-	BVS_WaitRise	= 1,
-	BVS_WaitFall	= 2,
-	BVS_Ready		= 3
-} BatteryVoltageState;
 
 // Variables
 //
 volatile Int64U CONTROL_TimeCounter = 0;
-volatile Int64U CONTROL_BatteryTimeout;
 volatile DeviceState CONTROL_State = DS_None;
-volatile BatteryVoltageState CONTROL_Battery = BVS_None;
 //
 static CONTROL_FUNC_RealTimeRoutine RealTimeRoutine = NULL;
 static EndTestDPCClosure EndXDPCArgument = { FALSE, 0, 0, DF_NONE, WARNING_NONE, PROBLEM_NONE };
@@ -60,7 +52,6 @@ volatile Int16U CONTROL_BootLoaderRequest = 0;
 
 // Forward functions
 //
-static void CONTROL_UpdateIdle();
 static void CONTROL_FillWPPartDefault();
 static void CONTROL_SetDeviceState(DeviceState NewState);
 static void CONTROL_SwitchStateToPowered();
@@ -71,12 +62,7 @@ static void CONTROL_TriggerMeasurementDPC();
 static void CONTROL_EndTestDPC();
 static void CONTROL_EndPassiveDPC();
 static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U UserError);
-//
 static void CONTROL_StartSequence();
-static void CONTROL_BatteryVoltagePrepare();
-static void CONTROL_BatteryVoltageConfig(Boolean DriverParam1, Boolean DriverParam2, BatteryVoltageState NewState);
-static void CONTROL_BatteryVoltageCheck();
-static void CONTROL_BatteryVoltageReady(Int16U Voltage);
 
 // Functions
 //
@@ -104,6 +90,8 @@ void CONTROL_Init()
 	// Reset control values
 	DEVPROFILE_ResetControlSection();
 
+	PS_Init();
+
 	// Use quadratic correction for block
 	DataTable[REG_QUADRATIC_CORR] = 1;
 
@@ -115,17 +103,10 @@ void CONTROL_Init()
 }
 // ----------------------------------------
 
-void CONTROL_DelayedInit()
-{
-	// Initialize sampling of parameters at primary side
-	PSAMPLING_Init();
-}
-// ----------------------------------------
-
 void CONTROL_Idle()
 {
-	CONTROL_UpdateIdle();
 	DEVPROFILE_ProcessRequests();
+	DataTable[REG_ACTUAL_PRIM_VOLTAGE] = PS_GetBatteryVoltage();
 
 	// Process deferred procedures
 	if(DPCDelegate)
@@ -140,18 +121,6 @@ void CONTROL_Idle()
 void inline CONTROL_RequestDPC(FUNC_AsyncDelegate Action)
 {
 	DPCDelegate = Action;
-}
-// ----------------------------------------
-
-void CONTROL_UpdateLow()
-{
-	// Update capacitor state
-	PSAMPLING_DoSamplingVCap();
-}
-// ----------------------------------------
-
-static void CONTROL_UpdateIdle()
-{
 }
 // ----------------------------------------
 
@@ -325,8 +294,6 @@ static void CONTROL_SwitchStateToPowered()
 {
 	ZbGPIO_SwitchIndicator(FALSE);
 
-	// Configure monitor
-	PSAMPLING_ConfigureSamplingVCap();
 	CONTROL_SetDeviceState(DS_Powered);
 
 	// Mark cycle inactive
@@ -418,17 +385,8 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U UserError)
 			{
 				if(CONTROL_State == DS_InProcess)
 				{
-					// In case of battery prepare
-					if (CONTROL_Battery != BVS_Ready)
-					{
-						CONTROL_RequestDPC(NULL);
-						CONTROL_SwitchStateToPowered();
-					}
-					else
-					{
-						CONTROL_RequestStop(DF_NONE, FALSE);
-						CONTROL_SetDeviceState(DS_Stopping);
-					}
+					CONTROL_RequestDPC(NULL);
+					CONTROL_SwitchStateToPowered();
 				}
 			}
 			break;
@@ -546,88 +504,6 @@ static void CONTROL_StartSequence()
 
 	CurrentMeasurementType = DataTable[REG_MEASUREMENT_TYPE];
 	CONTROL_SwitchStateToInProcess();
-
-	CONTROL_BatteryVoltagePrepare();
-}
-// ----------------------------------------
-
-static void CONTROL_BatteryVoltagePrepare()
-{
-	Int16U OutputPower = ((Int32U)DataTable[REG_LIMIT_VOLTAGE] * DataTable[REG_LIMIT_CURRENT]) / 10000;
-	CONTROL_Battery = BVS_None;
-
-	// For custom configured voltage
-	if (DataTable[REG_USE_CUSTOM_PRIM_V])
-	{
-		CONTROL_BatteryVoltageReady(DataTable[REG_PRIM_V_CUSTOM]);
-	}
-	else
-	{
-		if ((OutputPower > CAP_SW_POWER) || (DataTable[REG_LIMIT_VOLTAGE] > CAP_SW_VOLTAGE))
-		{
-			// Turn all power supplies in this case
-			CONTROL_BatteryVoltageConfig(TRUE, TRUE, BVS_WaitRise);
-		}
-		else
-		{
-			// For low voltage operation
-			if (DataTable[REG_ACTUAL_PRIM_VOLTAGE] > (DataTable[REG_PRIM_V_LOW_RANGE] + CAP_DELTA))
-			{
-				CONTROL_BatteryVoltageConfig(FALSE, FALSE, BVS_WaitFall);
-			}
-			else
-			{
-				CONTROL_BatteryVoltageReady(DataTable[REG_ACTUAL_PRIM_VOLTAGE]);
-			}
-		}
-	}
-}
-// ----------------------------------------
-
-static void CONTROL_BatteryVoltageConfig(Boolean DriverParam1, Boolean DriverParam2, BatteryVoltageState NewState)
-{
-	CONTROL_Battery = NewState;
-	CONTROL_BatteryTimeout = CONTROL_TimeCounter + BAT_CHARGE_TIMEOUT;
-	CONTROL_RequestDPC(&CONTROL_BatteryVoltageCheck);
-}
-// ----------------------------------------
-
-static void CONTROL_BatteryVoltageCheck()
-{
-	Int16U FullRangeVoltage = (DataTable[REG_USE_CUSTOM_PRIM_V]) ? DataTable[REG_PRIM_V_CUSTOM] : DataTable[REG_PRIM_V_FULL_RANGE];
-
-	switch (CONTROL_Battery)
-	{
-		case BVS_WaitRise:
-			{
-				if (DataTable[REG_ACTUAL_PRIM_VOLTAGE] >= (FullRangeVoltage - CAP_DELTA))
-					CONTROL_BatteryVoltageReady(DataTable[REG_ACTUAL_PRIM_VOLTAGE]);
-			}
-			break;
-
-		case BVS_WaitFall:
-			{
-				if (DataTable[REG_ACTUAL_PRIM_VOLTAGE] <= (DataTable[REG_PRIM_V_LOW_RANGE] + CAP_DELTA))
-				{
-					CONTROL_BatteryVoltageReady(DataTable[REG_ACTUAL_PRIM_VOLTAGE]);
-				}
-			}
-			break;
-	}
-
-	if (CONTROL_TimeCounter > CONTROL_BatteryTimeout)
-		CONTROL_SwitchStateToFault(DF_LOW_SIDE_PS);
-	else if (CONTROL_Battery != BVS_Ready)
-		CONTROL_RequestDPC(&CONTROL_BatteryVoltageCheck);
-}
-// ----------------------------------------
-
-static void CONTROL_BatteryVoltageReady(Int16U Voltage)
-{
-	CONTROL_Battery = BVS_Ready;
-	DataTable[REG_PRIM_VOLTAGE_CTRL] = Voltage;
 	CONTROL_RequestDPC(&CONTROL_TriggerMeasurementDPC);
 }
 // ----------------------------------------
-
-// No more.

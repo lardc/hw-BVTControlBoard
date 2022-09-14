@@ -92,9 +92,6 @@ void main()
 	EINT;
 	ERTM;
 
-	// Do delayed initialization
-	CONTROL_DelayedInit();
-
 	// Set watch-dog as WDRST
 	ZwSystem_SelectDogFunc(FALSE);
 	ZwSystem_EnableDog(SYS_WD_PRESCALER);
@@ -155,13 +152,7 @@ void InitializeTimers()
 
 void InitializeADC()
 {
-	// Initialize and prepare ADC
 	ZwADC_Init(ADC_PRESCALER, ADC_CD2, ADC_SH);
-	ZwADC_ConfigInterrupts(TRUE, FALSE);
-
-	// Enable interrupts on peripheral and CPU levels
-	ZwADC_EnableInterrupts(TRUE, FALSE);
-	ZwADC_EnableInterruptsGlobal(TRUE);
 }
 // -----------------------------------------
 
@@ -257,9 +248,6 @@ ISRCALL Timer0_ISR(void)
 ISRCALL Timer2_ISR(void)
 {
 	static Int16U dbgCounter = 0;
-
-	// Update low-priority tasks
-	CONTROL_UpdateLow();
 
 	// Update time
 	++CONTROL_TimeCounter;

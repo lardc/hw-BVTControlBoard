@@ -1,5 +1,5 @@
-﻿// -----------------------------------------
-// Monitoring of capacitors voltage and primary winding current
+﻿// ----------------------------------------
+// Samples battery voltage
 // ----------------------------------------
 
 #ifndef __PRIMARY_SAMPLING_H
@@ -7,19 +7,9 @@
 
 // Include
 #include "stdinc.h"
-#include "IQmathLib.h"
-
-// Variables
-//
-extern volatile _iq PSAMPLING_CapacitorVoltage;
 
 // Functions
-//
-// Init monitor
-void PSAMPLING_Init();
-// Configure for capacitor voltage monitoring
-void PSAMPLING_ConfigureSamplingVCap();
-// Sample capacitor voltage
-void PSAMPLING_DoSamplingVCap();
+void PS_Init();
+Int16U PS_GetBatteryVoltage();
 
 #endif // __PRIMARY_SAMPLING_H

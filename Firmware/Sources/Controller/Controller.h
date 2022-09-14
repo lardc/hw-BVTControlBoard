@@ -39,12 +39,8 @@ extern volatile Int16U CONTROL_BootLoaderRequest;
 //
 // Initialize controller
 void CONTROL_Init();
-// Delayed initialization routine
-void CONTROL_DelayedInit();
 // Do background idle operation
 void CONTROL_Idle();
-// Update low-priority tasks
-void CONTROL_UpdateLow();
 // Real-time control routine
 void CONTROL_RealTimeCycle();
 // Switch-on/off real-time cycle

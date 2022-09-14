@@ -52,11 +52,8 @@
 // 39 - 41
 #define REG_BRAKE_TIME				42	// Brake time (in ms)
 #define REG_TRANSFORMER_COFF		43	// Transformer V transfer ratio (secondary/primary)
-#define REG_PRIM_V_LOW_RANGE		44	// Low range voltage on primary side (in V)
-#define REG_PRIM_V_FULL_RANGE		45	// Full range voltage on primary side (in V)
-#define REG_USE_CUSTOM_PRIM_V		46	// Switch to custom voltage value on primary side
-#define REG_PRIM_V_CUSTOM			47	// Custom voltage on primary side (in V)
-// 48
+#define REG_PRIM_VOLTAGE			44	// Voltage on primary side (in V)
+// 45 - 48
 #define REG_OPTO_CONNECTION_MON		49	// Optical connection error when N packets lost (0 to disable)
 #define REG_SKIP_LOGGING_VOIDS		50	// Don't log empty zones in case of using frequency divisor
 // 51 - 79
@@ -124,7 +121,6 @@
 #define REG_VOLTAGE_ON_PLATE		201	// Indicates voltage plate region
 //
 #define REG_ACTUAL_PRIM_VOLTAGE		210	// Primary side capacitor voltage based on sensing (in V)
-#define REG_PRIM_VOLTAGE_CTRL		211	// Primary side capacitor voltage used by control system (in V)
 //
 #define REG_CAN_BUSOFF_COUNTER		220	// Counter of bus-off states
 #define REG_CAN_STATUS_REG			221	// CAN status register (32 bit)
