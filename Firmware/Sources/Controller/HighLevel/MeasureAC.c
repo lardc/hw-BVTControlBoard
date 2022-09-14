@@ -18,7 +18,6 @@
 #include "Global.h"
 #include "MeasureUtils.h"
 #include "DataLogger.h"
-#include "FIRFilter.h"
 
 // Definitions
 //
@@ -121,8 +120,6 @@ Boolean MEASURE_AC_StartProcess(Int16U Type, pInt16U pDFReason, pInt16U pProblem
 	//
 	ResultV = ResultI = 0;
 	State = ACPS_Ramp;
-	//
-	FIR_Reset();
 	
 	// Configure samplers
 	SS_ConfigureSensingCircuits(LimitCurrent, LimitVoltage);
@@ -344,8 +341,8 @@ void inline MEASURE_AC_DoSampling()
 	
 	SS_DoSampling();
 	
-	FIR_LoadValues(SS_Voltage, SS_Current);
-	FIR_Apply(&FilteredV, &FilteredI);
+	FilteredV = SS_Voltage;
+	FilteredI = SS_Current;
 	
 	tmp = _IQmpy(SSVoltageCoff, FilteredV);
 	tmp2 = _IQdiv(tmp, _IQ(1000.0f));

@@ -237,9 +237,6 @@ ISRCALL Timer0_ISR(void)
 	// Do control cycle
 	CONTROL_RealTimeCycle();
 
-	// Handle IBP timeouts
-	IBP_HighSpeedTimeoutCycle();
-
 	// allow other interrupts from group 1
 	TIMER0_ISR_DONE;
 }

@@ -12,7 +12,6 @@
 
 // Constants
 #define SAMPLE_LENGTH					16
-static const pInt16U ResStartAddr = 	(pInt16U)0x0B00;
 static const Int16U ADCChannelVC[SAMPLE_LENGTH] = {AIN_V_CAP, AIN_V_CAP, AIN_V_CAP, AIN_V_CAP, AIN_V_CAP, AIN_V_CAP,
 		AIN_V_CAP, AIN_V_CAP, AIN_V_CAP, AIN_V_CAP, AIN_V_CAP, AIN_V_CAP, AIN_V_CAP, AIN_V_CAP, AIN_V_CAP, AIN_V_CAP};
 
@@ -29,6 +28,7 @@ Int16U PS_GetBatteryVoltage()
 	while(ZwADC_IsSEQ1Busy());
 
 	Int32U i, Result = 0;
+	pInt16U ResStartAddr = ZwADC_GetValues1();
 	for(i = 0; i < SAMPLE_LENGTH; i++)
 		Result += *(ResStartAddr + i);
 
