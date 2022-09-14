@@ -18,7 +18,6 @@
 #include "Global.h"
 #include "MeasureUtils.h"
 #include "DataLogger.h"
-#include "PowerDriver.h"
 #include "FIRFilter.h"
 
 // Definitions

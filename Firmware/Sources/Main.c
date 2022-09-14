@@ -1,4 +1,4 @@
-﻿// -----------------------------------------
+﻿// ----------------------------------------
 // Program entry point
 // ----------------------------------------
 
@@ -23,6 +23,7 @@ void InitializeADC();
 void InitializeSPI();
 void InitializeSCI();
 void InitializeCAN();
+void InitializePWM();
 void InitializeBoard();
 void InitializeController();
 // -----------------------------------------
@@ -37,8 +38,6 @@ ISRCALL Timer2_ISR();
 ISRCALL CAN0_ISR();
 // ADC SEQ1 ISR
 ISRCALL SEQ1_ISR();
-// EPWM3 TZ ISR
-ISRCALL PWM3_TZ_ISR();
 // SPI-A RX ISR
 ISRCALL SPIaRX_ISR();
 // ILLEGAL ISR
@@ -71,6 +70,7 @@ void main()
 	InitializeSPI();
 	InitializeSCI();
 	InitializeCAN();
+	InitializePWM();
 
 	// Setup ISRs
 	BEGIN_ISR_MAP
@@ -78,7 +78,6 @@ void main()
 		ADD_ISR(TINT2, Timer2_ISR);
 		ADD_ISR(ECAN0INTA, CAN0_ISR);
 		ADD_ISR(SEQ1INT, SEQ1_ISR);
-		ADD_ISR(EPWM3_TZINT, PWM3_TZ_ISR);
 		ADD_ISR(SPIRXINTA, SPIaRX_ISR);
 		ADD_ISR(ILLEGAL, IllegalInstruction_ISR);
 	END_ISR_MAP
@@ -210,11 +209,15 @@ void InitializeCAN()
 }
 // -----------------------------------------
 
+void InitializePWM()
+{
+	ZwPWMB_InitBridge12(CPU_FRQ, PWM_FREQUENCY, 0, 0, 0, PWM_SATURATION);
+}
+// -----------------------------------------
+
 void InitializeBoard()
 {
-	// Init board GPIO
    	ZbGPIO_Init();
-   	// Init EPROM & SRAM
    	ZbMemory_Init();
 }
 // -----------------------------------------
@@ -232,7 +235,6 @@ void InitializeController()
 	#pragma CODE_SECTION(Timer2_ISR, "ramfuncs");
 	#pragma CODE_SECTION(CAN0_ISR, "ramfuncs");
 	#pragma CODE_SECTION(SEQ1_ISR, "ramfuncs");
-	#pragma CODE_SECTION(PWM3_TZ_ISR, "ramfuncs");
 	#pragma CODE_SECTION(SPIaRX_ISR, "ramfuncs");
 	#pragma CODE_SECTION(IllegalInstruction_ISR, "ramfuncs");
 #endif
@@ -304,24 +306,6 @@ ISRCALL CAN0_ISR(void)
 }
 // -----------------------------------------
 
-// EPWM3 TZ ISR
-ISRCALL PWM3_TZ_ISR(void)
-{
-	DINT;
-
-	// Shutdown bridge
-	ZwPWMB_SetValue12(0);
-	// Notify controller
-	CONTROL_RequestStop(DF_BRIDGE_SHORT, TRUE);
-	ZwPWM3_ProcessTZInterrupt();
-
-	// allow other interrupts from group 2
-	PWM_TZ_ISR_DONE;
-
-	EINT;
-}
-// -----------------------------------------
-
 ISRCALL SPIaRX_ISR()
 {
 	// Handle interrupt
@@ -347,5 +331,3 @@ ISRCALL IllegalInstruction_ISR(void)
 	ZwSystem_ForceDog();
 }
 // -----------------------------------------
-
-// No more.

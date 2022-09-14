@@ -14,7 +14,6 @@
 #include "DeviceProfile.h"
 #include "MemoryBuffers.h"
 #include "IQmathUtils.h"
-#include "PowerDriver.h"
 #include "PrimarySampling.h"
 #include "SecondarySampling.h"
 #include "MeasureUtils.h"
@@ -105,12 +104,6 @@ void CONTROL_Init()
 	// Reset control values
 	DEVPROFILE_ResetControlSection();
 
-	// Calibrate ADC
-	ZwADC_CalibrateLO(AIN_LO);
-
-	// Enable driver
-	DRIVER_Init();
-
 	// Use quadratic correction for block
 	DataTable[REG_QUADRATIC_CORR] = 1;
 
@@ -159,15 +152,6 @@ void CONTROL_UpdateLow()
 
 static void CONTROL_UpdateIdle()
 {
-	// Monitoring bridge temperature
-	if(DBG_USE_TEMP_MON && DRIVER_ReadTemperatureFault())
-	{
-		if(CONTROL_State == DS_InProcess)
-			CONTROL_RequestStop(DF_TEMP_MON, FALSE);
-
-		if(CONTROL_State == DS_Powered)
-			CONTROL_SwitchStateToFault(DF_TEMP_MON);
-	}
 }
 // ----------------------------------------
 
@@ -204,9 +188,6 @@ void CONTROL_SubcribeToCycle(CONTROL_FUNC_RealTimeRoutine Routine)
 #endif
 void CONTROL_RequestStop(Int16U Reason, Boolean HWSignal)
 {
-	if(HWSignal)
-		DRIVER_EnableTZandInt(FALSE);
-
 	ZbGPIO_SwitchIndicator(FALSE);
 
 	// Call stop process or switch to fault immediately
@@ -230,8 +211,6 @@ void CONTROL_RequestStop(Int16U Reason, Boolean HWSignal)
 
 		CONTROL_RequestDPC(&CONTROL_EndPassiveDPC);
 	}
-
-	DRIVER_ClearTZFault();
 }
 // ----------------------------------------
 
@@ -292,7 +271,6 @@ static void CONTROL_EndTestDPC()
 	CurrentMeasurementType = MEASUREMENT_TYPE_NONE;
 
 	CONTROL_ReInitSPI_Rx();
-	DRIVER_ClearTZFault();
 }
 // ----------------------------------------
 
@@ -332,12 +310,8 @@ static void CONTROL_SetDeviceState(DeviceState NewState)
 
 static void CONTROL_SwitchStateToNone()
 {
-	// Switch off TZ interrupt
-	DRIVER_EnableTZandInt(FALSE);
 	// Switch off LED indicator
 	ZbGPIO_SwitchIndicator(FALSE);
-	// Switch off power supply
-	DRIVER_SwitchPower(FALSE, FALSE);
 
 	DataTable[REG_FAULT_REASON] = DF_NONE;
 	CONTROL_SetDeviceState(DS_None);
@@ -351,8 +325,6 @@ static void CONTROL_SwitchStateToPowered()
 {
 	ZbGPIO_SwitchIndicator(FALSE);
 
-	// Enable power and protection signals
-	DRIVER_EnableTZandInt(TRUE);
 	// Configure monitor
 	PSAMPLING_ConfigureSamplingVCap();
 	CONTROL_SetDeviceState(DS_Powered);
@@ -374,9 +346,7 @@ static void CONTROL_SwitchStateToInProcess()
 static void CONTROL_SwitchStateToFault(Int16U FaultReason)
 {
 	// Switch off TZ interrupt
-	DRIVER_EnableTZandInt(FALSE);
 	ZbGPIO_SwitchIndicator(FALSE);
-	DRIVER_SwitchPower(FALSE, FALSE);
 
 	DataTable[REG_FAULT_REASON] = FaultReason;
 	CONTROL_SetDeviceState(DS_Fault);
@@ -389,7 +359,6 @@ static void CONTROL_SwitchStateToFault(Int16U FaultReason)
 static void CONTROL_SwitchStateToDisabled(Int16U DisableReason)
 {
 	// Switch off TZ interrupt
-	DRIVER_EnableTZandInt(FALSE);
 	ZbGPIO_SwitchIndicator(FALSE);
 
 	DataTable[REG_DISABLE_REASON] = DisableReason;
@@ -408,7 +377,6 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U UserError)
 			{
 				if(CONTROL_State == DS_None)
 				{
-					DRIVER_SwitchPower(TRUE, TRUE);
 					CONTROL_SwitchStateToPowered();
 				}
 				else
@@ -577,7 +545,6 @@ static void CONTROL_StartSequence()
 	ZbGPIO_SwitchIndicator(TRUE);
 
 	CurrentMeasurementType = DataTable[REG_MEASUREMENT_TYPE];
-	DRIVER_ClearTZFault();
 	CONTROL_SwitchStateToInProcess();
 
 	CONTROL_BatteryVoltagePrepare();
@@ -610,7 +577,6 @@ static void CONTROL_BatteryVoltagePrepare()
 			}
 			else
 			{
-				DRIVER_SwitchPower(TRUE, FALSE);
 				CONTROL_BatteryVoltageReady(DataTable[REG_ACTUAL_PRIM_VOLTAGE]);
 			}
 		}
@@ -620,7 +586,6 @@ static void CONTROL_BatteryVoltagePrepare()
 
 static void CONTROL_BatteryVoltageConfig(Boolean DriverParam1, Boolean DriverParam2, BatteryVoltageState NewState)
 {
-	DRIVER_SwitchPower(DriverParam1, DriverParam2);
 	CONTROL_Battery = NewState;
 	CONTROL_BatteryTimeout = CONTROL_TimeCounter + BAT_CHARGE_TIMEOUT;
 	CONTROL_RequestDPC(&CONTROL_BatteryVoltageCheck);
@@ -644,7 +609,6 @@ static void CONTROL_BatteryVoltageCheck()
 			{
 				if (DataTable[REG_ACTUAL_PRIM_VOLTAGE] <= (DataTable[REG_PRIM_V_LOW_RANGE] + CAP_DELTA))
 				{
-					DRIVER_SwitchPower(TRUE, FALSE);
 					CONTROL_BatteryVoltageReady(DataTable[REG_ACTUAL_PRIM_VOLTAGE]);
 				}
 			}
