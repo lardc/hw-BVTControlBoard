@@ -62,7 +62,6 @@ static Boolean InvertPolarity;
 static Int16S PrevDuty;
 static Int16U AmplitudePeriodCounter;
 static Int16U Problem, Warning, Fault;
-#pragma DATA_SECTION(PeakDetectorData, "data_mem");
 static DataSampleIQ PeakDetectorData[PEAK_DETECTOR_SIZE], PeakSample;
 static Int16U PeakDetectorCounter;
 //
