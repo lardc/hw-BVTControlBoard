@@ -1,95 +1,76 @@
-﻿// -----------------------------------------
+﻿// ----------------------------------------
 // Communication with secondary side
 // ----------------------------------------
 
 // Header
 #include "SecondarySampling.h"
-//
+
 // Includes
 #include "ZwDSP.h"
-#include "SysConfig.h"
 #include "DeviceObjectDictionary.h"
-#include "InterboardProtocol.h"
-#include "Global.h"
-#include "Controller.h"
 #include "DataTable.h"
+#include "Controller.h"
+#include "SysConfig.h"
 
+// Definitions
+#define IBP_GET_DATA				1
+#define IBP_CMD_CFG_SWITCH			2
+#define IBP_CMD_PING				3
+
+#define WAIT_DELAY					(3 * 1000000L / (SPIB_BAUDRATE / IBP_CHAR_SIZE / IBP_PACKET_SIZE))
 
 // Variables
-//
-_iq SS_Voltage = 0, SS_Current = 0;
-Boolean SS_DataValid = FALSE;
-//
-Int16U InputBuffer[IBP_PACKET_SIZE];
-//
-static volatile Boolean SamplingActive = FALSE;
+static Boolean RxAck;
+Int16U SS_Voltage, SS_Current;
+static Int16U InputBuffer[IBP_PACKET_SIZE];
 
+// Forward function
+Boolean SS_SendX(Int16U Header, Int16U Data, Boolean WaitAck);
 
 // Functions
-//
-void SS_ConfigureSensingCircuits(_iq CurrentSet, _iq VoltageSet)
+#ifdef BOOT_FROM_FLASH
+	#pragma CODE_SECTION(SS_SendX, "ramfuncs");
+#endif
+Boolean SS_SendX(Int16U Header, Int16U Data, Boolean WaitAck)
 {
-	Int16U tmp, cmdBuffer[IBP_PACKET_SIZE] = { 0 };
+	static Int16U Buffer[IBP_PACKET_SIZE];
 
-	// Voltage configuration
-	cmdBuffer[0] = (IBP_PACKET_START_BYTE << 8) | IBP_CMD_SET_ADC;
+	Buffer[0] = (IBP_PACKET_START_BYTE << 8) | Header;
+	Buffer[1] = Data;
+	if(WaitAck)
+		RxAck = FALSE;
+	ZwSPIb_BeginReceive(Buffer, IBP_PACKET_SIZE, IBP_CHAR_SIZE, STTStream);
 
-	if (CurrentSet <= HVD_IL_TH)
-		tmp = CurrentInput_Low;
-	else if (CurrentSet <= HVD_IH_TH)
-		tmp = CurrentInput_High;
-	else
-		tmp = CurrentInput_High2;
-	cmdBuffer[1] |= tmp;
+	if(WaitAck)
+		DELAY_US(WAIT_DELAY);
 
-	if (VoltageSet < HVD_VL_TH)
-		tmp = VoltageInput_Low;
-	else
-		tmp = VoltageInput_High;
-	cmdBuffer[1] |= tmp << 8;
-
-	IBP_SendData(cmdBuffer, TRUE);
+	return RxAck;
 }
 // ----------------------------------------
 
-void SS_StartSampling()
+Boolean SS_GetData(Boolean WaitAck)
 {
-	Int16U cmdBuffer[IBP_PACKET_SIZE] = { (IBP_PACKET_START_BYTE << 8) | IBP_CMD_SAMPLING, TRUE, 0, 0 };
-
-	IBP_SendData(cmdBuffer, TRUE);
-	SamplingActive = TRUE;
+	return SS_SendX(IBP_GET_DATA, 0, WaitAck);
 }
 // ----------------------------------------
 
-void SS_StopSampling()
+Boolean SS_SelectShunt(SwitchConfig Config)
 {
-	Int16U cmdBuffer[IBP_PACKET_SIZE] = { (IBP_PACKET_START_BYTE << 8) | IBP_CMD_SAMPLING, FALSE, 0, 0 };
-
-	IBP_SendData(cmdBuffer, TRUE);
-	SamplingActive = FALSE;
-}
-// ----------------------------------------
-
-void SS_Dummy(Boolean UseTimeout)
-{
-	Int16U cmdBuffer[IBP_PACKET_SIZE] = { (IBP_PACKET_START_BYTE << 8) | IBP_CMD_DUMMY, 0, 0, 0 };
-
-	IBP_SendData(cmdBuffer, UseTimeout);
+	return SS_SendX(IBP_CMD_CFG_SWITCH, Config, TRUE);
 }
 // ----------------------------------------
 
 Boolean SS_Ping()
 {
-	SS_DataValid = FALSE;
-	SamplingActive = TRUE;
+	return SS_SendX(IBP_CMD_PING, 0, TRUE);
+}
+// ----------------------------------------
 
-	SS_Dummy(FALSE);
-	DELAY_US(1000);
-	SS_DoSampling();
-	DELAY_US(1000);
-
-	SamplingActive = FALSE;
-	return SS_DataValid;
+void SS_GetLastMessage()
+{
+	Int16U i;
+	for(i = 0; i < IBP_PACKET_SIZE; i++)
+		DataTable[REG_DIAG_DIGI_PACKET_B1 + i] = InputBuffer[i];
 }
 // ----------------------------------------
 
@@ -103,22 +84,24 @@ void SS_HandleSlaveTransmission()
 		ZwSPIa_EndReceive(InputBuffer, IBP_PACKET_SIZE);
 
 		// Check header
-		if (((InputBuffer[0] >> 8) == IBP_PACKET_START_BYTE) &&
-			((InputBuffer[0] & 0x00FF) == IBP_ACK || (InputBuffer[0] & 0x00FF) == IBP_GET_DATA))
+		if((InputBuffer[0] >> 8) == IBP_PACKET_START_BYTE)
 		{
-			if ((InputBuffer[0] & 0x00FF) == IBP_ACK)
-				IBP_SubcribeToTimeoutCycle(NULL);
-
-			if (SamplingActive)
+			switch(InputBuffer[0] & 0x00FF)
 			{
-				// | Current (24 bit)			|	Voltage (24 bit)		|
-				// ||		16		||		8	|	8		||		16		||
-				SS_Current = ((Int32U)InputBuffer[1]) << 16;
-				SS_Current |= ((Int16U)InputBuffer[2]) & 0xFF00;
-				SS_Voltage = ((Int32U)InputBuffer[2]) << 24;
-				SS_Voltage |= ((Int32U)InputBuffer[3]) << 8;
+				case IBP_GET_DATA:
+					RxAck = TRUE;
+					SS_Voltage = InputBuffer[1];
+					SS_Current = InputBuffer[2];
+					CONTROL_RealTimeCycle();
+					break;
 
-				SS_DataValid = TRUE;
+				case IBP_CMD_CFG_SWITCH:
+				case IBP_CMD_PING:
+					RxAck = TRUE;
+					break;
+
+				default:
+					break;
 			}
 		}
 		else
@@ -131,5 +114,3 @@ void SS_HandleSlaveTransmission()
 	}
 }
 // ----------------------------------------
-
-// No more.

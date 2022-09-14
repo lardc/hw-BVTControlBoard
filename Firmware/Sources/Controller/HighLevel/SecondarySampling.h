@@ -1,4 +1,4 @@
-﻿// -----------------------------------------
+﻿// ----------------------------------------
 // Communication with secondary side
 // ----------------------------------------
 
@@ -7,40 +7,31 @@
 
 // Include
 #include "stdinc.h"
-//
-#include "ZwDSP.h"
-#include "InterboardProtocol.h"
-#include "Global.h"
+
+// Enums
+typedef enum __SwitchConfig
+{
+	SwitchConfig_I1 = 0,
+	SwitchConfig_I2,
+	SwitchConfig_I3
+} SwitchConfig;
+
+// Definitions
+// Protocol
+#define IBP_PACKET_START_BYTE		0xA6u
+#define IBP_HEADER_SIZE				1
+#define IBP_BODY_SIZE				2
+#define IBP_PACKET_SIZE				(IBP_HEADER_SIZE + IBP_BODY_SIZE)
+#define IBP_CHAR_SIZE				16
 
 // Variables
-//
-extern _iq SS_Current, SS_Voltage;
-extern Boolean SS_DataValid;
+extern Int16U SS_Voltage, SS_Current;
 
 // Functions
-//
-// Configure current and voltage sensing
-void SS_ConfigureSensingCircuits(_iq CurrentSet, _iq VoltageSet);
-// Start sampling
-void SS_StartSampling();
-// Stop sampling
-void SS_StopSampling();
-// Handle slave packet
-void SS_HandleSlaveTransmission();
-// Dummy command to finalize command set
-void SS_Dummy(Boolean UseTimeout);
-// Ping digitizer
+Boolean SS_GetData(Boolean WaitAck);
+Boolean SS_SelectShunt(SwitchConfig Config);
 Boolean SS_Ping();
-
-// Inline function
-//
-void inline SS_DoSampling()
-{
-	Int16U SPIBuffer[IBP_PACKET_SIZE] = { (IBP_PACKET_START_BYTE << 8) | IBP_GET_DATA, 0, 0, 0 };
-
-	// Send data to slave
-	IBP_SendData(SPIBuffer, FALSE);
-}
-// ----------------------------------------
+void SS_GetLastMessage();
+void SS_HandleSlaveTransmission();
 
 #endif // __SECONDARY_SAMPLING_H

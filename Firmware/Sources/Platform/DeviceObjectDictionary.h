@@ -9,10 +9,9 @@
 #define ACT_CLR_FAULT				3	// Clear fault (try switch state from FAULT to NONE)
 #define ACT_CLR_WARNING				4	// Clear warning flag
 //
+#define ACT_DBG_DIGI_GET_PACKET		10	// Считать последний принятый пакет от HVDigitizer
 #define ACT_DBG_DIGI_PING			11	// Ping optical connection
-#define ACT_DBG_DIGI_START_SMPL		12	// Digitizer start sampling
-#define ACT_DBG_DIGI_STOP_SMPL		13	// Digitizer stop sampling
-#define ACT_DBG_PULSE_SWITCH		14	// Pulse discharge switch
+#define ACT_DBG_DIGI_SAMPLE			12	// Request ADC sample
 //
 #define ACT_START_TEST				100	// Start test with defined parameters
 #define ACT_STOP					101	// Stop test sequence
@@ -129,7 +128,10 @@
 #define REG_CAN_DIAG_REC			224	// CAN REC
 #define REG_SPI_RX_RESETS			225	// Counter for SPI Rx resets
 //
-#define REG_DIAG_PING_RESULT		250	// Digitizer ping result
+#define REG_DIAG_DIGI_RESULT		230	// Результат выполнения команды по оптическому интерфейсу
+#define REG_DIAG_DIGI_PACKET_B1		231	// Байт 1 пакета, полученного от HVDigitizer
+#define REG_DIAG_DIGI_PACKET_B2		232	// Байт 2 пакета, полученного от HVDigitizer
+#define REG_DIAG_DIGI_PACKET_B3		233	// Байт 3 пакета, полученного от HVDigitizer
 //
 #define REG_QUADRATIC_CORR			254	// Use quadratic correction for block
 //

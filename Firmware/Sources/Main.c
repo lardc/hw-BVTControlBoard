@@ -7,11 +7,8 @@
 //
 #include "ZwDSP.h"
 #include "ZbBoard.h"
-//
 #include "SysConfig.h"
-//
 #include "Controller.h"
-#include "InterboardProtocol.h"
 #include "SecondarySampling.h"
 
 
@@ -170,13 +167,13 @@ void InitializeSCI()
 void InitializeSPI()
 {
 	// Init master optical transmitter interface
-	ZwSPIb_Init(TRUE, SPIB_BAUDRATE, 16, SPIB_PLR, SPIB_PHASE, ZW_SPI_INIT_TX, FALSE, FALSE);
+	ZwSPIb_Init(TRUE, SPIB_BAUDRATE, IBP_CHAR_SIZE, SPIB_PLR, SPIB_PHASE, ZW_SPI_INIT_TX, FALSE, FALSE);
 	ZwSPIb_InitFIFO(0, 0);
 	ZwSPIb_ConfigInterrupts(FALSE, FALSE);
 	ZwSPIb_EnableInterrupts(FALSE, FALSE);
 
 	// Init master optical receiver interface
-	ZwSPIa_Init(FALSE, 0, 16, SPIA_PLR, SPIA_PHASE, ZW_SPI_INIT_RX, FALSE, FALSE);
+	ZwSPIa_Init(FALSE, 0, IBP_CHAR_SIZE, SPIA_PLR, SPIA_PHASE, ZW_SPI_INIT_RX, FALSE, FALSE);
 	ZwSPIa_InitFIFO(IBP_PACKET_SIZE, 0);
 	ZwSPIa_ConfigInterrupts(TRUE, FALSE);
 	ZwSPIa_EnableInterrupts(TRUE, FALSE);
@@ -234,8 +231,8 @@ void InitializeController()
 
 ISRCALL Timer0_ISR(void)
 {
-	// Do control cycle
-	CONTROL_RealTimeCycle();
+	// Request sample
+	SS_GetData(FALSE);
 
 	// allow other interrupts from group 1
 	TIMER0_ISR_DONE;

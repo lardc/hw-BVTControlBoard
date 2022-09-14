@@ -91,6 +91,7 @@ void CONTROL_Init()
 	DEVPROFILE_ResetControlSection();
 
 	PS_Init();
+	SS_Ping();
 
 	// Use quadratic correction for block
 	DataTable[REG_QUADRATIC_CORR] = 1;
@@ -350,6 +351,7 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U UserError)
 					*UserError = ERR_DEVICE_NOT_READY;
 			}
 			break;
+
 		case ACT_DISABLE_POWER:
 			{
 				if(CONTROL_State == DS_InProcess || CONTROL_State == DS_Stopping)
@@ -358,6 +360,7 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U UserError)
 					CONTROL_SwitchStateToNone();
 			}
 			break;
+
 		case ACT_START_TEST:
 			{
 				if(CONTROL_State == DS_InProcess || CONTROL_State == DS_Stopping)
@@ -381,6 +384,7 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U UserError)
 					*UserError = ERR_DEVICE_NOT_READY;
 			}
 			break;
+
 		case ACT_STOP:
 			{
 				if(CONTROL_State == DS_InProcess)
@@ -390,6 +394,7 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U UserError)
 				}
 			}
 			break;
+
 		case ACT_READ_FRAGMENT:
 			{
 				DEVPROFILE_ResetScopes(0, IND_EP_I | IND_EP_V);
@@ -404,11 +409,13 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U UserError)
 					MU_LoadDataFragment();
 			}
 			break;
+
 		case ACT_READ_MOVE_BACK:
 			{
 				MU_SeekScopeBack(DataTable[REG_DBG_READ_XY_FRAGMENT]);
 			}
 			break;
+
 		case ACT_CLR_FAULT:
 			{
 				if(CONTROL_State == DS_Fault)
@@ -424,37 +431,32 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U UserError)
 
 			}
 			break;
+
 		case ACT_CLR_WARNING:
 			DataTable[REG_WARNING] = WARNING_NONE;
 			break;
+
+		case ACT_DBG_DIGI_GET_PACKET:
+			if(CONTROL_State == DS_None)
+				SS_GetLastMessage();
+			else
+				*UserError = ERR_OPERATION_BLOCKED;
+			break;
+
 		case ACT_DBG_DIGI_PING:
 			if(CONTROL_State == DS_None)
-				DataTable[REG_DIAG_PING_RESULT] = SS_Ping() ? 1 : 0;
+				DataTable[REG_DIAG_DIGI_RESULT] = SS_Ping() ? 1 : 0;
 			else
 				*UserError = ERR_OPERATION_BLOCKED;
 			break;
-		case ACT_DBG_DIGI_START_SMPL:
+
+		case ACT_DBG_DIGI_SAMPLE:
 			if(CONTROL_State == DS_None)
-				SS_StartSampling();
+				DataTable[REG_DIAG_DIGI_RESULT] = SS_GetData(TRUE) ? 1 : 0;
 			else
 				*UserError = ERR_OPERATION_BLOCKED;
 			break;
-		case ACT_DBG_DIGI_STOP_SMPL:
-			if(CONTROL_State == DS_None)
-				SS_StopSampling();
-			else
-				*UserError = ERR_OPERATION_BLOCKED;
-			break;
-		case ACT_DBG_PULSE_SWITCH:
-			if(CONTROL_State == DS_None)
-			{
-				ZwGPIO_WritePin(PIN_POWER_EN3, TRUE);
-				DELAY_US(1000000);
-				ZwGPIO_WritePin(PIN_POWER_EN3, FALSE);
-			}
-			else
-				*UserError = ERR_OPERATION_BLOCKED;
-			break;
+
 		default:
 			return FALSE;
 	}
@@ -466,7 +468,7 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U UserError)
 void CONTROL_ReInitSPI_Rx()
 {
 	// Init master optical receiver interface
-	ZwSPIa_Init(FALSE, 0, 16, SPIA_PLR, SPIA_PHASE, ZW_SPI_INIT_RX, TRUE, FALSE);
+	ZwSPIa_Init(FALSE, 0, IBP_CHAR_SIZE, SPIA_PLR, SPIA_PHASE, ZW_SPI_INIT_RX, TRUE, FALSE);
 }
 // -----------------------------------------
 
@@ -479,7 +481,7 @@ static void CONTROL_TriggerMeasurementDPC()
 
 	// Re-init RX SPI channel and send dummy request
 	CONTROL_ReInitSPI_Rx();
-	SS_Dummy(FALSE);
+	//SS_Dummy(FALSE);
 	DELAY_US(10);
 
 	switch(CurrentMeasurementType)

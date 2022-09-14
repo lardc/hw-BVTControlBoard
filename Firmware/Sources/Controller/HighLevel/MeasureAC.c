@@ -122,10 +122,10 @@ Boolean MEASURE_AC_StartProcess(Int16U Type, pInt16U pDFReason, pInt16U pProblem
 	State = ACPS_Ramp;
 	
 	// Configure samplers
-	SS_ConfigureSensingCircuits(LimitCurrent, LimitVoltage);
+	//SS_ConfigureSensingCircuits(LimitCurrent, LimitVoltage);
 	// Start sampling
-	SS_StartSampling();
-	SS_Dummy(TRUE);
+	//SS_StartSampling();
+	//SS_Dummy(TRUE);
 	
 	// Enable PWM generation
 	ZwPWMB_SetValue12(0);
@@ -140,8 +140,8 @@ Boolean MEASURE_AC_StartProcess(Int16U Type, pInt16U pDFReason, pInt16U pProblem
 
 void MEASURE_AC_FinishProcess()
 {
-	SS_StopSampling();
-	SS_Dummy(TRUE);
+	//SS_StopSampling();
+	//SS_Dummy(TRUE);
 	
 	CONTROL_SwitchRTCycle(FALSE);
 }
@@ -339,7 +339,7 @@ void inline MEASURE_AC_DoSampling()
 	_iq tmp, tmp2;
 	_iq FilteredV, FilteredI;
 	
-	SS_DoSampling();
+	//SS_DoSampling();
 	
 	FilteredV = SS_Voltage;
 	FilteredI = SS_Current;
@@ -373,6 +373,7 @@ static void MEASURE_AC_HandleVI()
 	// Connectivity monitoring
 	if(OptoConnectionMonMax && DBG_USE_OPTO_TIMEOUT)
 	{
+		/*
 		if(!SS_DataValid)
 		{
 			if(OptoConnectionMon++ >= OptoConnectionMonMax)
@@ -383,6 +384,7 @@ static void MEASURE_AC_HandleVI()
 			SS_DataValid = FALSE;
 			OptoConnectionMon = 0;
 		}
+		*/
 	}
 	
 	// Assign voltage and current values
