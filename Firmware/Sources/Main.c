@@ -97,10 +97,6 @@ void main()
 	// Start timers
 	ZwTimer_StartT2();
 
-	// Re-init SPI
-	DELAY_US(MSC_PON_SPI_RST * 1000L);
-	CONTROL_ReInitSPI_Rx();
-
 	// Background cycle
 	while(TRUE)
 		CONTROL_Idle();

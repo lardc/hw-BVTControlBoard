@@ -29,7 +29,9 @@
 
 // REGISTERS
 //
-// 0 - 19
+#define REG_RAW_ZERO_SVOLTAGE		0	// Значение нулевого уровня канала напряжения в тиках оцифровки
+#define REG_RAW_ZERO_SCURRENT		1	// Значение нулевого уровня канала тока в тиках оцифровки
+// 2 - 19
 #define REG_CAP_V_COFF_N			20	// Capacitor voltage coefficient (N)
 #define REG_CAP_V_COFF_D			21	// Capacitor voltage coefficient (D)
 // 22 - 23
@@ -85,8 +87,7 @@
 //
 // ----------------------------------------
 //
-#define REG_MEASUREMENT_TYPE		128	// Measurement type
-#define REG_MEASUREMENT_MODE		129	// Measurement mode (V-mode or I-mode)
+// 128 - 129
 #define REG_LIMIT_CURRENT			130	// Threshold current (in mA * 10)
 #define REG_LIMIT_VOLTAGE			131	// Maximum or test voltage (in V)
 #define REG_VOLTAGE_PLATE_TIME		132	// Voltage plate time in AC measurement mode (in ms)

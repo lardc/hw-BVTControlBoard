@@ -42,9 +42,7 @@ volatile DeviceState CONTROL_State = DS_None;
 static CONTROL_FUNC_RealTimeRoutine RealTimeRoutine = NULL;
 static EndTestDPCClosure EndXDPCArgument = { FALSE, 0, 0, DF_NONE, WARNING_NONE, PROBLEM_NONE };
 //
-static volatile Boolean CycleActive = FALSE, BatteryVoltageIsReady;
 static volatile FUNC_AsyncDelegate DPCDelegate = NULL;
-static volatile Int16U CurrentMeasurementType = MEASUREMENT_TYPE_NONE;
 //
 // Boot-loader flag
 #pragma DATA_SECTION(CONTROL_BootLoaderRequest, "bl_flag");
@@ -52,17 +50,13 @@ volatile Int16U CONTROL_BootLoaderRequest = 0;
 
 // Forward functions
 //
-static void CONTROL_FillWPPartDefault();
-static void CONTROL_SetDeviceState(DeviceState NewState);
-static void CONTROL_SwitchStateToPowered();
-static void CONTROL_SwitchStateToInProcess();
-static void CONTROL_SwitchStateToFault(Int16U FaultReason);
-static void CONTROL_SwitchStateToDisabled(Int16U DisableReason);
-static void CONTROL_TriggerMeasurementDPC();
-static void CONTROL_EndTestDPC();
-static void CONTROL_EndPassiveDPC();
-static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U UserError);
-static void CONTROL_StartSequence();
+void CONTROL_ResetValues();
+void CONTROL_SetDeviceState(DeviceState NewState);
+void CONTROL_SwitchStateToFault(Int16U FaultReason);
+void CONTROL_EndTestDPC();
+void CONTROL_EndPassiveDPC();
+Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U UserError);
+void CONTROL_StartSequence();
 
 // Functions
 //
@@ -81,11 +75,13 @@ void CONTROL_Init()
 	// Init data table
 	DT_Init(EPROMService, FALSE);
 	DT_SaveFirmwareInfo(DEVICE_CAN_ADDRESS, 0);
+
 	// Fill state variables with default values
-	CONTROL_FillWPPartDefault();
+	CONTROL_ResetValues();
 
 	// Device profile initialization
-	DEVPROFILE_Init(&CONTROL_DispatchAction, &CycleActive);
+	Boolean MaskChanges = FALSE;
+	DEVPROFILE_Init(&CONTROL_DispatchAction, &MaskChanges);
 	DEVPROFILE_InitEPService(EPIndexes, EPSized, EPCounters, EPDatas);
 	// Reset control values
 	DEVPROFILE_ResetControlSection();
@@ -158,21 +154,9 @@ void CONTROL_SubcribeToCycle(CONTROL_FUNC_RealTimeRoutine Routine)
 #endif
 void CONTROL_RequestStop(Int16U Reason, Boolean HWSignal)
 {
-	ZbGPIO_SwitchIndicator(FALSE);
-
-	// Call stop process or switch to fault immediately
 	if(CONTROL_State == DS_InProcess)
 	{
-		switch(CurrentMeasurementType)
-		{
-			case MEASUREMENT_TYPE_AC:
-			case MEASUREMENT_TYPE_AC_R:
-			case MEASUREMENT_TYPE_AC_D:
-				MEASURE_AC_Stop(Reason);
-				break;
-			default:
-				break;
-		}
+		MAC_Stop(Reason);
 	}
 	else if(HWSignal)
 	{
@@ -208,26 +192,12 @@ void CONTROL_NotifyCANFault(ZwCAN_SysFlags Flag)
 }
 // ----------------------------------------
 
-static void CONTROL_EndTestDPC()
+void CONTROL_EndTestDPC()
 {
-	switch(CurrentMeasurementType)
-	{
-		case MEASUREMENT_TYPE_AC:
-		case MEASUREMENT_TYPE_AC_R:
-		case MEASUREMENT_TYPE_AC_D:
-			MEASURE_AC_FinishProcess();
-			break;
-		default:
-			break;
-	}
+	MAC_FinishProcess();
 
 	if(EndXDPCArgument.SavedDFReason != DF_NONE)
-	{
-		if(EndXDPCArgument.SavedRequestToDisable)
-			CONTROL_SwitchStateToDisabled(EndXDPCArgument.SavedDFReason);
-		else
-			CONTROL_SwitchStateToFault(EndXDPCArgument.SavedDFReason);
-	}
+		CONTROL_SwitchStateToFault(EndXDPCArgument.SavedDFReason);
 	else
 	{
 		DataTable[REG_FINISHED] = (EndXDPCArgument.SavedProblem == PROBLEM_NONE) ? OPRESULT_OK : OPRESULT_FAIL;
@@ -235,25 +205,21 @@ static void CONTROL_EndTestDPC()
 		DataTable[REG_PROBLEM] = (EndXDPCArgument.SavedProblem == PROBLEM_OUTPUT_SHORT) ? PROBLEM_NONE : EndXDPCArgument.SavedProblem;
 		DataTable[REG_RESULT_V] = EndXDPCArgument.SavedResultV;
 		DataTable[REG_RESULT_I] = EndXDPCArgument.SavedResultI;
-		CONTROL_SwitchStateToPowered();
+		CONTROL_SetDeviceState(DS_Powered);
 	}
-
-	CurrentMeasurementType = MEASUREMENT_TYPE_NONE;
 
 	CONTROL_ReInitSPI_Rx();
 }
 // ----------------------------------------
 
-static void CONTROL_EndPassiveDPC()
+void CONTROL_EndPassiveDPC()
 {
 	if(EndXDPCArgument.SavedRequestToDisable)
-		CONTROL_SwitchStateToDisabled(EndXDPCArgument.SavedDFReason);
-	else
 		CONTROL_SwitchStateToFault(EndXDPCArgument.SavedDFReason);
 }
 // ----------------------------------------
 
-static void CONTROL_FillWPPartDefault()
+void CONTROL_ResetValues()
 {
 	// Set volatile states
 	DataTable[REG_DEV_STATE] = (Int16U)DS_None;
@@ -270,74 +236,23 @@ static void CONTROL_FillWPPartDefault()
 }
 // ----------------------------------------
 
-static void CONTROL_SetDeviceState(DeviceState NewState)
+void CONTROL_SetDeviceState(DeviceState NewState)
 {
-	// Set new state
+	ZbGPIO_SwitchIndicator(NewState == DS_InProcess);
+
 	CONTROL_State = NewState;
 	DataTable[REG_DEV_STATE] = NewState;
 }
 // ----------------------------------------
 
-static void CONTROL_SwitchStateToNone()
+void CONTROL_SwitchStateToFault(Int16U FaultReason)
 {
-	// Switch off LED indicator
-	ZbGPIO_SwitchIndicator(FALSE);
-
-	DataTable[REG_FAULT_REASON] = DF_NONE;
-	CONTROL_SetDeviceState(DS_None);
-
-	// Mark cycle inactive
-	CycleActive = FALSE;
-}
-// ----------------------------------------
-
-static void CONTROL_SwitchStateToPowered()
-{
-	ZbGPIO_SwitchIndicator(FALSE);
-
-	CONTROL_SetDeviceState(DS_Powered);
-
-	// Mark cycle inactive
-	CycleActive = FALSE;
-}
-// ----------------------------------------
-
-static void CONTROL_SwitchStateToInProcess()
-{
-	// Mark cycle active
-	CycleActive = TRUE;
-
-	CONTROL_SetDeviceState(DS_InProcess);
-}
-// ----------------------------------------
-
-static void CONTROL_SwitchStateToFault(Int16U FaultReason)
-{
-	// Switch off TZ interrupt
-	ZbGPIO_SwitchIndicator(FALSE);
-
 	DataTable[REG_FAULT_REASON] = FaultReason;
 	CONTROL_SetDeviceState(DS_Fault);
-
-	// Mark cycle inactive
-	CycleActive = FALSE;
 }
 // ----------------------------------------
 
-static void CONTROL_SwitchStateToDisabled(Int16U DisableReason)
-{
-	// Switch off TZ interrupt
-	ZbGPIO_SwitchIndicator(FALSE);
-
-	DataTable[REG_DISABLE_REASON] = DisableReason;
-	CONTROL_SetDeviceState(DS_Disabled);
-
-	// Mark cycle inactive
-	CycleActive = FALSE;
-}
-// ----------------------------------------
-
-static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U UserError)
+Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U UserError)
 {
 	switch(ActionID)
 	{
@@ -345,7 +260,7 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U UserError)
 			{
 				if(CONTROL_State == DS_None)
 				{
-					CONTROL_SwitchStateToPowered();
+					CONTROL_SetDeviceState(DS_Powered);
 				}
 				else
 					*UserError = ERR_DEVICE_NOT_READY;
@@ -357,7 +272,7 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U UserError)
 				if(CONTROL_State == DS_InProcess || CONTROL_State == DS_Stopping)
 					*UserError = ERR_OPERATION_BLOCKED;
 				else if(CONTROL_State == DS_Powered)
-					CONTROL_SwitchStateToNone();
+					CONTROL_SetDeviceState(DS_None);
 			}
 			break;
 
@@ -390,7 +305,7 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U UserError)
 				if(CONTROL_State == DS_InProcess)
 				{
 					CONTROL_RequestDPC(NULL);
-					CONTROL_SwitchStateToPowered();
+					CONTROL_SetDeviceState(DS_Powered);
 				}
 			}
 			break;
@@ -421,7 +336,7 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U UserError)
 				if(CONTROL_State == DS_Fault)
 				{
 					CONTROL_ReInitSPI_Rx();
-					CONTROL_SwitchStateToNone();
+					CONTROL_SetDeviceState(DS_None);
 
 					DataTable[REG_WARNING] = WARNING_NONE;
 					DataTable[REG_FAULT_REASON] = DF_NONE;
@@ -472,40 +387,12 @@ void CONTROL_ReInitSPI_Rx()
 }
 // -----------------------------------------
 
-static void CONTROL_TriggerMeasurementDPC()
+void CONTROL_StartSequence()
 {
-	Boolean success = FALSE;
-	Int16U DFReason = DF_NONE, problem = PROBLEM_NONE;
-
 	MU_StartScope();
-
-	// Re-init RX SPI channel and send dummy request
-	CONTROL_ReInitSPI_Rx();
-	//SS_Dummy(FALSE);
-	DELAY_US(10);
-
-	switch(CurrentMeasurementType)
-	{
-		case MEASUREMENT_TYPE_AC:
-		case MEASUREMENT_TYPE_AC_D:
-		case MEASUREMENT_TYPE_AC_R:
-			success = MEASURE_AC_StartProcess(CurrentMeasurementType, &DFReason, &problem);
-			break;
-		default:
-			break;
-	}
-
-	if(!success)
-		CONTROL_NotifyEndTest(0, 0, DFReason, problem, WARNING_NONE);
-}
-// ----------------------------------------
-
-static void CONTROL_StartSequence()
-{
-	ZbGPIO_SwitchIndicator(TRUE);
-
-	CurrentMeasurementType = DataTable[REG_MEASUREMENT_TYPE];
-	CONTROL_SwitchStateToInProcess();
-	CONTROL_RequestDPC(&CONTROL_TriggerMeasurementDPC);
+	if(MAC_StartProcess())
+		CONTROL_SetDeviceState(DS_InProcess);
+	else
+		CONTROL_SwitchStateToFault(DF_OPTO_CON_ERROR);
 }
 // ----------------------------------------

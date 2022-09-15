@@ -1,4 +1,4 @@
-﻿// -----------------------------------------
+﻿// ----------------------------------------
 // Global definitions
 // ----------------------------------------
 
@@ -14,8 +14,8 @@
 //
 const TableItemConstraint NVConstraint[DATA_TABLE_NV_SIZE] =
 									  {
-											{0, 0, 0},																// 0
-											{0, 0, 0},																// 1
+											{0, INT16U_MAX, 0},														// 0
+											{0, INT16U_MAX, 0},														// 1
 											{0, 0, 0},																// 2
 											{0, 0, 0},																// 3
 											{0, 0, 0},																// 4
@@ -146,7 +146,7 @@ const TableItemConstraint NVConstraint[DATA_TABLE_NV_SIZE] =
 
 const TableItemConstraint VConstraint[DATA_TABLE_WP_START - DATA_TABLE_WR_START] =
 									 {
-											{MEASUREMENT_TYPE_NONE, MEASUREMENT_TYPE_TEST, MEASUREMENT_TYPE_AC_D},	// 128
+											{0, 0, 0},																// 128
 											{0, 1, 0},																// 129
 											{TEST_CURRENT_MIN, TEST_CURRENT_MAX, TEST_CURRENT_DEF},					// 130
 											{LIMIT_VOLTAGE_MIN, LIMIT_VOLTAGE_MAX, LIMIT_VOLTAGE_DEF},				// 131

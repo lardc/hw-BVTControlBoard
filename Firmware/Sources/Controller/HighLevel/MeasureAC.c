@@ -4,7 +4,7 @@
 
 // Header
 #include "MeasureAC.h"
-//
+
 // Includes
 #include "SysConfig.h"
 #include "ZwDSP.h"
@@ -20,12 +20,14 @@
 #include "DataLogger.h"
 
 // Definitions
-//
 #define PEAK_DETECTOR_SIZE			500
 #define PEAK_THR_COLLECT			_IQ(0.7f)
 
+#define SQROOT2						_IQ(1.4142f)
+#define SINE_FREQUENCY				50
+#define SINE_PERIOD_PULSES			(PWM_FREQUENCY / SINE_FREQUENCY)
+
 // Types
-//
 typedef enum __ACProcessState
 {
 	ACPS_None = 0,
@@ -36,17 +38,22 @@ typedef enum __ACProcessState
 } ACProcessState;
 
 // Variables
-//
+static Int16U RingBufferV[SINE_PERIOD_PULSES], RingBufferI[SINE_PERIOD_PULSES];
+static Int16U RingBufferPointer;
+static Boolean RingBufferFull;
+
+static Int16U TargetVrms, ControlTargetVrms, MaxSafePWM, RawZeroVoltage, RawZeroCurrent;
+static _iq TransAndPWMCoff;
+
 static Int32U TimeCounter, StartPauseTimeCounterTop;
 static Int32U VRateCounter, VRateCounterTop;
 static Int32U VPlateTimeCounter, VPlateTimeCounterTop, VPrePlateTimeCounter, VPrePlateTimeCounterTop;
 static Int32U BrakeTimeCounter, BrakeTimeCounterTop, FrequencyDivisorCounter, FrequencyDivisorCounterTop;
 static Int16U NormalizedPIdiv2Shift;
-static Int16S PeakShiftTicks;
 static Int16U OptoConnectionMon, OptoConnectionMonMax, CurrentMultiply;
 static Int16U FollowingErrorCounter;
-static Int16S MaxSafePWM, MinSafePWM, SSVoltageP2, SSCurrentP2;
-static _iq SSVoltageCoff, SSCurrentCoff, SSVoltageP1, SSVoltageP0, SSCurrentP1, SSCurrentP0, TransCoffInv, PWMCoff;
+static Int16S MinSafePWM, SSVoltageP2, SSCurrentP2;
+static _iq SSVoltageCoff, SSCurrentCoff, SSVoltageP1, SSVoltageP0, SSCurrentP1, SSCurrentP0;
 static _iq LimitCurrent, LimitCurrentHaltLevel, LimitVoltage, VoltageRateStep, NormalizedFrequency;
 static _iq KpVAC, KiVAC, SIVAerr;
 static _iq FollowingErrorFraction, FollowingErrorAbsolute;
@@ -68,26 +75,22 @@ static volatile ACProcessState State = ACPS_None;
 
 // Forward functions
 //
-static void MEASURE_AC_ControlCycle();
-static void MEASURE_AC_CCSub_CorrectionAndLog(Int16S ActualCorrection);
-static Int16S MEASURE_AC_CCSub_Regulator(Boolean *PeriodTrigger);
-//
-static void MEASURE_AC_CacheVariables();
-static Boolean MEASURE_AC_PIControllerSequence(_iq DesiredV);
-static Int16S MEASURE_AC_PredictControl(_iq DesiredV);
-static void MEASURE_AC_HandleVI();
-static void MEASURE_AC_HandleTripCondition(Boolean UsePeakValues);
-static void MEASURE_AC_HandleNonTripCondition();
-static _iq MEASURE_AC_GetCurrentLimit();
-static Boolean MEASURE_AC_PWMZeroDetector();
+static Int16S MAC_CalculatePWM();
+
+static void MAC_ControlCycle();
+static void MAC_CCSub_CorrectionAndLog(Int16S ActualCorrection);
+static void MAC_CacheVariables();
+static Boolean MAC_PIControllerSequence(_iq DesiredV);
+static void MAC_HandleVI();
+static void MAC_HandleTripCondition(Boolean UsePeakValues);
+static void MAC_HandleNonTripCondition();
+static _iq MAC_GetCurrentLimit();
 
 // Functions
 //
-Boolean MEASURE_AC_StartProcess(Int16U Type, pInt16U pDFReason, pInt16U pProblem)
+Boolean MAC_StartProcess()
 {
-	// Cache data
-	MEASURE_AC_CacheVariables();
-	// Enable RT cycle
+	MAC_CacheVariables();
 	CONTROL_SwitchRTCycle(TRUE);
 	
 	// Init variables
@@ -132,13 +135,13 @@ Boolean MEASURE_AC_StartProcess(Int16U Type, pInt16U pDFReason, pInt16U pProblem
 	ZwPWM_Enable(TRUE);
 	
 	// Enable control cycle
-	CONTROL_SubcribeToCycle(MEASURE_AC_ControlCycle);
+	CONTROL_SubcribeToCycle(MAC_ControlCycle);
 	
 	return TRUE;
 }
 // ----------------------------------------
 
-void MEASURE_AC_FinishProcess()
+void MAC_FinishProcess()
 {
 	//SS_StopSampling();
 	//SS_Dummy(TRUE);
@@ -147,55 +150,24 @@ void MEASURE_AC_FinishProcess()
 }
 // ----------------------------------------
 
-Int16S inline MEASURE_AC_PredictControl(_iq DesiredV)
+void inline MAC_SetPWM(Int16S pwm)
 {
-	return _IQint(_IQmpy(_IQmpy(DesiredV, TransCoffInv), PWMCoff));
+	ZwPWMB_SetValue12(DbgMutePWM ? 0 : pwm);
 }
 // ----------------------------------------
 
-Int16S inline MEASURE_AC_TrimPWM(Int16S Duty)
-{
-	if(ABS(Duty) < (MinSafePWM / 2))
-		return 0;
-	else if(ABS(Duty) < MinSafePWM)
-		return MinSafePWM * SIGN(Duty);
-	else
-		return Duty;
-}
-// ----------------------------------------
-
-Int16S inline MEASURE_AC_SetPWM(Int16S Duty)
-{
-	Int16S PWMOutput = 0;
-	
-	if(Duty >= 0 && PrevDuty < 0)
-		InvertPolarity = !InvertPolarity;
-	
-	if(Duty > 0)
-	{
-		PWMOutput = MEASURE_AC_TrimPWM(InvertPolarity ? -Duty : Duty);
-		ZwPWMB_SetValue12(DbgMutePWM ? 0 : PWMOutput);
-	}
-	else
-		ZwPWMB_SetValue12(0);
-	
-	PrevDuty = Duty;
-	return PWMOutput;
-}
-// ----------------------------------------
-
-void MEASURE_AC_Stop(Int16U Reason)
+void MAC_Stop(Int16U Reason)
 {
 	TripConditionDetected = TRUE;
 
 	switch (Reason)
 	{
 		case DF_INTERNAL:
-			MEASURE_AC_HandleTripCondition(UseInstantMethod);
+			MAC_HandleTripCondition(UseInstantMethod);
 			break;
 
 		case PROBLEM_OUTPUT_SHORT:
-			MEASURE_AC_HandleTripCondition(FALSE);
+			MAC_HandleTripCondition(FALSE);
 		case DF_NONE:
 			Problem = Reason;
 			break;
@@ -210,27 +182,9 @@ void MEASURE_AC_Stop(Int16U Reason)
 // ----------------------------------------
 
 #ifdef BOOT_FROM_FLASH
-#pragma CODE_SECTION(MEASURE_AC_CalculatePWM, "ramfuncs");
+#pragma CODE_SECTION(MAC_HandlePeakLogic, "ramfuncs");
 #endif
-static Int16S MEASURE_AC_CalculatePWM(_iq DesiredV)
-{
-	Int16S correction;
-	correction = MEASURE_AC_PredictControl(DesiredV) * (FrequencyRateSwitch ? 1 : 0);
-	
-	if(ABS(correction) > MaxSafePWM)
-	{
-		MEASURE_AC_Stop(DF_PWM_SATURATION);
-		return 0;
-	}
-	
-	return correction;
-}
-// ----------------------------------------
-
-#ifdef BOOT_FROM_FLASH
-#pragma CODE_SECTION(MEASURE_AC_HandlePeakLogic, "ramfuncs");
-#endif
-static void MEASURE_AC_HandlePeakLogic()
+static void MAC_HandlePeakLogic()
 {
 	Int16U i;
 	
@@ -244,7 +198,7 @@ static void MEASURE_AC_HandlePeakLogic()
 		else
 		{
 			// Пороговое значение перезаписи пика — половина от уставки
-			_iq CurrentThr = _IQdiv(MEASURE_AC_GetCurrentLimit(), _IQ(2));
+			_iq CurrentThr = _IQdiv(MAC_GetCurrentLimit(), _IQ(2));
 
 			if (PeakDetectorCounter)
 			{
@@ -271,16 +225,16 @@ static void MEASURE_AC_HandlePeakLogic()
 		MU_LogScopeIVpeak(PeakSample);
 		
 		// Handle overcurrent
-		if((State != ACPS_Brake) && (PeakSample.Current >= MEASURE_AC_GetCurrentLimit()))
-			MEASURE_AC_Stop(DF_INTERNAL);
+		if((State != ACPS_Brake) && (PeakSample.Current >= MAC_GetCurrentLimit()))
+			MAC_Stop(DF_INTERNAL);
 	}
 }
 // ----------------------------------------
 
 #ifdef BOOT_FROM_FLASH
-#pragma CODE_SECTION(MEASURE_AC_PIControllerSequence, "ramfuncs");
+#pragma CODE_SECTION(MAC_PIControllerSequence, "ramfuncs");
 #endif
-static Boolean MEASURE_AC_PIControllerSequence(_iq DesiredV)
+static Boolean MAC_PIControllerSequence(_iq DesiredV)
 {
 	// Every even zero
 	if((DesiredV >= 0) && (DesiredVoltageHistory < 0))
@@ -297,7 +251,7 @@ static Boolean MEASURE_AC_PIControllerSequence(_iq DesiredV)
 			AmplitudePeriodCounter = 0;
 			_iq err = 0, p;
 			
-			MEASURE_AC_HandlePeakLogic();
+			MAC_HandlePeakLogic();
 			
 			ActualMaxPosVoltage = UseInstantMethod ? PeakSample.Voltage : MaxPosVoltage;
 			ActualMaxPosCurrent = MaxPosCurrent;
@@ -334,102 +288,34 @@ static Boolean MEASURE_AC_PIControllerSequence(_iq DesiredV)
 }
 // ----------------------------------------
 
-void inline MEASURE_AC_DoSampling()
-{
-	_iq tmp, tmp2;
-	_iq FilteredV, FilteredI;
-	
-	//SS_DoSampling();
-	
-	FilteredV = SS_Voltage;
-	FilteredI = SS_Current;
-	
-	tmp = _IQmpy(SSVoltageCoff, FilteredV);
-	tmp2 = _IQdiv(tmp, _IQ(1000.0f));
-	ActualSecondarySample.IQFields.Voltage = _IQmpy(tmp2, _IQmpyI32(tmp2, SSVoltageP2)) + _IQmpy(tmp, SSVoltageP1)
-			+ SSVoltageP0;
-	
-	tmp = _IQmpy(SSCurrentCoff, FilteredI);
-	tmp2 = _IQdiv(tmp, _IQ(1000.0f));
-	ActualSecondarySample.IQFields.Current = _IQmpy(tmp2, _IQmpyI32(tmp2, SSCurrentP2)) + _IQmpy(tmp, SSCurrentP1)
-			+ SSCurrentP0;
-
-	if(!DbgDualPolarity)
-	{
-		if(ActualSecondarySample.IQFields.Voltage < 0)
-			ActualSecondarySample.IQFields.Voltage = 0;
-
-		if(ActualSecondarySample.IQFields.Current < 0)
-			ActualSecondarySample.IQFields.Current = 0;
-	}
-}
-// ----------------------------------------
-
 #ifdef BOOT_FROM_FLASH
-#pragma CODE_SECTION(MEASURE_AC_HandleVI, "ramfuncs");
+#pragma CODE_SECTION(MAC_HandleVI, "ramfuncs");
 #endif
-static void MEASURE_AC_HandleVI()
+static void MAC_HandleVI()
 {
-	// Connectivity monitoring
-	if(OptoConnectionMonMax && DBG_USE_OPTO_TIMEOUT)
+	// Сохранение значения в кольцевой буфер
+	RingBufferV[RingBufferPointer] = (Int32S)SS_Voltage - RawZeroVoltage;
+	RingBufferI[RingBufferPointer] = (Int32S)SS_Current - RawZeroCurrent;
+	RingBufferPointer++;
+
+	if(RingBufferPointer >= SINE_PERIOD_PULSES)
 	{
-		/*
-		if(!SS_DataValid)
-		{
-			if(OptoConnectionMon++ >= OptoConnectionMonMax)
-				MEASURE_AC_Stop(DF_OPTO_CON_ERROR);
-		}
-		else
-		{
-			SS_DataValid = FALSE;
-			OptoConnectionMon = 0;
-		}
-		*/
+		RingBufferPointer = 0;
+		RingBufferFull = TRUE;
 	}
-	
-	// Assign voltage and current values
-	if(TimeCounter > StartPauseTimeCounterTop)
+
+	// Расчёт действующих значений
+	Int32S Vrms = 0, Irms = 0;
+	Int16U i, cnt = RingBufferFull ? SINE_PERIOD_PULSES : RingBufferPointer;
+	for(i = 0; i < cnt; i++)
 	{
-		// Handle values
-		if(ActualSecondarySample.IQFields.Current > MaxPosCurrent)
-			MaxPosCurrent = ActualSecondarySample.IQFields.Current;
-	}
-	
-	// Detect maximum voltage for AC period
-	if((!ModifySine && (ActualSecondarySample.IQFields.Voltage >= MaxPosVoltage)) ||
-		(ModifySine && MEASURE_AC_PWMZeroDetector()))
-	{
-		MaxPosVoltage = ActualSecondarySample.IQFields.Voltage;
-		MaxPosInstantCurrent = ActualSecondarySample.IQFields.Current;
-	}
-	
-	// Check current conditions
-	if(UseInstantMethod)
-	{
-		if(ActualSecondarySample.IQFields.Current >= LimitCurrentHaltLevel)
-			MEASURE_AC_Stop(PROBLEM_OUTPUT_SHORT);
-	}
-	else
-	{
-		if(ActualSecondarySample.IQFields.Current >= MEASURE_AC_GetCurrentLimit())
-			MEASURE_AC_Stop(DF_INTERNAL);
-	}
-	
-	if(!ModifySine && !(SkipNegativeLogging && InvertPolarity))
-	{
-		// Store data for peak detection
-		if ((ActualSecondarySample.IQFields.Voltage > _IQmpy(DesiredAmplitudeV, PEAK_THR_COLLECT)) &&
-			(PeakDetectorCounter < PEAK_DETECTOR_SIZE))
-		{
-			PeakDetectorData[PeakDetectorCounter].Current = ActualSecondarySample.IQFields.Current;
-			PeakDetectorData[PeakDetectorCounter].Voltage = ActualSecondarySample.IQFields.Voltage;
-			++PeakDetectorCounter;
-		}
+		Vrms += RingBufferV[i] * RingBufferV[i];
+		Irms += RingBufferI[i] * RingBufferI[i];
 	}
 }
 // ----------------------------------------
 
-static _iq MEASURE_AC_GetCurrentLimit()
+static _iq MAC_GetCurrentLimit()
 {
 	if(TimeCounter < StartPauseTimeCounterTop)
 		return ((LimitCurrent < MAX_CURRENT_1ST_PULSE ) ? MAX_CURRENT_1ST_PULSE : LimitCurrent);
@@ -438,7 +324,7 @@ static _iq MEASURE_AC_GetCurrentLimit()
 }
 // ----------------------------------------
 
-static void MEASURE_AC_HandleTripCondition(Boolean UsePeakValues)
+static void MAC_HandleTripCondition(Boolean UsePeakValues)
 {
 	if(UsePeakValues)
 	{
@@ -453,7 +339,7 @@ static void MEASURE_AC_HandleTripCondition(Boolean UsePeakValues)
 }
 // ----------------------------------------
 
-static void MEASURE_AC_HandleNonTripCondition()
+static void MAC_HandleNonTripCondition()
 {
 	if(UseInstantMethod)
 	{
@@ -469,22 +355,21 @@ static void MEASURE_AC_HandleNonTripCondition()
 // ----------------------------------------
 
 #ifdef BOOT_FROM_FLASH
-#pragma CODE_SECTION(MEASURE_AC_ControlCycle, "ramfuncs");
+#pragma CODE_SECTION(MAC_ControlCycle, "ramfuncs");
 #endif
-static void MEASURE_AC_ControlCycle()
+static void MAC_ControlCycle()
 {
 	Int16S correction = 0;
 	Boolean trig_flag = FALSE;
 	static Int16S PrevCorrection = 0;
 	
-	MEASURE_AC_DoSampling();
 	TimeCounter++;
 	
 	switch (State)
 	{
 		case ACPS_Ramp:
 			{
-				MEASURE_AC_HandleVI();
+				MAC_HandleVI();
 				VRateCounter++;
 				
 				if(VRateCounter >= VRateCounterTop)
@@ -499,19 +384,19 @@ static void MEASURE_AC_ControlCycle()
 					}
 				}
 				
-				correction = MEASURE_AC_CCSub_Regulator(NULL);
+				correction = MAC_CalculatePWM();
 				if(State == ACPS_Brake)
 					return;
-				MEASURE_AC_CCSub_CorrectionAndLog(correction);
+				MAC_CCSub_CorrectionAndLog(correction);
 			}
 			break;
 			
 		case ACPS_VPrePlate:
 			{
-				MEASURE_AC_HandleVI();
+				MAC_HandleVI();
 				VPrePlateTimeCounter++;
 				
-				correction = MEASURE_AC_CCSub_Regulator(&trig_flag);
+				correction = MAC_CalculatePWM();
 				if(State == ACPS_Brake)
 					return;
 				
@@ -523,23 +408,23 @@ static void MEASURE_AC_ControlCycle()
 					DataTable[REG_VOLTAGE_ON_PLATE] = 1;
 				}
 				
-				MEASURE_AC_CCSub_CorrectionAndLog(correction);
+				MAC_CCSub_CorrectionAndLog(correction);
 			}
 			break;
 			
 		case ACPS_VPlate:
 			{
-				MEASURE_AC_HandleVI();
+				MAC_HandleVI();
 				VPlateTimeCounter++;
 				
-				correction = MEASURE_AC_CCSub_Regulator(&trig_flag);
+				correction = MAC_CalculatePWM();
 				if(State == ACPS_Brake)
 					return;
 				
 				if(VPlateTimeCounter > VPlateTimeCounterTop && trig_flag)
 					State = ACPS_Brake;
 				else
-					MEASURE_AC_CCSub_CorrectionAndLog(correction);
+					MAC_CCSub_CorrectionAndLog(correction);
 			}
 			break;
 			
@@ -549,7 +434,7 @@ static void MEASURE_AC_ControlCycle()
 				correction =
 						(ABS(PrevCorrection) >= PWM_REDUCE_RATE) ?
 								(PrevCorrection - SIGN(PrevCorrection) * PWM_REDUCE_RATE) : 0;
-				MEASURE_AC_CCSub_CorrectionAndLog((Warning == WARNING_OUTPUT_OVERLOAD) ? 0 : correction);
+				MAC_CCSub_CorrectionAndLog((Warning == WARNING_OUTPUT_OVERLOAD) ? 0 : correction);
 				
 				// Increase timer only when PWM reduced to zero
 				if(correction == 0)
@@ -560,7 +445,7 @@ static void MEASURE_AC_ControlCycle()
 					CONTROL_SubcribeToCycle(NULL);
 					
 					if(!TripConditionDetected)
-						MEASURE_AC_HandleNonTripCondition();
+						MAC_HandleNonTripCondition();
 					
 					CONTROL_NotifyEndTest(ResultV, ResultI, Fault, Problem, Warning);
 					ZwPWM_Enable(FALSE);
@@ -575,85 +460,47 @@ static void MEASURE_AC_ControlCycle()
 // ----------------------------------------
 
 #ifdef BOOT_FROM_FLASH
-#pragma CODE_SECTION(MEASURE_AC_CCSub_CorrectionAndLog, "ramfuncs");
+#pragma CODE_SECTION(MAC_CCSub_CorrectionAndLog, "ramfuncs");
 #endif
-static void MEASURE_AC_CCSub_CorrectionAndLog(Int16S ActualCorrection)
+static void MAC_CCSub_CorrectionAndLog(Int16S ActualCorrection)
 {
-	Int16S PWMOutput = MEASURE_AC_SetPWM(ActualCorrection);
 	if(!SkipLoggingVoids || FrequencyRateSwitch)
 	{
 		if(!(SkipNegativeLogging && InvertPolarity))
 		{
 			MU_LogScope(&ActualSecondarySample, CurrentMultiply, DbgSRAM, DbgDualPolarity);
 			MU_LogScopeIV(ActualSecondarySample);
-			MU_LogScopeDIAG(PWMOutput);
+			MU_LogScopeDIAG(ActualCorrection);
 		}
 	}
 }
 // ----------------------------------------
 
 #ifdef BOOT_FROM_FLASH
-#pragma CODE_SECTION(MEASURE_AC_CCSub_Regulator, "ramfuncs");
+#pragma CODE_SECTION(MAC_CalculatePWM, "ramfuncs");
 #endif
-static Int16S MEASURE_AC_CCSub_Regulator(Boolean *PeriodTrigger)
+static Int16S MAC_CalculatePWM()
 {
-	Boolean ret;
-	Int16S correction;
-	_iq desiredSecondaryVoltage;
-	
-	// Calculate desired amplitude
-	_iq SineValue = _IQsinPU(_IQmpyI32(NormalizedFrequency, TimeCounter));
-	if(ModifySine)
-		desiredSecondaryVoltage = _IQmpy(_IQmpy(SineValue, _IQexp(_IQ(1) - _IQabs(SineValue))), ControlledAmplitudeV);
+	// Расчёт мгновенного значения напряжения
+	// Отбрасывание целых периодов счётчика времени
+	Int32U TrimmedCounter = TimeCounter - (TimeCounter % SINE_PERIOD_PULSES) * SINE_PERIOD_PULSES;
+	_iq SinValue = _IQsinPU(_FPtoIQ2(TrimmedCounter, SINE_PERIOD_PULSES));
+	_iq InstantVoltage = _IQmpy(_IQmpyI32(SQROOT2, ControlTargetVrms), SinValue);
+
+	// Пересчёт в ШИМ
+	Int16S pwm = _IQint(_IQmpy(InstantVoltage, TransAndPWMCoff));
+
+	// Обрезка нижних значений
+	if(ABS(pwm) < (MinSafePWM / 2))
+		return 0;
+	else if(ABS(pwm) < MinSafePWM)
+		return MinSafePWM * SIGN(pwm);
 	else
-		desiredSecondaryVoltage = _IQmpy(SineValue, ControlledAmplitudeV);
-
-	// Calculate correction
-	ret = MEASURE_AC_PIControllerSequence(desiredSecondaryVoltage);
-	if(PeriodTrigger)
-		*PeriodTrigger = ret;
-	// Transform correction to PWM value
-	correction = MEASURE_AC_CalculatePWM(desiredSecondaryVoltage);
-	DesiredVoltageHistory = desiredSecondaryVoltage;
-	
-	// Following error detection
-	if(ret && !DbgMutePWM && DBG_USE_FOLLOWING_ERR && (KpVAC != 0) && (KiVAC != 0))
-	{
-		if((FollowingErrorFraction > FE_MAX_FRACTION) && (_IQabs(FollowingErrorAbsolute) > FE_MAX_ABSOLUTE))
-		{
-			if(FollowingErrorCounter++ > (FE_MAX_COUNTER * (PWM_SKIP_NEG_PULSES ? 2 : 1)))
-			{
-				correction = 0;
-				MEASURE_AC_Stop(DF_FOLLOWING_ERROR);
-			}
-		}
-		else
-			FollowingErrorCounter = 0;
-	}
-	
-	// Log error
-	if(ret)
-		MU_LogScopeErr(_IQint(FollowingErrorAbsolute));
-	
-	return correction;
+		return pwm;
 }
 // ----------------------------------------
 
-static Boolean MEASURE_AC_PWMZeroDetector()
-{
-	static _iq PrevSine = 0;
-	Boolean result = FALSE;
-	_iq CurrentSine = _IQsinPU(_IQmpyI32(NormalizedFrequency, TimeCounter + NormalizedPIdiv2Shift + PeakShiftTicks));
-
-	if(((PrevSine < 0 && CurrentSine >= 0) || (PrevSine > 0 && CurrentSine <= 0)) && PrevDuty > 0)
-		result = TRUE;
-
-	PrevSine = CurrentSine;
-	return result;
-}
-// ----------------------------------------
-
-static void MEASURE_AC_CacheVariables()
+static void MAC_CacheVariables()
 {
 	// Current in mA
 	LimitCurrent = _FPtoIQ2(DataTable[REG_LIMIT_CURRENT], 10);
@@ -668,10 +515,14 @@ static void MEASURE_AC_CacheVariables()
 	VPlateTimeCounterTop = (CONTROL_FREQUENCY * DataTable[REG_VOLTAGE_PLATE_TIME]) / 1000;
 	BrakeTimeCounterTop = (CONTROL_FREQUENCY * DataTable[REG_BRAKE_TIME]) / 1000;
 	
-	TransCoffInv = _FPtoIQ2(1, DataTable[REG_TRANSFORMER_COFF]);
-	PWMCoff = _IQdiv(_IQ(ZW_PWM_DUTY_BASE), _IQI(DataTable[REG_PRIM_VOLTAGE]));
+
+
+	TransAndPWMCoff = _FPtoIQ2(ZW_PWM_DUTY_BASE, DataTable[REG_PRIM_VOLTAGE] * DataTable[REG_TRANSFORMER_COFF]);
 	MaxSafePWM = DataTable[REG_SAFE_MAX_PWM];
+	RawZeroVoltage = DataTable[REG_RAW_ZERO_SVOLTAGE];
+	RawZeroCurrent = DataTable[REG_RAW_ZERO_SCURRENT];
 	
+
 	StartPauseTimeCounterTop = (CONTROL_FREQUENCY / DataTable[REG_VOLTAGE_FREQUENCY]) * 2;
 	NormalizedFrequency = _IQdiv(_IQ(1.0f), _IQI(CONTROL_FREQUENCY / DataTable[REG_VOLTAGE_FREQUENCY]));
 	NormalizedPIdiv2Shift = CONTROL_FREQUENCY / (4L * DataTable[REG_VOLTAGE_FREQUENCY]);
