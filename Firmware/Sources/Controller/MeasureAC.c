@@ -37,17 +37,16 @@ typedef enum __ACProcessState
 	ACPS_Brake
 } ACProcessState;
 
-typedef struct __MeasureCoeff
+typedef struct __RingBufferElement
 {
-	_iq K;
-	_iq Offset;
-	_iq P2;
-	_iq P1;
-	_iq P0;
-} MeasureCoeff;
+	Int16S Voltage;
+	Int16S Current;
+} RingBufferElement, *pRingBufferElement;
+
+typedef _iq (*CurrentCalc)(Int32S RawValue, Boolean RMSFineCorrection);
 
 // Variables
-static DataSampleIQ RingBuffer[SINE_PERIOD_PULSES];
+static RingBufferElement RingBuffer[SINE_PERIOD_PULSES];
 static Int16U RingBufferPointer;
 static Boolean RingBufferFull;
 
@@ -61,8 +60,7 @@ static Int32U BrakeTimeCounter, BrakeTimeCounterTop, FrequencyDivisorCounter, Fr
 static Int16U NormalizedPIdiv2Shift;
 static Int16U OptoConnectionMon, OptoConnectionMonMax, CurrentMultiply;
 static Int16U FollowingErrorCounter;
-static Int16S MinSafePWM, SSVoltageP2, SSCurrentP2;
-static _iq SSVoltageCoff, SSCurrentCoff, SSVoltageP1, SSVoltageP0, SSCurrentP1, SSCurrentP0;
+static Int16S MinSafePWM;
 static _iq LimitCurrent, LimitCurrentHaltLevel, LimitVoltage, VoltageRateStep, NormalizedFrequency;
 static _iq KpVAC, KiVAC, SVIAerr;
 static _iq FollowingErrorFraction, FollowingErrorAbsolute;
@@ -79,18 +77,20 @@ static Int16U AmplitudePeriodCounter;
 static Int16U Problem, Warning, Fault;
 static DataSampleIQ PeakDetectorData[PEAK_DETECTOR_SIZE], PeakSample;
 static Int16U PeakDetectorCounter;
+
 //
 static volatile ACProcessState State = ACPS_None;
+static CurrentCalc MAC_CurrentCalc;
 
 // Forward functions
 //
 static Int16S MAC_CalculatePWM();
+static DataSampleIQ MAC_HandleVI();
 
 static void MAC_ControlCycle();
 static void MAC_CCSub_CorrectionAndLog(Int16S ActualCorrection);
 static void MAC_CacheVariables();
 static Boolean MAC_PIControllerSequence(_iq DesiredV);
-static void MAC_HandleVI();
 static void MAC_HandleTripCondition(Boolean UsePeakValues);
 static void MAC_HandleNonTripCondition();
 static _iq MAC_GetCurrentLimit();
@@ -297,12 +297,14 @@ static Boolean MAC_PIControllerSequence(_iq DesiredV)
 #ifdef BOOT_FROM_FLASH
 #pragma CODE_SECTION(MAC_HandleVI, "ramfuncs");
 #endif
-static void MAC_HandleVI()
+static DataSampleIQ MAC_HandleVI()
 {
-	/*
 	// Сохранение значения в кольцевой буфер
-	RingBufferV[RingBufferPointer] = (Int32S)SS_Voltage - RawZeroVoltage;
-	RingBufferI[RingBufferPointer] = (Int32S)SS_Current - RawZeroCurrent;
+	RingBufferElement RingSample;
+	RingSample.Voltage = (Int32S)SS_Voltage - RawZeroVoltage;
+	RingSample.Current = (Int32S)SS_Current - RawZeroCurrent;
+
+	RingBuffer[RingBufferPointer] = RingSample;
 	RingBufferPointer++;
 
 	if(RingBufferPointer >= SINE_PERIOD_PULSES)
@@ -311,15 +313,33 @@ static void MAC_HandleVI()
 		RingBufferFull = TRUE;
 	}
 
+	// Сохранение пересчитанных мгновенных значений
+	DataSampleIQ InstantSample;
+	InstantSample.Voltage = MU_CalcVoltage(RingSample.Voltage, FALSE);
+	InstantSample.Current = MAC_CurrentCalc(RingSample.Current, FALSE);
+	MU_LogScopeVI(InstantSample, DbgSRAM);
+
 	// Расчёт действующих значений
-	Int32S Vrms = 0, Irms = 0;
+	Int32U Vrms_sum = 0, Irms_sum = 0;
 	Int16U i, cnt = RingBufferFull ? SINE_PERIOD_PULSES : RingBufferPointer;
 	for(i = 0; i < cnt; i++)
 	{
-		Vrms += RingBufferV[i] * RingBufferV[i];
-		Irms += RingBufferI[i] * RingBufferI[i];
+		Vrms_sum += (Int32S)RingBuffer[i].Voltage * RingBuffer[i].Voltage;
+		Irms_sum += (Int32S)RingBuffer[i].Current * RingBuffer[i].Current;
 	}
-	*/
+
+	DataSampleIQ RMS;
+	RMS.Voltage = MU_CalcVoltage(MAC_SQRoot(Vrms_sum / cnt), TRUE);
+	RMS.Current = MAC_CurrentCalc(MAC_SQRoot(Irms_sum / cnt), TRUE);
+
+	return RMS;
+}
+// ----------------------------------------
+
+static _iq MAC_SQRoot(Int32U Value)
+{
+	_iq2 iq2_rms = _IQ2sqrt(_IQ2mpyI32(_IQ2(1), Value));
+	return _IQ2toIQ(iq2_rms);
 }
 // ----------------------------------------
 
@@ -553,45 +573,11 @@ static void MAC_CacheVariables()
 	// Select start voltage basing on measurement mode
 	ControlledAmplitudeV = DesiredAmplitudeV = DesiredAmplitudeVHistory = _IQI(DataTable[REG_START_VOLTAGE_AC]);
 	
-	ModifySine = FALSE;
-	CurrentMultiply = 10;
-	if(LimitCurrent <= HVD_IL_TH)
-	{
-		LimitCurrentHaltLevel = HVD_IL_TH;
-		
-		SSCurrentCoff = _FPtoIQ2(DataTable[REG_SCURRENT1_COFF_N], DataTable[REG_SCURRENT1_COFF_D]);
-		SSCurrentCoff = _IQdiv(SSCurrentCoff, _IQ(100.0f));
-		
-		SSCurrentP2 = (Int16S)DataTable[REG_SCURRENT1_FINE_P2];
-		SSCurrentP1 = _FPtoIQ2(DataTable[REG_SCURRENT1_FINE_P1], 1000);
-		SSCurrentP0 = _FPtoIQ2((Int16S)DataTable[REG_SCURRENT1_FINE_P0], 1000);
-	}
-	else
-	{
-		LimitCurrentHaltLevel = HVD_IH_TH;
-		
-		SSCurrentCoff = _FPtoIQ2(DataTable[REG_SCURRENT2_COFF_N], DataTable[REG_SCURRENT2_COFF_D]);
-		
-		SSCurrentP2 = (Int16S)DataTable[REG_SCURRENT2_FINE_P2];
-		SSCurrentP1 = _FPtoIQ2(DataTable[REG_SCURRENT2_FINE_P1], 1000);
-		SSCurrentP0 = _FPtoIQ2((Int16S)DataTable[REG_SCURRENT2_FINE_P0], 1000);
-	}
-	
-	if(LimitVoltage < HVD_VL_TH)
-	{
-		SSVoltageCoff = _FPtoIQ2(DataTable[REG_SVOLTAGE1_COFF_N], DataTable[REG_SVOLTAGE1_COFF_D]);
-		
-		SSVoltageP2 = (Int16S)DataTable[REG_SVOLTAGE1_FINE_P2];
-		SSVoltageP1 = _FPtoIQ2(DataTable[REG_SVOLTAGE1_FINE_P1], 1000);
-		SSVoltageP0 = _FPtoIQ2((Int16S)DataTable[REG_SVOLTAGE1_FINE_P0], 10);
-	}
-	else
-	{
-		SSVoltageCoff = _FPtoIQ2(DataTable[REG_SVOLTAGE2_COFF_N], DataTable[REG_SVOLTAGE2_COFF_D]);
-		
-		SSVoltageP2 = (Int16S)DataTable[REG_SVOLTAGE2_FINE_P2];
-		SSVoltageP1 = _FPtoIQ2(DataTable[REG_SVOLTAGE2_FINE_P1], 1000);
-		SSVoltageP0 = _FPtoIQ2((Int16S)DataTable[REG_SVOLTAGE2_FINE_P0], 10);
-	}
+	MU_InitCoeffVoltage();
+	MU_InitCoeffCurrent1();
+	MU_InitCoeffCurrent2();
+	MU_InitCoeffCurrent3();
+
+	MAC_CurrentCalc = MU_CalcCurrent1;
 }
 // ----------------------------------------

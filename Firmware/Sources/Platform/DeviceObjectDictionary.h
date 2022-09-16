@@ -29,11 +29,35 @@
 
 // REGISTERS
 //
-#define REG_RAW_ZERO_SVOLTAGE		0	// Значение нулевого уровня канала напряжения в тиках оцифровки
-#define REG_RAW_ZERO_SCURRENT		1	// Значение нулевого уровня канала тока в тиках оцифровки
+#define REG_CAP_V_COFF_N			0	// Capacitor voltage coefficient (N)
+#define REG_CAP_V_COFF_D			1	// Capacitor voltage coefficient (D)
+
+#define REG_RAW_ZERO_SVOLTAGE		2	// Значение нулевого уровня канала напряжения в тиках оцифровки
+#define REG_RAW_ZERO_SCURRENT		3	// Значение нулевого уровня канала тока в тиках оцифровки
+
+#define REG_COEFF_VOLTAGE_K			4	// Пропорциональный коэффициент пересёта напряжения х1000
+#define REG_COEFF_VOLTAGE_P2		5	// Коэффициент тонкой подстройки напряжения P2 x1e6
+#define REG_COEFF_VOLTAGE_P1		6	// Коэффициент тонкой подстройки напряжения P1 x1000
+#define REG_COEFF_VOLTAGE_P0		7	// Коэффициент тонкой подстройки напряжения P0 x10
+
+#define REG_COEFF_CURRENT1_K		8	// Пропорциональный коэффициент пересёта напряжения х1000
+#define REG_COEFF_CURRENT1_P2		9	// Коэффициент тонкой подстройки тока 1 P2 x1e6
+#define REG_COEFF_CURRENT1_P1		10	// Коэффициент тонкой подстройки тока 1 P1 x1000
+#define REG_COEFF_CURRENT1_P0		11	// Коэффициент тонкой подстройки тока 1 P0 x10
+
+#define REG_COEFF_CURRENT2_K		12	// Пропорциональный коэффициент пересёта напряжения х1000
+#define REG_COEFF_CURRENT2_P2		13	// Коэффициент тонкой подстройки тока 2 P2 x1e6
+#define REG_COEFF_CURRENT2_P1		14	// Коэффициент тонкой подстройки тока 2 P1 x1000
+#define REG_COEFF_CURRENT2_P0		15	// Коэффициент тонкой подстройки тока 2 P0 x10
+
+#define REG_COEFF_CURRENT3_K		16	// Пропорциональный коэффициент пересёта напряжения х1000
+#define REG_COEFF_CURRENT3_P2		17	// Коэффициент тонкой подстройки тока 3 P2 x1e6
+#define REG_COEFF_CURRENT3_P1		18	// Коэффициент тонкой подстройки тока 3 P1 x1000
+#define REG_COEFF_CURRENT3_P0		19	// Коэффициент тонкой подстройки тока 3 P0 x10
+
+
 // 2 - 19
-#define REG_CAP_V_COFF_N			20	// Capacitor voltage coefficient (N)
-#define REG_CAP_V_COFF_D			21	// Capacitor voltage coefficient (D)
+
 // 22 - 23
 #define REG_SCURRENT1_COFF_N		24	// Secondary current 1 coefficient (N)
 #define REG_SCURRENT1_COFF_D		25	// Secondary current 1 coefficient (D)

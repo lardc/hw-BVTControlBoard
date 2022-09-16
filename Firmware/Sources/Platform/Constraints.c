@@ -14,28 +14,33 @@
 //
 const TableItemConstraint NVConstraint[DATA_TABLE_NV_SIZE] =
 									  {
-											{0, INT16U_MAX, 0},														// 0
-											{0, INT16U_MAX, 0},														// 1
-											{0, 0, 0},																// 2
-											{0, 0, 0},																// 3
-											{0, 0, 0},																// 4
-											{0, 0, 0},																// 5
-											{0, 0, 0},																// 6
-											{0, 0, 0},																// 7
-											{0, 0, 0},																// 8
-											{0, 0, 0},																// 9
-											{0, 0, 0},																// 10
-											{0, 0, 0},																// 11
-											{0, 0, 0},																// 12
-											{0, 0, 0},																// 13
-											{0, 0, 0},																// 14
-											{0, 0, 0},																// 15
-											{0, 0, 0},																// 16
-											{0, 0, 0},																// 17
-											{0, 0, 0},																// 18
-											{0, 0, 0},																// 19
-											{0, INT16U_MAX, CAP_V_COFF_N_DEF},										// 20
-											{1, X_D_DEF3, X_D_DEF2},												// 21
+											{0, INT16U_MAX, CAP_V_COFF_N_DEF},										// 0
+											{1, X_D_DEF3, X_D_DEF2},												// 1
+											{0, INT16U_MAX, 0},														// 2
+											{0, INT16U_MAX, 0},														// 3
+
+											{1, X_D_DEF3, X_D_DEF2},												// 4
+											{0, INT16U_MAX, 0},														// 5
+											{X_D_DEF1, X_D_DEF3, X_D_DEF2},											// 6
+											{0, INT16U_MAX, 0},														// 7
+
+											{1, X_D_DEF3, X_D_DEF2},												// 8
+											{0, INT16U_MAX, 0},														// 9
+											{X_D_DEF1, X_D_DEF3, X_D_DEF2},											// 10
+											{0, INT16U_MAX, 0},														// 11											{0, 0, 0},																// 12
+
+											{1, X_D_DEF3, X_D_DEF2},												// 12
+											{0, INT16U_MAX, 0},														// 13
+											{X_D_DEF1, X_D_DEF3, X_D_DEF2},											// 14
+											{0, INT16U_MAX, 0},														// 15
+
+											{1, X_D_DEF3, X_D_DEF2},												// 16
+											{0, INT16U_MAX, 0},														// 17
+											{X_D_DEF1, X_D_DEF3, X_D_DEF2},											// 18
+											{0, INT16U_MAX, 0},														// 19
+
+											{0, 0, 0},																// 20
+											{0, 0, 0},																// 21
 											{0, 0, 0},																// 22
 											{0, 0, 0},																// 23
 											{0, INT16U_MAX, SCURRENT1_COFF_N_DEF},									// 24
