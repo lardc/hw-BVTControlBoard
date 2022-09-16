@@ -1,4 +1,4 @@
-﻿// -----------------------------------------
+﻿// ----------------------------------------
 // Logic controller
 // ----------------------------------------
 
@@ -7,15 +7,12 @@
 
 // Include
 #include "stdinc.h"
-//
 #include "ZwDSP.h"
 #include "Global.h"
 #include "DeviceObjectDictionary.h"
 #include "MeasureAC.h"
 
-
 // Types
-//
 typedef enum __DeviceState
 {
 	DS_None				= 0,
@@ -25,18 +22,25 @@ typedef enum __DeviceState
 	DS_Powered			= 4,
 	DS_InProcess		= 5
 } DeviceState;
-//
+
 typedef void (*CONTROL_FUNC_RealTimeRoutine)();
 
 // Variables
-//
 extern volatile Int64U CONTROL_TimeCounter;
 extern volatile DeviceState CONTROL_State;
 extern volatile Int16U CONTROL_BootLoaderRequest;
 
+extern Int16U MEMBUF_Values_V[];
+extern Int16U MEMBUF_Values_ImA[];
+extern Int16U MEMBUF_Values_IuA[];
+extern Int16U MEMBUF_Values_PWM[];
+extern Int16U MEMBUF_Values_Err[];
+
+extern volatile Int16U MEMBUF_ValuesVI_Counter;
+extern volatile Int16U MEMBUF_ValuesPWM_Counter;
+extern volatile Int16U MEMBUF_ValuesErr_Counter;
 
 // Functions
-//
 // Initialize controller
 void CONTROL_Init();
 // Do background idle operation
@@ -55,6 +59,5 @@ void CONTROL_NotifyEndTest(_iq BVTResultV, _iq BVTResultI, Int16U DFReason, Int1
 void CONTROL_NotifyCANFault(ZwCAN_SysFlags Flag);
 // Re-init RX SPI channels
 void CONTROL_ReInitSPI_Rx();
-
 
 #endif // __CONTROLLER_H

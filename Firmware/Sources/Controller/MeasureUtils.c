@@ -8,8 +8,8 @@
 // Includes
 #include "DeviceObjectDictionary.h"
 #include "DataTable.h"
-#include "MemoryBuffers.h"
 #include "IQmathUtils.h"
+#include "Controller.h"
 
 // Variables
 static Int16U ScopeCounter, ScopeVICounter, ScopePWMCounter, ScopeErrCounter;

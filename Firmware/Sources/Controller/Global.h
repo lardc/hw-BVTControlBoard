@@ -1,4 +1,4 @@
-﻿// -----------------------------------------
+﻿// ----------------------------------------
 // Global definitions
 // ----------------------------------------
 
@@ -14,6 +14,7 @@
 #define	SCCI_TIMEOUT_TICKS		1000			// in ms
 #define DT_EPROM_ADDRESS		0
 #define EP_COUNT				5
+#define VALUES_x_SIZE			1000
 
 // Password to unlock non-volatile area for write
 #define ENABLE_LOCKING			FALSE

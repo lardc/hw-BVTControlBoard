@@ -12,7 +12,6 @@
 #include "DataTable.h"
 #include "SCCISlave.h"
 #include "DeviceProfile.h"
-#include "MemoryBuffers.h"
 #include "IQmathUtils.h"
 #include "PrimarySampling.h"
 #include "SecondarySampling.h"
@@ -35,6 +34,16 @@ typedef struct __EndTestDPCClosure
 } EndTestDPCClosure;
 
 // Variables
+//
+Int16U MEMBUF_Values_V[VALUES_x_SIZE];
+Int16U MEMBUF_Values_ImA[VALUES_x_SIZE];
+Int16U MEMBUF_Values_IuA[VALUES_x_SIZE];
+Int16U MEMBUF_Values_PWM[VALUES_x_SIZE];
+Int16U MEMBUF_Values_Err[VALUES_x_SIZE];
+//
+volatile Int16U MEMBUF_ValuesVI_Counter = 0;
+volatile Int16U MEMBUF_ValuesPWM_Counter = 0;
+volatile Int16U MEMBUF_ValuesErr_Counter = 0;
 //
 volatile Int64U CONTROL_TimeCounter = 0;
 volatile DeviceState CONTROL_State = DS_None;
