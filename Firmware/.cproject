@@ -127,7 +127,6 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/Sources}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/Sources/Platform}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/Sources/Controller}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/Sources/Controller/HighLevel}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/Sources/Board}&quot;"/>
 									<listOptionValue builtIn="false" value="../../../hw-TMS-libs/Interface"/>
 									<listOptionValue builtIn="false" value="../../../hw-TMS-libs/Library"/>
