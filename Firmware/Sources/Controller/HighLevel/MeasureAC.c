@@ -37,13 +37,22 @@ typedef enum __ACProcessState
 	ACPS_Brake
 } ACProcessState;
 
+typedef struct __MeasureCoeff
+{
+	_iq K;
+	_iq Offset;
+	_iq P2;
+	_iq P1;
+	_iq P0;
+} MeasureCoeff;
+
 // Variables
-static Int16U RingBufferV[SINE_PERIOD_PULSES], RingBufferI[SINE_PERIOD_PULSES];
+static DataSampleIQ RingBuffer[SINE_PERIOD_PULSES];
 static Int16U RingBufferPointer;
 static Boolean RingBufferFull;
 
 static Int16U TargetVrms, ControlTargetVrms, MaxSafePWM, RawZeroVoltage, RawZeroCurrent;
-static _iq TransAndPWMCoff;
+static _iq TransAndPWMCoeff;
 
 static Int32U TimeCounter, StartPauseTimeCounterTop;
 static Int32U VRateCounter, VRateCounterTop;
@@ -55,7 +64,7 @@ static Int16U FollowingErrorCounter;
 static Int16S MinSafePWM, SSVoltageP2, SSCurrentP2;
 static _iq SSVoltageCoff, SSCurrentCoff, SSVoltageP1, SSVoltageP0, SSCurrentP1, SSCurrentP0;
 static _iq LimitCurrent, LimitCurrentHaltLevel, LimitVoltage, VoltageRateStep, NormalizedFrequency;
-static _iq KpVAC, KiVAC, SIVAerr;
+static _iq KpVAC, KiVAC, SVIAerr;
 static _iq FollowingErrorFraction, FollowingErrorAbsolute;
 static _iq ResultV, ResultI;
 static _iq DesiredAmplitudeV, DesiredAmplitudeVHistory, ControlledAmplitudeV, DesiredVoltageHistory;
@@ -108,10 +117,8 @@ Boolean MAC_StartProcess()
 	AmplitudePeriodCounter = 0;
 	InvertPolarity = TRUE;
 	SkipRegulation = TRUE;
-	SIVAerr = 0;
+	SVIAerr = 0;
 	//
-	ActualSecondarySample.IQFields.Voltage = 0;
-	ActualSecondarySample.IQFields.Current = 0;
 	ActualMaxPosVoltage = 0;
 	ActualMaxPosCurrent = 0;
 	MaxPosVoltage = 0;
@@ -222,7 +229,6 @@ static void MAC_HandlePeakLogic()
 				PeakSample.Voltage = 0;
 			}
 		}
-		MU_LogScopeIVpeak(PeakSample);
 		
 		// Handle overcurrent
 		if((State != ACPS_Brake) && (PeakSample.Current >= MAC_GetCurrentLimit()))
@@ -272,9 +278,9 @@ static Boolean MAC_PIControllerSequence(_iq DesiredV)
 				err = DesiredAmplitudeVHistory - ActualMaxPosVoltage;
 				DesiredAmplitudeVHistory = DesiredAmplitudeV;
 				p = _IQmpy(err, KpVAC);
-				SIVAerr += _IQmpy(err, KiVAC);
+				SVIAerr += _IQmpy(err, KiVAC);
 				
-				ControlledAmplitudeV = DesiredAmplitudeV + (SIVAerr + p);
+				ControlledAmplitudeV = DesiredAmplitudeV + (SVIAerr + p);
 
 				FollowingErrorAbsolute = err;
 				FollowingErrorFraction = _IQdiv(_IQabs(err), DesiredAmplitudeV);
@@ -293,6 +299,7 @@ static Boolean MAC_PIControllerSequence(_iq DesiredV)
 #endif
 static void MAC_HandleVI()
 {
+	/*
 	// Сохранение значения в кольцевой буфер
 	RingBufferV[RingBufferPointer] = (Int32S)SS_Voltage - RawZeroVoltage;
 	RingBufferI[RingBufferPointer] = (Int32S)SS_Current - RawZeroCurrent;
@@ -312,6 +319,7 @@ static void MAC_HandleVI()
 		Vrms += RingBufferV[i] * RingBufferV[i];
 		Irms += RingBufferI[i] * RingBufferI[i];
 	}
+	*/
 }
 // ----------------------------------------
 
@@ -333,8 +341,8 @@ static void MAC_HandleTripCondition(Boolean UsePeakValues)
 	}
 	else
 	{
-		ResultI = ActualSecondarySample.IQFields.Current;
-		ResultV = ActualSecondarySample.IQFields.Voltage;
+		//ResultI = ActualSecondarySample.IQFields.Current;
+		//ResultV = ActualSecondarySample.IQFields.Voltage;
 	}
 }
 // ----------------------------------------
@@ -468,9 +476,8 @@ static void MAC_CCSub_CorrectionAndLog(Int16S ActualCorrection)
 	{
 		if(!(SkipNegativeLogging && InvertPolarity))
 		{
-			MU_LogScope(&ActualSecondarySample, CurrentMultiply, DbgSRAM, DbgDualPolarity);
-			MU_LogScopeIV(ActualSecondarySample);
-			MU_LogScopeDIAG(ActualCorrection);
+			//MU_LogScopeVI(ActualSecondarySample, );
+			MU_LogScopePWM(ActualCorrection);
 		}
 	}
 }
@@ -488,7 +495,7 @@ static Int16S MAC_CalculatePWM()
 	_iq InstantVoltage = _IQmpy(_IQmpyI32(SQROOT2, ControlTargetVrms), SinValue);
 
 	// Пересчёт в ШИМ
-	Int16S pwm = _IQint(_IQmpy(InstantVoltage, TransAndPWMCoff));
+	Int16S pwm = _IQint(_IQmpy(InstantVoltage, TransAndPWMCoeff));
 
 	// Обрезка нижних значений
 	if(ABS(pwm) < (MinSafePWM / 2))
@@ -517,7 +524,7 @@ static void MAC_CacheVariables()
 	
 
 
-	TransAndPWMCoff = _FPtoIQ2(ZW_PWM_DUTY_BASE, DataTable[REG_PRIM_VOLTAGE] * DataTable[REG_TRANSFORMER_COFF]);
+	TransAndPWMCoeff = _FPtoIQ2(ZW_PWM_DUTY_BASE, DataTable[REG_PRIM_VOLTAGE] * DataTable[REG_TRANSFORMER_COFF]);
 	MaxSafePWM = DataTable[REG_SAFE_MAX_PWM];
 	RawZeroVoltage = DataTable[REG_RAW_ZERO_SVOLTAGE];
 	RawZeroCurrent = DataTable[REG_RAW_ZERO_SCURRENT];

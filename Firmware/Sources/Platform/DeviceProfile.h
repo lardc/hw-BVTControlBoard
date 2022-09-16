@@ -1,4 +1,4 @@
-﻿// -----------------------------------------
+﻿// ----------------------------------------
 // Device profile
 // ----------------------------------------
 
@@ -25,7 +25,7 @@ void DEVPROFILE_ResetEPReadState();
 // Reset user control (WR) section of data table
 void DEVPROFILE_ResetControlSection();
 // Reset scopes
-void DEVPROFILE_ResetScopes(Int16U ResetPosition, Int16U ScopeMask);
+void DEVPROFILE_ResetScopes(Int16U EPIndex);
 // Notify that CAN system fault occurs
 void DEVPROFILE_NotifyCANFault(ZwCAN_SysFlags Flag);
 // Update diagnostic registers

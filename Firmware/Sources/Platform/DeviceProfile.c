@@ -1,4 +1,4 @@
-﻿// -----------------------------------------
+﻿// ----------------------------------------
 // Device profile
 // ----------------------------------------
 
@@ -18,6 +18,7 @@
 //
 typedef struct __EPState
 {
+	Int16U Index;
 	Int16U Size;
 	Int16U ReadCounter;
 	Int16U LastReadCounter;
@@ -107,10 +108,12 @@ void DEVPROFILE_InitEPService(pInt16U Indexes, pInt16U Sizes, pInt16U *Counters,
 
 	for(i = 0; i < EP_COUNT; ++i)
 	{
+		RS232_EPState.EPs[i].Index = Indexes[i];
 		RS232_EPState.EPs[i].Size = Sizes[i];
 		RS232_EPState.EPs[i].pDataCounter = Counters[i];
 		RS232_EPState.EPs[i].Data = Datas[i];
 
+		CAN_EPState.EPs[i].Index = Indexes[i];
 		CAN_EPState.EPs[i].Size = Sizes[i];
 		CAN_EPState.EPs[i].pDataCounter = Counters[i];
 		CAN_EPState.EPs[i].Data = Datas[i];
@@ -139,7 +142,6 @@ void DEVPROFILE_ProcessRequests()
 void DEVPROFILE_ResetEPReadState()
 {
 	Int16U i;
-
 	for(i = 0; i < EP_COUNT; ++i)
 	{
 		RS232_EPState.EPs[i].ReadCounter = 0;
@@ -156,16 +158,15 @@ void DEVPROFILE_ResetControlSection()
 }
 // ----------------------------------------
 
-void DEVPROFILE_ResetScopes(Int16U ResetPosition, Int16U ScopeMask)
+void DEVPROFILE_ResetScopes(Int16U EPIndex)
 {
 	Int16U i;
-
 	for(i = 0; i < EP_COUNT; ++i)
 	{
-		if((1 << i) & ScopeMask)
+		if(EPIndex == 0 || RS232_EPState.EPs[i].Index == EPIndex || CAN_EPState.EPs[i].Index == EPIndex)
 		{
-			*(RS232_EPState.EPs[i].pDataCounter) = ResetPosition;
-			*(CAN_EPState.EPs[i].pDataCounter) = ResetPosition;
+			*(RS232_EPState.EPs[i].pDataCounter) = 0;
+			*(CAN_EPState.EPs[i].pDataCounter) = 0;
 
 			MemZero16(RS232_EPState.EPs[i].Data, RS232_EPState.EPs[i].Size);
 			MemZero16(CAN_EPState.EPs[i].Data, CAN_EPState.EPs[i].Size);
@@ -370,5 +371,3 @@ static Int16U DEVPROFILE_CallbackReadX(Int16U Endpoint, pInt16U *Buffer, Boolean
 	return pLen;
 }
 
-
-// No more

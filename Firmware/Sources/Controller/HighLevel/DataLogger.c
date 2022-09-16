@@ -1,23 +1,19 @@
-﻿// -----------------------------------------
+﻿// ----------------------------------------
 // Log data to SRAM
 // ----------------------------------------
 
 // Header
 #include "DataLogger.h"
-//
+
 // Includes
 #include "ZbBoard.h"
 
-
 // Variables
-//
 Int16U BankCounterMax, BankCounterW, BankCounterR;
 Int32U AddressCounterW, AddressCounterMax, DirectCounterW;
 Int32U AddressCounterR, DirectCounterR;
 
-
 // Functions
-//
 void DL_PrepareLogging()
 {
 	DirectCounterW = DirectCounterR = 0;
@@ -101,5 +97,3 @@ void DL_MoveReadPointer(Int16S Offset)
 	}
 }
 // ----------------------------------------
-
-// No more.

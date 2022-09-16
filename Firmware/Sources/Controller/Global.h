@@ -13,7 +13,7 @@
 // --- Global miscellaneous parameters
 #define	SCCI_TIMEOUT_TICKS		1000			// in ms
 #define DT_EPROM_ADDRESS		0
-#define EP_COUNT				6
+#define EP_COUNT				5
 
 // Password to unlock non-volatile area for write
 #define ENABLE_LOCKING			FALSE

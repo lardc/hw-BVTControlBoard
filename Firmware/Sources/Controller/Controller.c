@@ -62,15 +62,16 @@ void CONTROL_StartSequence();
 //
 void CONTROL_Init()
 {
-	Int16U EPIndexes[EP_COUNT] = { EP16_I, EP16_V, EP16_DIAG, EP16_ERR, EP16_PEAK_I, EP16_PEAK_V };
-	Int16U EPSized[EP_COUNT] = { VALUES_x_SIZE, VALUES_x_SIZE, VALUES_x_SIZE, VALUES_x_SIZE, VALUES_x_SIZE, VALUES_x_SIZE };
-	pInt16U EPCounters[EP_COUNT] = { (pInt16U)&MEMBUF_ValuesIV_Counter,		(pInt16U)&MEMBUF_ValuesIV_Counter,
-									 (pInt16U)&MEMBUF_ValuesDIAG_Counter,	(pInt16U)&MEMBUF_ValuesErr_Counter,
-									 (pInt16U)&MEMBUF_ValuesIVpeak_Counter,	(pInt16U)&MEMBUF_ValuesIVpeak_Counter };
-	pInt16U EPDatas[EP_COUNT] = { MEMBUF_Values_I, MEMBUF_Values_V, MEMBUF_Values_DIAG,
-								  MEMBUF_Values_Err, MEMBUF_Values_Ipeak, MEMBUF_Values_Vpeak };
+	Int16U EPIndexes[EP_COUNT] = {EP16_V, EP16_ImA, EP16_IuA, EP16_PWM, EP16_Error};
+	Int16U EPSized[EP_COUNT] = {VALUES_x_SIZE, VALUES_x_SIZE, VALUES_x_SIZE, VALUES_x_SIZE, VALUES_x_SIZE};
+	pInt16U pVIcnt = (pInt16U)&MEMBUF_ValuesVI_Counter;
+	pInt16U EPCounters[EP_COUNT] =
+			{pVIcnt, pVIcnt, pVIcnt, (pInt16U)&MEMBUF_ValuesPWM_Counter, (pInt16U)&MEMBUF_ValuesErr_Counter};
+	pInt16U EPDatas[EP_COUNT] =
+			{MEMBUF_Values_V, MEMBUF_Values_ImA, MEMBUF_Values_IuA, MEMBUF_Values_PWM, MEMBUF_Values_Err};
+
 	// Data-table EPROM service configuration
-	EPROMServiceConfig EPROMService = { &ZbMemory_WriteValuesEPROM, &ZbMemory_ReadValuesEPROM };
+	EPROMServiceConfig EPROMService = {&ZbMemory_WriteValuesEPROM, &ZbMemory_ReadValuesEPROM};
 
 	// Init data table
 	DT_Init(EPROMService, FALSE);
@@ -290,7 +291,7 @@ Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U UserError)
 					DataTable[REG_RESULT_V] = 0;
 					DataTable[REG_RESULT_I] = 0;
 					DataTable[REG_RESULT_I_UA_R] = 0;
-					DEVPROFILE_ResetScopes(0, IND_EP_I | IND_EP_V | IND_EP_DBG | IND_EP_ERR | IND_EP_PEAK_I | IND_EP_PEAK_V);
+					DEVPROFILE_ResetScopes(0);
 					DEVPROFILE_ResetEPReadState();
 
 					CONTROL_StartSequence();
@@ -312,16 +313,11 @@ Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U UserError)
 
 		case ACT_READ_FRAGMENT:
 			{
-				DEVPROFILE_ResetScopes(0, IND_EP_I | IND_EP_V);
+				DEVPROFILE_ResetScopes(EP16_V);
+				DEVPROFILE_ResetScopes(EP16_ImA);
+				DEVPROFILE_ResetScopes(EP16_IuA);
 				DEVPROFILE_ResetEPReadState();
-
-				if (DataTable[REG_USE_INST_METHOD] && DataTable[REG_REPLACE_CURVES])
-				{
-					MU_ReplaceIVbyPeakData();
-					DEVPROFILE_ResetScopes(0, IND_EP_PEAK_I | IND_EP_PEAK_V);
-				}
-				else
-					MU_LoadDataFragment();
+				MU_LoadDataFragment();
 			}
 			break;
 

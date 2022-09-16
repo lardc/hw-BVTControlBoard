@@ -1,48 +1,38 @@
-﻿// -----------------------------------------
+﻿// ----------------------------------------
 // Log data to SRAM
 // ----------------------------------------
 
 #ifndef __DATA_LOGGER_H
 #define __DATA_LOGGER_H
 
-
 // Include
 #include "stdinc.h"
-//
 #include "IQmathLib.h"
 
-
-#define RAW_FIELDS_COUNT	2
+// Definitions
+#define RAW_FIELDS_COUNT	3
 
 // Types
-//
 typedef struct __DataSample
 {
-	struct
-	{
-		_iq Voltage;
-		_iq Current;
-	} IQFields;
 	union
 	{
 		Int16U Raw[RAW_FIELDS_COUNT];
 		struct
 		{
-			Int16U Voltage;
-			Int16U Current;
+			Int16S Voltage;
+			Int32S Current;
 		} Data;
 	} ScopeFields;
 } DataSample, *pDataSample;
-//
+
 typedef struct __DataSampleIQ
 {
 	_iq Voltage;
 	_iq Current;
 } DataSampleIQ, *pDataSampleIQ;
 
-
 // Functions
-//
 // Initialize logger for a new work
 void DL_PrepareLogging();
 // Write data sample to SRAM
