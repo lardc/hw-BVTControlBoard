@@ -1,4 +1,4 @@
-﻿// -----------------------------------------
+﻿// ----------------------------------------
 // Driver for EEPROM & FRAM via SPI
 // ----------------------------------------
 
@@ -228,7 +228,7 @@ static void ZbMemory_EnableWriteEPROM()
 #endif
 static void ZwMemory_PrepareSPIForSRAM()
 {
-	if (SPIMode != SPIMODE_SRAM)
+	if(SPIMode != SPIMODE_SRAM)
 	{
 		// Config SPI for SRAM
 		ZwSPIc_Init(TRUE, MEM_SRAM_BAUDRATE, 16, MEM_PLR, MEM_PHASE, 0, TRUE, FALSE);
@@ -240,7 +240,7 @@ static void ZwMemory_PrepareSPIForSRAM()
 
 static void ZwMemory_PrepareSPIForEPROM()
 {
-	if (SPIMode != SPIMODE_EPROM)
+	if(SPIMode != SPIMODE_EPROM)
 	{
 		// Config SPI for EPROM
 		ZwSPIc_Init(TRUE, MEM_EPROM_BAUDRATE, 8, MEM_PLR, MEM_PHASE, 0, TRUE, FALSE);
@@ -249,5 +249,3 @@ static void ZwMemory_PrepareSPIForEPROM()
 	}
 }
 // ----------------------------------------
-
-// No more.

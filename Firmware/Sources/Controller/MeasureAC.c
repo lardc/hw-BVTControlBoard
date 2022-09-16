@@ -86,6 +86,7 @@ static CurrentCalc MAC_CurrentCalc;
 //
 static Int16S MAC_CalculatePWM();
 static DataSampleIQ MAC_HandleVI();
+static _iq MAC_SQRoot(Int32U Value);
 
 static void MAC_ControlCycle();
 static void MAC_CCSub_CorrectionAndLog(Int16S ActualCorrection);
@@ -317,7 +318,7 @@ static DataSampleIQ MAC_HandleVI()
 	DataSampleIQ InstantSample;
 	InstantSample.Voltage = MU_CalcVoltage(RingSample.Voltage, FALSE);
 	InstantSample.Current = MAC_CurrentCalc(RingSample.Current, FALSE);
-	MU_LogScopeVI(InstantSample, DbgSRAM);
+	MU_LogScopeVI(&InstantSample, DbgSRAM);
 
 	// Расчёт действующих значений
 	Int32U Vrms_sum = 0, Irms_sum = 0;

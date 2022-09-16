@@ -9,8 +9,8 @@
 #include "ZbBoard.h"
 
 // Variables
-Int16U BankCounterMax, BankCounterW, BankCounterR;
-Int32U AddressCounterW, AddressCounterMax, DirectCounterW;
+Int16U BankCounterW, BankCounterR;
+Int32U AddressCounterW, DirectCounterW;
 Int32U AddressCounterR, DirectCounterR;
 
 // Functions
@@ -19,8 +19,6 @@ void DL_PrepareLogging()
 	DirectCounterW = DirectCounterR = 0;
 	AddressCounterW = AddressCounterR = 0;
 	BankCounterW = BankCounterR = 0;
-	AddressCounterMax = SRAM_BANK_CAPACITY_SAMPLE;
-	BankCounterMax = SRAM_BANK_COUNT;
 }
 // ----------------------------------------
 
@@ -34,12 +32,12 @@ void DL_WriteData(pDataSample Sample)
 	++DirectCounterW;
 	AddressCounterW += sizeof(Sample->ScopeFields.Raw);
 
-	if(AddressCounterW >= AddressCounterMax)
+	if(AddressCounterW >= SRAM_BANK_CAPACITY_SAMPLE)
 	{
 		AddressCounterW = 0;
 		BankCounterW++;
 
-		if(BankCounterW >= BankCounterMax)
+		if(BankCounterW >= SRAM_BANK_COUNT)
 		{
 			BankCounterW = 0;
 			DirectCounterW = 0;
@@ -55,7 +53,7 @@ Boolean DL_ReadData(pDataSample pData)
 	if(DirectCounterR >= DirectCounterW)
 		return FALSE;
 
-	if(AddressCounterR >= AddressCounterMax)
+	if(AddressCounterR >= SRAM_BANK_CAPACITY_SAMPLE)
 	{
 		AddressCounterR = 0;
 		BankCounterR++;
@@ -81,8 +79,8 @@ void DL_MoveReadPointer(Int16S Offset)
 		if(DirectCounterR > DirectCounterW)
 			DirectCounterR = DirectCounterW;
 
-		AddressCounterR = (DirectCounterR * RAW_FIELDS_COUNT) % AddressCounterMax;
-		BankCounterR = (DirectCounterR * RAW_FIELDS_COUNT) / AddressCounterMax;
+		AddressCounterR = (DirectCounterR * RAW_FIELDS_COUNT) % SRAM_BANK_CAPACITY_SAMPLE;
+		BankCounterR = (DirectCounterR * RAW_FIELDS_COUNT) / SRAM_BANK_CAPACITY_SAMPLE;
 	}
 	else
 	{
@@ -92,8 +90,8 @@ void DL_MoveReadPointer(Int16S Offset)
 			DirectCounterR += DirectCounterW;
 		DirectCounterR -= Offset;
 
-		AddressCounterR = (DirectCounterR * RAW_FIELDS_COUNT) % AddressCounterMax;
-		BankCounterR = (DirectCounterR * RAW_FIELDS_COUNT) / AddressCounterMax;
+		AddressCounterR = (DirectCounterR * RAW_FIELDS_COUNT) % SRAM_BANK_CAPACITY_SAMPLE;
+		BankCounterR = (DirectCounterR * RAW_FIELDS_COUNT) / SRAM_BANK_CAPACITY_SAMPLE;
 	}
 }
 // ----------------------------------------

@@ -136,9 +136,6 @@ void DEVPROFILE_ProcessRequests()
 }
 // ----------------------------------------
 
-#ifdef BOOT_FROM_FLASH
-	#pragma CODE_SECTION(DEVPROFILE_ResetEPReadState, "ramfuncs");
-#endif
 void DEVPROFILE_ResetEPReadState()
 {
 	Int16U i;
@@ -175,9 +172,6 @@ void DEVPROFILE_ResetScopes(Int16U EPIndex)
 }
 // ----------------------------------------
 
-#ifdef BOOT_FROM_FLASH
-	#pragma CODE_SECTION(DEVPROFILE_NotifyCANFault, "ramfuncs");
-#endif
 void DEVPROFILE_NotifyCANFault(ZwCAN_SysFlags Flag)
 {
 	// Update error counter

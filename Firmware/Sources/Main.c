@@ -217,10 +217,8 @@ void InitializeController()
 #ifdef BOOT_FROM_FLASH
 	#pragma CODE_SECTION(Timer0_ISR, "ramfuncs");
 	#pragma CODE_SECTION(Timer2_ISR, "ramfuncs");
-	#pragma CODE_SECTION(CAN0_ISR, "ramfuncs");
 	#pragma CODE_SECTION(SEQ1_ISR, "ramfuncs");
 	#pragma CODE_SECTION(SPIaRX_ISR, "ramfuncs");
-	#pragma CODE_SECTION(IllegalInstruction_ISR, "ramfuncs");
 #endif
 //
 #pragma INTERRUPT(Timer0_ISR, HPI);

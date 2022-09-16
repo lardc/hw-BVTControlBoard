@@ -141,9 +141,6 @@ void CONTROL_RealTimeCycle()
 }
 // ----------------------------------------
 
-#ifdef BOOT_FROM_FLASH
-	#pragma CODE_SECTION(CONTROL_SwitchRTCycle, "ramfuncs");
-#endif
 void CONTROL_SwitchRTCycle(Boolean Enable)
 {
 	if(Enable)
@@ -159,9 +156,6 @@ void CONTROL_SubcribeToCycle(CONTROL_FUNC_RealTimeRoutine Routine)
 }
 // ----------------------------------------
 
-#ifdef BOOT_FROM_FLASH
-	#pragma CODE_SECTION(CONTROL_RequestStop, "ramfuncs");
-#endif
 void CONTROL_RequestStop(Int16U Reason, Boolean HWSignal)
 {
 	if(CONTROL_State == DS_InProcess)
@@ -193,9 +187,6 @@ void CONTROL_NotifyEndTest(_iq BVTResultV, _iq BVTResultI, Int16U DFReason, Int1
 }
 // ----------------------------------------
 
-#ifdef BOOT_FROM_FLASH
-	#pragma CODE_SECTION(CONTROL_NotifyCANFault, "ramfuncs");
-#endif
 void CONTROL_NotifyCANFault(ZwCAN_SysFlags Flag)
 {
 	DEVPROFILE_NotifyCANFault(Flag);

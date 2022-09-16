@@ -48,6 +48,9 @@ Boolean SS_SendX(Int16U Header, Int16U Data, Boolean WaitAck)
 }
 // ----------------------------------------
 
+#ifdef BOOT_FROM_FLASH
+	#pragma CODE_SECTION(SS_GetData, "ramfuncs");
+#endif
 Boolean SS_GetData(Boolean WaitAck)
 {
 	return SS_SendX(IBP_GET_DATA, 0, WaitAck);
