@@ -85,7 +85,7 @@ static CurrentCalc MAC_CurrentCalc;
 // Forward functions
 //
 static Int16S MAC_CalculatePWM();
-static DataSampleIQ MAC_HandleVI();
+static void MAC_HandleVI(pDataSampleIQ Instant, pDataSampleIQ RMS);
 static _iq MAC_SQRoot(Int32U Value);
 
 static void MAC_ControlCycle();
@@ -298,7 +298,7 @@ static Boolean MAC_PIControllerSequence(_iq DesiredV)
 #ifdef BOOT_FROM_FLASH
 #pragma CODE_SECTION(MAC_HandleVI, "ramfuncs");
 #endif
-static DataSampleIQ MAC_HandleVI()
+static void MAC_HandleVI(pDataSampleIQ Instant, pDataSampleIQ RMS)
 {
 	// Сохранение значения в кольцевой буфер
 	RingBufferElement RingSample;
@@ -315,10 +315,8 @@ static DataSampleIQ MAC_HandleVI()
 	}
 
 	// Сохранение пересчитанных мгновенных значений
-	DataSampleIQ InstantSample;
-	InstantSample.Voltage = MU_CalcVoltage(RingSample.Voltage, FALSE);
-	InstantSample.Current = MAC_CurrentCalc(RingSample.Current, FALSE);
-	MU_LogScopeVI(&InstantSample, DbgSRAM);
+	Instant->Voltage = MU_CalcVoltage(RingSample.Voltage, FALSE);
+	Instant->Current = MAC_CurrentCalc(RingSample.Current, FALSE);
 
 	// Расчёт действующих значений
 	Int32U Vrms_sum = 0, Irms_sum = 0;
@@ -329,11 +327,8 @@ static DataSampleIQ MAC_HandleVI()
 		Irms_sum += (Int32S)RingBuffer[i].Current * RingBuffer[i].Current;
 	}
 
-	DataSampleIQ RMS;
-	RMS.Voltage = MU_CalcVoltage(MAC_SQRoot(Vrms_sum / cnt), TRUE);
-	RMS.Current = MAC_CurrentCalc(MAC_SQRoot(Irms_sum / cnt), TRUE);
-
-	return RMS;
+	RMS->Voltage = MU_CalcVoltage(MAC_SQRoot(Vrms_sum / cnt), TRUE);
+	RMS->Current = MAC_CurrentCalc(MAC_SQRoot(Irms_sum / cnt), TRUE);
 }
 // ----------------------------------------
 
@@ -394,11 +389,14 @@ static void MAC_ControlCycle()
 	
 	TimeCounter++;
 	
+	DataSampleIQ Instant, RMS;
+	MAC_HandleVI(&Instant, &RMS);
+
 	switch (State)
 	{
 		case ACPS_Ramp:
 			{
-				MAC_HandleVI();
+
 				VRateCounter++;
 				
 				if(VRateCounter >= VRateCounterTop)
@@ -422,7 +420,6 @@ static void MAC_ControlCycle()
 			
 		case ACPS_VPrePlate:
 			{
-				MAC_HandleVI();
 				VPrePlateTimeCounter++;
 				
 				correction = MAC_CalculatePWM();
@@ -443,7 +440,6 @@ static void MAC_ControlCycle()
 			
 		case ACPS_VPlate:
 			{
-				MAC_HandleVI();
 				VPlateTimeCounter++;
 				
 				correction = MAC_CalculatePWM();
@@ -498,7 +494,7 @@ static void MAC_CCSub_CorrectionAndLog(Int16S ActualCorrection)
 		if(!(SkipNegativeLogging && InvertPolarity))
 		{
 			//MU_LogScopeVI(ActualSecondarySample, );
-			MU_LogScopePWM(ActualCorrection);
+			//MU_LogScopePWM(ActualCorrection);
 		}
 	}
 }

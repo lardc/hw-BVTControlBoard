@@ -23,9 +23,7 @@ typedef struct __MeasureCoeff
 // Init scope
 void MU_StartScope();
 // Log data to SRAM
-void MU_LogScopeVI(pDataSampleIQ Sample, Boolean SRAMDebug);
-// Log diagnostic values
-void MU_LogScopePWM(Int16S Value);
+void MU_LogScopeValues(pDataSampleIQ Instant, pDataSampleIQ RMS, Int16S PWM, Boolean SRAMDebug);
 // Log following error
 void MU_LogScopeError(Int16S Value);
 // Load data from SRAM

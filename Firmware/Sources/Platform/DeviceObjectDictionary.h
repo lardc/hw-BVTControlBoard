@@ -174,8 +174,11 @@
 #define EP16_V						1	// Endpoint for V value sequence
 #define EP16_ImA					2	// Endpoint for I value sequence mA part
 #define EP16_IuA					3	// Endpoint for I value sequence uA part
-#define EP16_PWM					4	// Endpoint for PWM value sequence
-#define EP16_Error					5	// Endpoint for V following error
+#define EP16_Vrms					4	// Endpoint for Vrms value sequence
+#define EP16_Irms_mA				5	// Endpoint for Irms value sequence mA part
+#define EP16_Irms_uA				6	// Endpoint for Irms value sequence uA part
+#define EP16_PWM					7	// Endpoint for PWM value sequence
+#define EP16_Error					8	// Endpoint for V following error
 
 
 // MEASUREMENT TYPE

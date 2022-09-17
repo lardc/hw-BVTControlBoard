@@ -33,12 +33,14 @@ extern volatile Int16U CONTROL_BootLoaderRequest;
 extern Int16U MEMBUF_Values_V[];
 extern Int16U MEMBUF_Values_ImA[];
 extern Int16U MEMBUF_Values_IuA[];
+extern Int16U MEMBUF_Values_Vrms[];
+extern Int16U MEMBUF_Values_Irms_mA[];
+extern Int16U MEMBUF_Values_Irms_uA[];
 extern Int16U MEMBUF_Values_PWM[];
 extern Int16U MEMBUF_Values_Err[];
 
-extern volatile Int16U MEMBUF_ValuesVI_Counter;
-extern volatile Int16U MEMBUF_ValuesPWM_Counter;
-extern volatile Int16U MEMBUF_ValuesErr_Counter;
+extern volatile Int16U MEMBUF_ScopeValues_Counter;
+extern volatile Int16U MEMBUF_ErrorValues_Counter;
 
 // Functions
 // Initialize controller

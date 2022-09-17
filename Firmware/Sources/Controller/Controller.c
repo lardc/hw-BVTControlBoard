@@ -38,12 +38,14 @@ typedef struct __EndTestDPCClosure
 Int16U MEMBUF_Values_V[VALUES_x_SIZE];
 Int16U MEMBUF_Values_ImA[VALUES_x_SIZE];
 Int16U MEMBUF_Values_IuA[VALUES_x_SIZE];
+Int16U MEMBUF_Values_Vrms[VALUES_x_SIZE];
+Int16U MEMBUF_Values_Irms_mA[VALUES_x_SIZE];
+Int16U MEMBUF_Values_Irms_uA[VALUES_x_SIZE];
 Int16U MEMBUF_Values_PWM[VALUES_x_SIZE];
 Int16U MEMBUF_Values_Err[VALUES_x_SIZE];
 //
-volatile Int16U MEMBUF_ValuesVI_Counter = 0;
-volatile Int16U MEMBUF_ValuesPWM_Counter = 0;
-volatile Int16U MEMBUF_ValuesErr_Counter = 0;
+volatile Int16U MEMBUF_ScopeValues_Counter = 0;
+volatile Int16U MEMBUF_ErrorValues_Counter = 0;
 //
 volatile Int64U CONTROL_TimeCounter = 0;
 volatile DeviceState CONTROL_State = DS_None;
@@ -71,13 +73,14 @@ void CONTROL_StartSequence();
 //
 void CONTROL_Init()
 {
-	Int16U EPIndexes[EP_COUNT] = {EP16_V, EP16_ImA, EP16_IuA, EP16_PWM, EP16_Error};
-	Int16U EPSized[EP_COUNT] = {VALUES_x_SIZE, VALUES_x_SIZE, VALUES_x_SIZE, VALUES_x_SIZE, VALUES_x_SIZE};
-	pInt16U pVIcnt = (pInt16U)&MEMBUF_ValuesVI_Counter;
+	Int16U EPIndexes[EP_COUNT] = {EP16_V, EP16_ImA, EP16_IuA, EP16_Vrms, EP16_Irms_mA, EP16_Irms_uA, EP16_PWM, EP16_Error};
+	Int16U EPSized[EP_COUNT] = {VALUES_x_SIZE, VALUES_x_SIZE, VALUES_x_SIZE, VALUES_x_SIZE,
+			VALUES_x_SIZE, VALUES_x_SIZE, VALUES_x_SIZE, VALUES_x_SIZE};
+	pInt16U cnt = (pInt16U)&MEMBUF_ScopeValues_Counter;
 	pInt16U EPCounters[EP_COUNT] =
-			{pVIcnt, pVIcnt, pVIcnt, (pInt16U)&MEMBUF_ValuesPWM_Counter, (pInt16U)&MEMBUF_ValuesErr_Counter};
-	pInt16U EPDatas[EP_COUNT] =
-			{MEMBUF_Values_V, MEMBUF_Values_ImA, MEMBUF_Values_IuA, MEMBUF_Values_PWM, MEMBUF_Values_Err};
+			{cnt, cnt, cnt, cnt, cnt, cnt, cnt, (pInt16U)&MEMBUF_ErrorValues_Counter};
+	pInt16U EPDatas[EP_COUNT] = {MEMBUF_Values_V, MEMBUF_Values_ImA, MEMBUF_Values_IuA,
+			MEMBUF_Values_Vrms, MEMBUF_Values_Irms_mA, MEMBUF_Values_Irms_uA, MEMBUF_Values_PWM, MEMBUF_Values_Err};
 
 	// Data-table EPROM service configuration
 	EPROMServiceConfig EPROMService = {&ZbMemory_WriteValuesEPROM, &ZbMemory_ReadValuesEPROM};
@@ -313,9 +316,9 @@ Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U UserError)
 
 		case ACT_READ_FRAGMENT:
 			{
-				DEVPROFILE_ResetScopes(EP16_V);
-				DEVPROFILE_ResetScopes(EP16_ImA);
-				DEVPROFILE_ResetScopes(EP16_IuA);
+				Int16U i;
+				for(i = EP16_V; i <= EP16_PWM; i++)
+					DEVPROFILE_ResetScopes(i);
 				DEVPROFILE_ResetEPReadState();
 				MU_LoadDataFragment();
 			}

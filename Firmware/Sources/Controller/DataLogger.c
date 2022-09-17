@@ -27,10 +27,10 @@ void DL_PrepareLogging()
 #endif
 void DL_WriteData(pDataSample Sample)
 {
-	ZbMemory_WriteValuesSRAM(BankCounterW, AddressCounterW, Sample->ScopeFields.Raw, sizeof(Sample->ScopeFields.Raw));
+	ZbMemory_WriteValuesSRAM(BankCounterW, AddressCounterW, Sample->U.Raw, sizeof(Sample->U.Raw));
 
 	++DirectCounterW;
-	AddressCounterW += sizeof(Sample->ScopeFields.Raw);
+	AddressCounterW += sizeof(Sample->U.Raw);
 
 	if(AddressCounterW >= SRAM_BANK_CAPACITY_SAMPLE)
 	{
@@ -59,10 +59,10 @@ Boolean DL_ReadData(pDataSample pData)
 		BankCounterR++;
 	}
 
-	ZbMemory_ReadValuesSRAM(BankCounterR, AddressCounterR, buffer.ScopeFields.Raw, sizeof(buffer.ScopeFields.Raw));
+	ZbMemory_ReadValuesSRAM(BankCounterR, AddressCounterR, buffer.U.Raw, sizeof(buffer.U.Raw));
 
 	++DirectCounterR;
-	AddressCounterR += sizeof(buffer.ScopeFields.Raw);
+	AddressCounterR += sizeof(buffer.U.Raw);
 
 	*pData = buffer;
 
