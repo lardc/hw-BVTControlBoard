@@ -20,7 +20,7 @@
 #define SYS_HSP_FREQ		(CPU_FRQ / 2) 	// High-speed bus frequency = 50MHz
 #define SYS_LSP_FREQ		(CPU_FRQ / 2) 	// Low-speed bus frequency = 50MHz
 //
-#define ZW_PWM_DUTY_BASE	5000
+#define ZW_PWM_DUTY_BASE	5000l
 
 // Peripheral options
 #define HWUSE_SPI_A

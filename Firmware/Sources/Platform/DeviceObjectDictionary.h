@@ -16,120 +16,61 @@
 #define ACT_START_TEST				100	// Start test with defined parameters
 #define ACT_STOP					101	// Stop test sequence
 #define ACT_READ_FRAGMENT			110	// Read next data portion
-#define ACT_READ_MOVE_BACK			111	// Move read pointer back
 //
 #define ACT_SAVE_TO_ROM				200	// Save parameters to EEPROM module
 #define ACT_RESTORE_FROM_ROM		201	// Restore parameters from EEPROM module
 #define ACT_RESET_TO_DEFAULT		202	// Reset parameters to default values (only in controller memory)
-#define ACT_LOCK_NV_AREA			203	// Lock modifications of parameters area
-#define ACT_UNLOCK_NV_AREA			204	// Unlock modifications of parameters area (password-protected)
 //
 #define ACT_BOOT_LOADER_REQUEST		320	// Request reboot to bootloader
 
 
 // REGISTERS
 //
-#define REG_CAP_V_COFF_N			0	// Capacitor voltage coefficient (N)
-#define REG_CAP_V_COFF_D			1	// Capacitor voltage coefficient (D)
+#define REG_RAW_ZERO_SVOLTAGE		0	// Значение нулевого уровня канала напряжения в тиках оцифровки
+#define REG_RAW_ZERO_SCURRENT		1	// Значение нулевого уровня канала тока в тиках оцифровки
 
-#define REG_RAW_ZERO_SVOLTAGE		2	// Значение нулевого уровня канала напряжения в тиках оцифровки
-#define REG_RAW_ZERO_SCURRENT		3	// Значение нулевого уровня канала тока в тиках оцифровки
+#define REG_COEFF_VOLTAGE_K			2	// Пропорциональный коэффициент пересёта напряжения х1000
+#define REG_COEFF_VOLTAGE_P2		3	// Коэффициент тонкой подстройки напряжения P2 x1e6
+#define REG_COEFF_VOLTAGE_P1		4	// Коэффициент тонкой подстройки напряжения P1 x1000
+#define REG_COEFF_VOLTAGE_P0		5	// Коэффициент тонкой подстройки напряжения P0 x10
 
-#define REG_COEFF_VOLTAGE_K			4	// Пропорциональный коэффициент пересёта напряжения х1000
-#define REG_COEFF_VOLTAGE_P2		5	// Коэффициент тонкой подстройки напряжения P2 x1e6
-#define REG_COEFF_VOLTAGE_P1		6	// Коэффициент тонкой подстройки напряжения P1 x1000
-#define REG_COEFF_VOLTAGE_P0		7	// Коэффициент тонкой подстройки напряжения P0 x10
+#define REG_COEFF_CURRENT1_K		6	// Пропорциональный коэффициент пересёта напряжения х1000
+#define REG_COEFF_CURRENT1_P2		7	// Коэффициент тонкой подстройки тока 1 P2 x1e6
+#define REG_COEFF_CURRENT1_P1		8	// Коэффициент тонкой подстройки тока 1 P1 x1000
+#define REG_COEFF_CURRENT1_P0		9	// Коэффициент тонкой подстройки тока 1 P0 x10
 
-#define REG_COEFF_CURRENT1_K		8	// Пропорциональный коэффициент пересёта напряжения х1000
-#define REG_COEFF_CURRENT1_P2		9	// Коэффициент тонкой подстройки тока 1 P2 x1e6
-#define REG_COEFF_CURRENT1_P1		10	// Коэффициент тонкой подстройки тока 1 P1 x1000
-#define REG_COEFF_CURRENT1_P0		11	// Коэффициент тонкой подстройки тока 1 P0 x10
+#define REG_COEFF_CURRENT2_K		10	// Пропорциональный коэффициент пересёта напряжения х1000
+#define REG_COEFF_CURRENT2_P2		11	// Коэффициент тонкой подстройки тока 2 P2 x1e6
+#define REG_COEFF_CURRENT2_P1		12	// Коэффициент тонкой подстройки тока 2 P1 x1000
+#define REG_COEFF_CURRENT2_P0		13	// Коэффициент тонкой подстройки тока 2 P0 x10
 
-#define REG_COEFF_CURRENT2_K		12	// Пропорциональный коэффициент пересёта напряжения х1000
-#define REG_COEFF_CURRENT2_P2		13	// Коэффициент тонкой подстройки тока 2 P2 x1e6
-#define REG_COEFF_CURRENT2_P1		14	// Коэффициент тонкой подстройки тока 2 P1 x1000
-#define REG_COEFF_CURRENT2_P0		15	// Коэффициент тонкой подстройки тока 2 P0 x10
+#define REG_COEFF_CURRENT3_K		14	// Пропорциональный коэффициент пересёта напряжения х1000
+#define REG_COEFF_CURRENT3_P2		15	// Коэффициент тонкой подстройки тока 3 P2 x1e6
+#define REG_COEFF_CURRENT3_P1		16	// Коэффициент тонкой подстройки тока 3 P1 x1000
+#define REG_COEFF_CURRENT3_P0		17	// Коэффициент тонкой подстройки тока 3 P0 x10
 
-#define REG_COEFF_CURRENT3_K		16	// Пропорциональный коэффициент пересёта напряжения х1000
-#define REG_COEFF_CURRENT3_P2		17	// Коэффициент тонкой подстройки тока 3 P2 x1e6
-#define REG_COEFF_CURRENT3_P1		18	// Коэффициент тонкой подстройки тока 3 P1 x1000
-#define REG_COEFF_CURRENT3_P0		19	// Коэффициент тонкой подстройки тока 3 P0 x10
+#define REG_CAP_COEFF				18	// Коэффициент пересчёта напряжения первичной стороны х1000
 
+#define REG_START_VOLTAGE			19	// Стартовое напряжение формирования (в В)
+#define REG_VOLTAGE_RATE			20	// Скорость нарастания напряжения (в кВ/с х10)
 
-// 2 - 19
+#define REG_KP						21	// Пропорциональный коэффициент регулятора х100
+#define REG_KI						22	// Интегральный коэффициент регулятора х100
 
-// 22 - 23
-#define REG_SCURRENT1_COFF_N		24	// Secondary current 1 coefficient (N)
-#define REG_SCURRENT1_COFF_D		25	// Secondary current 1 coefficient (D)
-#define REG_SCURRENT2_COFF_N		26	// Secondary current 2 coefficient (N)
-#define REG_SCURRENT2_COFF_D		27	// Secondary current 2 coefficient (D)
-#define REG_SVOLTAGE1_COFF_N		28	// Secondary voltage 1 coefficient (N)
-#define REG_SVOLTAGE1_COFF_D		29	// Secondary voltage 1 coefficient (D)
-#define REG_SVOLTAGE2_COFF_N		30	// Secondary voltage 2 coefficient (N)
-#define REG_SVOLTAGE2_COFF_D		31	// Secondary voltage 2 coefficient (D)
-// 32
-#define REG_KP_VAC_N				33	// AC voltage amplitude controller P coefficient (N)
-#define REG_KP_VAC_D				34	// AC voltage amplitude controller P coefficient (D)
-#define REG_KI_VAC_N				35	// AC voltage amplitude controller I coefficient (N)
-#define REG_KI_VAC_D				36	// AC voltage amplitude controller I coefficient (D)
-#define REG_SCURRENT3_COFF_N		37	// Secondary current 3 coefficient (N)
-#define REG_SCURRENT3_COFF_D		38	// Secondary current 3 coefficient (D)
-// 39 - 41
-#define REG_BRAKE_TIME				42	// Brake time (in ms)
-#define REG_TRANSFORMER_COFF		43	// Transformer V transfer ratio (secondary/primary)
-#define REG_PRIM_VOLTAGE			44	// Voltage on primary side (in V)
-// 45 - 48
-#define REG_OPTO_CONNECTION_MON		49	// Optical connection error when N packets lost (0 to disable)
-#define REG_SKIP_LOGGING_VOIDS		50	// Don't log empty zones in case of using frequency divisor
-// 51 - 79
-#define REG_SAFE_MAX_PWM			80	// Maximum PWM (AC mode)
-#define REG_USE_INST_METHOD			81	// Measurement method
-#define REG_REPLACE_CURVES			82	// Replace output V/I curves by peak measurement
-#define REG_PEAK_SEARCH_ZONE		83	// % of peak voltage to search max current (in %)
-// 84 - 85
-#define REG_MODIFY_SINE				86	// Enable sine modification at low currents
-#define REG_SKIP_NEG_LOGGING		87	// Skip negative pulses logging
-#define REG_MODIFY_SINE_SHIFT		88	// Modified sine sample point shift from pwm peak (in ticks)
-// 89 - 95
-#define REG_SCURRENT1_FINE_P2		96	// Secondary current 1 tune quadratic coefficient P2 x1e6
-#define REG_SCURRENT1_FINE_P1		97	// Secondary current 1 tune quadratic coefficient P1 x1000
-#define REG_SCURRENT2_FINE_P2		98	// Secondary current 2 tune quadratic coefficient P2 x1e6
-#define REG_SCURRENT2_FINE_P1		99	// Secondary current 2 tune quadratic coefficient P1 x1000
-// 100 - 103
-#define REG_SVOLTAGE1_FINE_P2		104	// Secondary voltage 1 tune quadratic coefficient P2 x1e6
-#define REG_SVOLTAGE1_FINE_P1		105	// Secondary voltage 1 tune quadratic coefficient P1 x1000
-#define REG_SVOLTAGE2_FINE_P2		106	// Secondary voltage 2 tune quadratic coefficient P2 x1e6
-#define REG_SVOLTAGE2_FINE_P1		107	// Secondary voltage 2 tune quadratic coefficient P1 x1000
-// 108 - 111
-#define REG_SCURRENT3_FINE_P2		112	// Secondary current 3 tune quadratic coefficient P2 x1e6
-#define REG_SCURRENT3_FINE_P1		113	// Secondary current 3 tune quadratic coefficient P1 x1000
-#define REG_SVOLTAGE1_FINE_P0		114	// Secondary voltage 1 tune quadratic coefficient P0 (in V x10)
-#define REG_SVOLTAGE2_FINE_P0		115	// Secondary voltage 2 tune quadratic coefficient P0 (in V x10)
-#define REG_SCURRENT1_FINE_P0		116	// Secondary current 1 tune quadratic coefficient P0 (in uA)
-#define REG_SCURRENT2_FINE_P0		117	// Secondary current 2 tune quadratic coefficient P0 (in uA)
-#define REG_SCURRENT3_FINE_P0		118	// Secondary current 3 tune quadratic coefficient P0 (in uA)
+#define REG_TRANSFORMER_COFF		23	// Коэффициент трансформации
+#define REG_PRIM_VOLTAGE			24	// Напряжение первичной сторны (в В)
 //
 // ----------------------------------------
 //
-// 128 - 129
-#define REG_LIMIT_CURRENT			130	// Threshold current (in mA * 10)
-#define REG_LIMIT_VOLTAGE			131	// Maximum or test voltage (in V)
-#define REG_VOLTAGE_PLATE_TIME		132	// Voltage plate time in AC measurement mode (in ms)
-#define REG_VOLTAGE_AC_RATE			133	// Rate of increasing AC voltage (in kV/s * 10)
-#define REG_START_VOLTAGE_AC		134	// Start voltage for AC modes (in V)
-#define REG_VOLTAGE_FREQUENCY		135	// Voltage frequency (in Hz)
-#define REG_FREQUENCY_DIVISOR		136	// Divisor for voltage pulses rate
-#define REG_SCOPE_RATE				137	// Scope rate divisor
+#define REG_TARGET_VOLTAGE			128	// Действующее напряжение уставки (в В)
+#define REG_LIMIT_CURRENT_mA		129	// Предельный ток (часть мА)
+#define REG_LIMIT_CURRENT_uA		130	// Предельный ток (часть мкА)
+#define REG_ACTIVE_MODE				131	// Режим измерения активной составляющей тока
+#define REG_VOLTAGE_PLATE_TIME		132	// Длительность формирования полки (в сек)
+#define REG_SCOPE_RATE				133	// Делитель логгирования данных
 //
 #define REG_DBG_SRAM				170	// Write saw-shape debug sequence to SRAM
 #define REG_DBG_MUTE_PWM			171	// Mute PWM output
-#define REG_DBG_DUAL_POLARITY		172	// Use data points of both signs
-#define REG_DBG_READ_XY_FRAGMENT	173	// Fragment length for XY plot
-//
-#define REG_PWD_1					180	// Unlock password location 1
-#define REG_PWD_2					181	// Unlock password location 2
-#define REG_PWD_3					182	// Unlock password location 3
-#define REG_PWD_4					183	// Unlock password location 4
 //
 // ----------------------------------------
 //

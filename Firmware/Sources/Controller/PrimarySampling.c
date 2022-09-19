@@ -33,6 +33,6 @@ Int16U PS_GetBatteryVoltage()
 		Result += *(ResStartAddr + i);
 
 	ZwADC_ProcessInterruptSEQ1();
-	return Result * DataTable[REG_CAP_V_COFF_N] / DataTable[REG_CAP_V_COFF_D] / SAMPLE_LENGTH;
+	return Result * DataTable[REG_CAP_COEFF] / 1000 / SAMPLE_LENGTH;
 }
 // ----------------------------------------

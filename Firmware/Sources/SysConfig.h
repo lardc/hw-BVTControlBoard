@@ -105,15 +105,16 @@
 
 // PWM
 //--------------------------------------------------------
-#define PWM_FREQUENCY		20000L      // 20 kHz
-#define PWM_TH				1000	    // 1000 ns
+#define PWM_FREQUENCY		20000L      // in Hz
+#define PWM_MIN_TH			1000	    // in ns
+#define PWM_MAX_SAT			95			// in %
 #define PWM_SATURATION		((Int16S)(ZW_PWM_DUTY_BASE * 0.95f))
 //--------------------------------------------------------
 
 // MISCELLANEOUS
 //--------------------------------------------------------
-#define MSC_PON_DELAY_MS	500			// 500 ms
-#define MSC_PON_SPI_RST		2000		// 2000 ms
+#define MSC_PON_DELAY_MS	500			// in ms
+#define MSC_PON_SPI_RST		2000		// in ms
 //--------------------------------------------------------
 
 #endif // __SYSCONFIG_H

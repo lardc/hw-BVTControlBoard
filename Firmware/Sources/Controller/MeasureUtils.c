@@ -178,6 +178,9 @@ void MU_InitCoeffCurrent3()
 }
 // ----------------------------------------
 
+#ifdef BOOT_FROM_FLASH
+	#pragma CODE_SECTION(MU_CalcX, "ramfuncs");
+#endif
 _iq MU_CalcX(pMeasureCoeff Coeff, Int32S RawValue, Boolean RMSFineCorrection)
 {
 	_iq tmp = _IQmpyI32(Coeff->K, RawValue);
@@ -192,24 +195,36 @@ _iq MU_CalcX(pMeasureCoeff Coeff, Int32S RawValue, Boolean RMSFineCorrection)
 }
 // ----------------------------------------
 
+#ifdef BOOT_FROM_FLASH
+	#pragma CODE_SECTION(MU_CalcVoltage, "ramfuncs");
+#endif
 _iq MU_CalcVoltage(Int32S RawValue, Boolean RMSFineCorrection)
 {
 	return MU_CalcX(&Voltage, RawValue, RMSFineCorrection);
 }
 // ----------------------------------------
 
+#ifdef BOOT_FROM_FLASH
+	#pragma CODE_SECTION(MU_CalcCurrent1, "ramfuncs");
+#endif
 _iq MU_CalcCurrent1(Int32S RawValue, Boolean RMSFineCorrection)
 {
 	return MU_CalcX(&CurrentRange1, RawValue, RMSFineCorrection);
 }
 // ----------------------------------------
 
+#ifdef BOOT_FROM_FLASH
+	#pragma CODE_SECTION(MU_CalcCurrent2, "ramfuncs");
+#endif
 _iq MU_CalcCurrent2(Int32S RawValue, Boolean RMSFineCorrection)
 {
 	return MU_CalcX(&CurrentRange2, RawValue, RMSFineCorrection);
 }
 // ----------------------------------------
 
+#ifdef BOOT_FROM_FLASH
+	#pragma CODE_SECTION(MU_CalcCurrent2, "ramfuncs");
+#endif
 _iq MU_CalcCurrent3(Int32S RawValue, Boolean RMSFineCorrection)
 {
 	return MU_CalcX(&CurrentRange3, RawValue, RMSFineCorrection);
