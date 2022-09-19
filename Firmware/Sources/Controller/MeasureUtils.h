@@ -25,7 +25,7 @@ void MU_StartScope();
 // Log data to SRAM
 void MU_LogScopeValues(pDataSampleIQ Instant, pDataSampleIQ RMS, Int16S PWM, Boolean SRAMDebug);
 // Log following error
-void MU_LogScopeError(Int16S Value);
+void MU_LogScopeError(_iq Value);
 // Load data from SRAM
 void MU_LoadDataFragment();
 // Move scope pointer back

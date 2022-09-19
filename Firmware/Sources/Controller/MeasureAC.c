@@ -26,13 +26,13 @@
 #define PWM_LIMIT					(ZW_PWM_DUTY_BASE * PWM_MAX_SAT / 100)
 
 // Types
-typedef enum __ACProcessState
+typedef enum __ProcessState
 {
-	ACPS_None = 0,
-	ACPS_Ramp,
-	ACPS_Plate,
-	ACPS_Brake
-} ACProcessState;
+	PS_None = 0,
+	PS_Ramp,
+	PS_Plate,
+	PS_Break
+} ProcessState;
 
 typedef struct __RingBufferElement
 {
@@ -48,13 +48,14 @@ static Int16U RingBufferPointer;
 static Boolean RingBufferFull;
 
 static Int16S MinSafePWM, PWM;
-static Int16U RawZeroVoltage, RawZeroCurrent;
-static _iq TransAndPWMCoeff, Ki_err, Kp, Ki;
+static Int16U RawZeroVoltage, RawZeroCurrent, FECounter, FECounterMax;
+static _iq TransAndPWMCoeff, Ki_err, Kp, Ki, FEAbsolute, FERelative;
 static _iq TargetVrms, ControlVrms, PeriodCorrection, VrmsRateStep, LimitIrms;
 static Int32U TimeCounter, PlateCounterTop;
 static Boolean DbgMutePWM, DbgSRAM;
 
-static volatile ACProcessState State = ACPS_None;
+static ProcessState State;
+static ProcessBreakReason BreakReason;
 static CurrentCalc MAC_CurrentCalc;
 
 // Forward functions
@@ -82,20 +83,19 @@ Boolean MAC_StartProcess()
 }
 // ----------------------------------------
 
-void MAC_FinishProcess()
-{
-	CONTROL_SwitchRTCycle(FALSE);
-}
-// ----------------------------------------
-
 void inline MAC_SetPWM(Int16S pwm)
 {
 	ZwPWMB_SetValue12(DbgMutePWM ? 0 : pwm);
 }
 // ----------------------------------------
 
-void MAC_Stop(Int16U Reason)
+void MAC_RequestStop(ProcessBreakReason Reason)
 {
+	if(State != PS_Break)
+	{
+		State = PS_Break;
+		BreakReason = Reason;
+	}
 }
 // ----------------------------------------
 
@@ -106,8 +106,9 @@ static _iq MAC_PeriodController(_iq ActualVrms)
 {
 	_iq err = ControlVrms - ActualVrms;
 	Ki_err += _IQmpy(err, Ki);
+	PeriodCorrection = Ki_err + _IQmpy(err, Kp);
 
-	return Ki_err + _IQmpy(err, Kp);
+	return err;
 }
 // ----------------------------------------
 
@@ -167,30 +168,98 @@ static void MAC_ControlCycle()
 	DataSampleIQ Instant, RMS;
 	MAC_HandleVI(&Instant, &RMS);
 
-	// Циклическая работа регулятора
+	// Работа амплитудного регулятора
 	if(TimeCounter % SINE_PERIOD_PULSES == 0)
 	{
-		_iq PeriodCorrection = MAC_PeriodController(RMS.Voltage);
+		_iq PeriodError = MAC_PeriodController(RMS.Voltage);
+		MU_LogScopeError(PeriodError);
 
-		if(State == ACPS_Ramp)
+		// Проверка на ошибку следования
+		if(State != PS_Break && Kp && Ki &&
+				_IQdiv(_IQabs(PeriodError), ControlVrms) > FERelative && _IQabs(PeriodError) > FEAbsolute)
 		{
-			ControlVrms += VrmsRateStep;
-			if(ControlVrms > TargetVrms)
+			FECounter++;
+		}
+		else
+			FECounter = 0;
+
+		// Триггер ошибки следования
+		if(FECounter >= FECounterMax)
+		{
+			State = PS_Break;
+			BreakReason = PBR_FollowingError;
+		}
+		// Нормальное функционирование
+		else
+		{
+			switch(State)
 			{
-				ControlVrms = TargetVrms;
-				State = ACPS_Plate;
+				case PS_Ramp:
+					ControlVrms += VrmsRateStep;
+					if(ControlVrms > TargetVrms)
+					{
+						PlateCounterTop += TimeCounter;
+						ControlVrms = TargetVrms;
+						State = PS_Plate;
+					}
+					break;
+
+				case PS_Plate:
+					if(TimeCounter >= PlateCounterTop)
+						State = PS_Break;
+					break;
 			}
 		}
 	}
 
 	// Расчёт и уставка ШИМ
-	if(State == ACPS_Brake)
+	if(State == PS_Break)
+	{
 		PWM = (ABS(PWM) >= PWM_REDUCE_RATE) ? (PWM - SIGN(PWM) * PWM_REDUCE_RATE) : 0;
+
+		// Завершение процесса
+		if(PWM == 0)
+		{
+			CONTROL_SwitchRTCycle(FALSE);
+			CONTROL_SubcribeToCycle(NULL);
+
+			switch(BreakReason)
+			{
+				case PBR_None:
+					DataTable[REG_RESULT_V] = _IQint(RMS.Voltage);
+					DataTable[REG_RESULT_I_mA] = _IQint(RMS.Current);
+					DataTable[REG_RESULT_I_uA] = _IQmpyI32int(_IQfrac(RMS.Current), 1000);
+					DataTable[REG_FINISHED] = OPRESULT_OK;
+					break;
+
+				case PBR_FollowingError:
+					DataTable[REG_PROBLEM] = PROBLEM_FOLLOWING_ERROR;
+					DataTable[REG_FINISHED] = OPRESULT_FAIL;
+					break;
+
+				case PBR_RequestStop:
+					DataTable[REG_PROBLEM] = PROBLEM_STOP;
+					DataTable[REG_FINISHED] = OPRESULT_FAIL;
+					break;
+
+				case PBR_PWMSaturation:
+					DataTable[REG_PROBLEM] = PROBLEM_PWM_SATURATION;
+					DataTable[REG_FINISHED] = OPRESULT_FAIL;
+					break;
+			}
+
+			CONTROL_RequestStop();
+		}
+	}
 	else
+	{
 		PWM = MAC_CalculatePWM();
+		if(ABS(PWM) == PWM_LIMIT)
+			MAC_RequestStop(PBR_PWMSaturation);
+	}
 	MAC_SetPWM(PWM);
 
-	// Логгирование данных
+	// Логгирование мгновенных данных
 	MU_LogScopeValues(&Instant, &RMS, PWM, DbgSRAM);
 	TimeCounter++;
 }
@@ -242,6 +311,10 @@ static void MAC_CacheVariables()
 	RawZeroVoltage = DataTable[REG_RAW_ZERO_SVOLTAGE];
 	RawZeroCurrent = DataTable[REG_RAW_ZERO_SCURRENT];
 	
+	FEAbsolute = _IQI(DataTable[REG_FE_ABSOLUTE]);
+	FERelative = _FPtoIQ2(DataTable[REG_FE_RELATIVE], 100);
+	FECounterMax = DataTable[REG_FE_COUNTER_MAX];
+
 	DbgSRAM = DataTable[REG_DBG_SRAM] ? TRUE : FALSE;
 	DbgMutePWM = DataTable[REG_DBG_MUTE_PWM] ? TRUE : FALSE;
 	
@@ -254,9 +327,10 @@ static void MAC_CacheVariables()
 
 	// Сброс переменных
 	PWM = 0;
-	TimeCounter = 0;
+	FECounter = TimeCounter = 0;
 	Ki_err = 0;
 	PeriodCorrection = 0;
-	State = ACPS_Ramp;
+	State = PS_Ramp;
+	BreakReason = PBR_None;
 }
 // ----------------------------------------

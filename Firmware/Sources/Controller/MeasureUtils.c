@@ -105,12 +105,12 @@ void MU_SaveSampleToEP(pDataSample Sample, Int16U Index)
 #ifdef BOOT_FROM_FLASH
 	#pragma CODE_SECTION(MU_LogScopeError, "ramfuncs");
 #endif
-void MU_LogScopeError(Int16S Value)
+void MU_LogScopeError(_iq Value)
 {
 	if(ScopeDivErrCounter++ >= ScopeDivErrCounterMax)
 	{
 		ScopeDivErrCounter = 0;
-		MEMBUF_Values_Err[ErrorValuesCounter++] = Value;
+		MEMBUF_Values_Err[ErrorValuesCounter++] = _IQint(Value);
 
 		if(MEMBUF_ErrorValues_Counter < VALUES_x_SIZE)
 			MEMBUF_ErrorValues_Counter = ErrorValuesCounter;

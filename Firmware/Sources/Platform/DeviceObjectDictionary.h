@@ -57,8 +57,12 @@
 #define REG_KP						21	// Пропорциональный коэффициент регулятора х100
 #define REG_KI						22	// Интегральный коэффициент регулятора х100
 
-#define REG_TRANSFORMER_COFF		23	// Коэффициент трансформации
-#define REG_PRIM_VOLTAGE			24	// Напряжение первичной сторны (в В)
+#define REG_FE_ABSOLUTE				23	// Пороговая абсолютная ошибка регулирования действующего напряжения (в В)
+#define REG_FE_RELATIVE				24	// Пороговая относительная ошибка регулирования действующего напряжения (в %)
+#define REG_FE_COUNTER_MAX			25	// Максимальное количество срабатываний ошибки следования
+
+#define REG_TRANSFORMER_COFF		26	// Коэффициент трансформации
+#define REG_PRIM_VOLTAGE			27	// Напряжение первичной сторны (в В)
 //
 // ----------------------------------------
 //
@@ -80,10 +84,10 @@
 #define REG_WARNING					195	// Warning if present
 #define REG_PROBLEM					196	// Problem reason
 #define REG_FINISHED				197	// Indicates that test is done and there is result or fault
-#define REG_RESULT_V				198	// Test result (in V)
-#define REG_RESULT_I				199	// Test result (mA * 10 or uA)
-#define REG_RESULT_I_UA_R			200	// Resistance result R for DC-mode (in MOhm * 10) or Test result mA fraction for AC mode (in uA)
-#define REG_VOLTAGE_ON_PLATE		201	// Indicates voltage plate region
+//
+#define REG_RESULT_V				200	// Test result (in V)
+#define REG_RESULT_I_mA				201	// Test result (mA part)
+#define REG_RESULT_I_uA				202	// Test result (uA part)
 //
 #define REG_ACTUAL_PRIM_VOLTAGE		210	// Primary side capacitor voltage based on sensing (in V)
 //
@@ -121,15 +125,6 @@
 #define EP16_PWM					7	// Endpoint for PWM value sequence
 #define EP16_Error					8	// Endpoint for V following error
 
-
-// MEASUREMENT TYPE
-//
-#define MEASUREMENT_TYPE_NONE		0	// None
-#define MEASUREMENT_TYPE_AC			1	// AC full wave
-#define MEASUREMENT_TYPE_AC_D		2	// AC positive polarity
-#define MEASUREMENT_TYPE_AC_R		3	// AC negative polarity
-#define MEASUREMENT_TYPE_TEST		6	// Test sine wave
-
 // OPERATION RESULTS
 //
 #define OPRESULT_NONE				0	// No information or not finished
@@ -139,33 +134,17 @@
 // PROBLEM CODES
 //
 #define PROBLEM_NONE				0	// No problem
-#define PROBLEM_STOP				100	// Stop by user command
-#define PROBLEM_OUTPUT_SHORT		101	// Output short circuit
+#define PROBLEM_STOP				1	// Stop by user command
+#define PROBLEM_FOLLOWING_ERROR		2	// Following error
+#define PROBLEM_PWM_SATURATION		3	// PWM reached upper limit
 
 // FAULT & DISABLE
 //
-#define DF_NONE						0	// No faults
-#define DF_BRIDGE_SHORT				200	// Bridge current overload
-#define DF_TEMP_MON					201	// Bridge temperature overload
-#define DF_OPTO_CON_ERROR			202	// Optical connection error
-#define DF_LOW_SIDE_PS				203	// Low-side power supply fault
-#define DF_FOLLOWING_ERROR			204	// Voltage following error
-#define DF_PWM_SATURATION			205	// Detected PWM output saturation
-#define DF_INTERNAL					0xFFFF
-
-// Start-up check
-//
-#define DISABLE_NO_SHORT_SIGNAL		300	// Short signal low or disconnected on startup
-#define DISABLE_NO_TEMP_SIGNAL		301	// Temperature signal low or disconnected on startup
+#define DF_NONE						0	// No fault
 
 // WARNING CODES
 //
 #define WARNING_NONE				0	// No warning
-#define WARNING_CURRENT_NOT_REACHED 401	// No trip condition detected in I-mode
-#define WARNING_VOLTAGE_NOT_REACHED 402	// Trip condition detected in V-mode
-#define WARNING_RES_OUT_OF_RANGE	403	// Resistance is too low or too high
-#define WARNING_OUTPUT_OVERLOAD		404	// Output overload
-//
 #define WARNING_WATCHDOG_RESET		1001	// System has been reseted by WD
 
 // USER ERROR CODES
@@ -174,7 +153,6 @@
 #define ERR_CONFIGURATION_LOCKED	1	// Device is locked for writing
 #define ERR_OPERATION_BLOCKED		2	// Operation can't be done due to current device state
 #define ERR_DEVICE_NOT_READY		3	// Device isn't ready to switch state
-#define ERR_WRONG_PWD				4	// Wrong password - unlock failed
 
 
 #endif	// __DEV_OBJ_DIC_H

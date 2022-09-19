@@ -21,8 +21,6 @@
 
 // Types
 //
-typedef void (*FUNC_AsyncDelegate)();
-//
 typedef struct __EndTestDPCClosure
 {
 	Boolean SavedRequestToDisable;
@@ -51,9 +49,6 @@ volatile Int64U CONTROL_TimeCounter = 0;
 volatile DeviceState CONTROL_State = DS_None;
 //
 static CONTROL_FUNC_RealTimeRoutine RealTimeRoutine = NULL;
-static EndTestDPCClosure EndXDPCArgument = { FALSE, 0, 0, DF_NONE, WARNING_NONE, PROBLEM_NONE };
-//
-static volatile FUNC_AsyncDelegate DPCDelegate = NULL;
 //
 // Boot-loader flag
 #pragma DATA_SECTION(CONTROL_BootLoaderRequest, "bl_flag");
@@ -117,20 +112,6 @@ void CONTROL_Idle()
 {
 	DEVPROFILE_ProcessRequests();
 	DataTable[REG_ACTUAL_PRIM_VOLTAGE] = PS_GetBatteryVoltage();
-
-	// Process deferred procedures
-	if(DPCDelegate)
-	{
-		FUNC_AsyncDelegate del = DPCDelegate;
-		DPCDelegate = NULL;
-		del();
-	}
-}
-// ----------------------------------------
-
-void inline CONTROL_RequestDPC(FUNC_AsyncDelegate Action)
-{
-	DPCDelegate = Action;
 }
 // ----------------------------------------
 
@@ -159,34 +140,9 @@ void CONTROL_SubcribeToCycle(CONTROL_FUNC_RealTimeRoutine Routine)
 }
 // ----------------------------------------
 
-void CONTROL_RequestStop(Int16U Reason, Boolean HWSignal)
+void CONTROL_RequestStop()
 {
-	if(CONTROL_State == DS_InProcess)
-	{
-		MAC_Stop(Reason);
-	}
-	else if(HWSignal)
-	{
-		EndXDPCArgument.SavedRequestToDisable = TRUE;
-		EndXDPCArgument.SavedDFReason = Reason;
-
-		CONTROL_RequestDPC(&CONTROL_EndPassiveDPC);
-	}
-}
-// ----------------------------------------
-
-void CONTROL_NotifyEndTest(_iq BVTResultV, _iq BVTResultI, Int16U DFReason, Int16U Problem, Int16U Warning)
-{
-	// Save values for further processing
-	EndXDPCArgument.SavedResultV = _IQint(BVTResultV);
-	EndXDPCArgument.SavedResultI = _IQmpyI32int(BVTResultI, 10);
-	DataTable[REG_RESULT_I_UA_R] = (BVTResultI > 0) ? _IQmpyI32int(_IQfrac(BVTResultI), 1000) : 0;
-	//
-	EndXDPCArgument.SavedDFReason = DFReason;
-	EndXDPCArgument.SavedProblem = Problem;
-	EndXDPCArgument.SavedWarning = Warning;
-
-	CONTROL_RequestDPC(&CONTROL_EndTestDPC);
+	CONTROL_SetDeviceState(DS_Powered);
 }
 // ----------------------------------------
 
@@ -196,47 +152,16 @@ void CONTROL_NotifyCANFault(ZwCAN_SysFlags Flag)
 }
 // ----------------------------------------
 
-void CONTROL_EndTestDPC()
-{
-	MAC_FinishProcess();
-
-	if(EndXDPCArgument.SavedDFReason != DF_NONE)
-		CONTROL_SwitchStateToFault(EndXDPCArgument.SavedDFReason);
-	else
-	{
-		DataTable[REG_FINISHED] = (EndXDPCArgument.SavedProblem == PROBLEM_NONE) ? OPRESULT_OK : OPRESULT_FAIL;
-		DataTable[REG_WARNING] = EndXDPCArgument.SavedWarning;
-		DataTable[REG_PROBLEM] = (EndXDPCArgument.SavedProblem == PROBLEM_OUTPUT_SHORT) ? PROBLEM_NONE : EndXDPCArgument.SavedProblem;
-		DataTable[REG_RESULT_V] = EndXDPCArgument.SavedResultV;
-		DataTable[REG_RESULT_I] = EndXDPCArgument.SavedResultI;
-		CONTROL_SetDeviceState(DS_Powered);
-	}
-
-	CONTROL_ReInitSPI_Rx();
-}
-// ----------------------------------------
-
-void CONTROL_EndPassiveDPC()
-{
-	if(EndXDPCArgument.SavedRequestToDisable)
-		CONTROL_SwitchStateToFault(EndXDPCArgument.SavedDFReason);
-}
-// ----------------------------------------
-
 void CONTROL_ResetValues()
 {
-	// Set volatile states
-	DataTable[REG_DEV_STATE] = (Int16U)DS_None;
 	DataTable[REG_FAULT_REASON] = DF_NONE;
 	DataTable[REG_DISABLE_REASON] = DF_NONE;
 	DataTable[REG_WARNING] = WARNING_NONE;
 	DataTable[REG_PROBLEM] = PROBLEM_NONE;
-	DataTable[REG_FINISHED] = OPRESULT_OK;
+	DataTable[REG_FINISHED] = OPRESULT_NONE;
 	DataTable[REG_RESULT_V] = 0;
-	DataTable[REG_RESULT_I] = 0;
-	DataTable[REG_RESULT_I_UA_R] = 0;
-	//
-	DataTable[REG_ACTUAL_PRIM_VOLTAGE] = 0;
+	DataTable[REG_RESULT_I_mA] = 0;
+	DataTable[REG_RESULT_I_uA] = 0;
 }
 // ----------------------------------------
 
@@ -261,57 +186,37 @@ Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U UserError)
 	switch(ActionID)
 	{
 		case ACT_ENABLE_POWER:
-			{
-				if(CONTROL_State == DS_None)
-				{
-					CONTROL_SetDeviceState(DS_Powered);
-				}
-				else
-					*UserError = ERR_DEVICE_NOT_READY;
-			}
+			if(CONTROL_State == DS_None)
+				CONTROL_SetDeviceState(DS_Powered);
+			else if(CONTROL_State != DS_Powered)
+				*UserError = ERR_DEVICE_NOT_READY;
 			break;
 
 		case ACT_DISABLE_POWER:
-			{
-				if(CONTROL_State == DS_InProcess || CONTROL_State == DS_Stopping)
-					*UserError = ERR_OPERATION_BLOCKED;
-				else if(CONTROL_State == DS_Powered)
-					CONTROL_SetDeviceState(DS_None);
-			}
+			if(CONTROL_State == DS_InProcess)
+				*UserError = ERR_OPERATION_BLOCKED;
+			else
+				CONTROL_SetDeviceState(DS_None);
 			break;
 
 		case ACT_START_TEST:
+			if(CONTROL_State == DS_InProcess)
+				*UserError = ERR_OPERATION_BLOCKED;
+			else if(CONTROL_State == DS_Powered)
 			{
-				if(CONTROL_State == DS_InProcess || CONTROL_State == DS_Stopping)
-				{
-					*UserError = ERR_OPERATION_BLOCKED;
-				}
-				else if(CONTROL_State == DS_Powered)
-				{
-					DataTable[REG_FINISHED] = OPRESULT_NONE;
-					DataTable[REG_PROBLEM] = PROBLEM_NONE;
-					DataTable[REG_WARNING] = WARNING_NONE;
-					DataTable[REG_RESULT_V] = 0;
-					DataTable[REG_RESULT_I] = 0;
-					DataTable[REG_RESULT_I_UA_R] = 0;
-					DEVPROFILE_ResetScopes(0);
-					DEVPROFILE_ResetEPReadState();
+				CONTROL_ResetValues();
+				DEVPROFILE_ResetScopes(0);
+				DEVPROFILE_ResetEPReadState();
 
-					CONTROL_StartSequence();
-				}
-				else
-					*UserError = ERR_DEVICE_NOT_READY;
+				CONTROL_StartSequence();
 			}
+			else
+				*UserError = ERR_DEVICE_NOT_READY;
 			break;
 
 		case ACT_STOP:
-			{
-				if(CONTROL_State == DS_InProcess)
-				{
-					CONTROL_RequestDPC(NULL);
-					CONTROL_SetDeviceState(DS_Powered);
-				}
-			}
+			if(CONTROL_State == DS_InProcess)
+				MAC_RequestStop(PBR_RequestStop);
 			break;
 
 		case ACT_READ_FRAGMENT:
@@ -325,18 +230,10 @@ Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U UserError)
 			break;
 
 		case ACT_CLR_FAULT:
+			if(CONTROL_State == DS_Fault)
 			{
-				if(CONTROL_State == DS_Fault)
-				{
-					CONTROL_ReInitSPI_Rx();
-					CONTROL_SetDeviceState(DS_None);
-
-					DataTable[REG_WARNING] = WARNING_NONE;
-					DataTable[REG_FAULT_REASON] = DF_NONE;
-				}
-				else if(CONTROL_State == DS_Disabled)
-					*UserError = ERR_OPERATION_BLOCKED;
-
+				CONTROL_SetDeviceState(DS_None);
+				DataTable[REG_FAULT_REASON] = DF_NONE;
 			}
 			break;
 
@@ -386,6 +283,6 @@ void CONTROL_StartSequence()
 	if(MAC_StartProcess())
 		CONTROL_SetDeviceState(DS_InProcess);
 	else
-		CONTROL_SwitchStateToFault(DF_OPTO_CON_ERROR);
+		CONTROL_SwitchStateToFault(0);
 }
 // ----------------------------------------
