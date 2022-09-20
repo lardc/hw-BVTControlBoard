@@ -21,6 +21,9 @@
 #define I_RANGE2				_IQ(10)
 #define I_RANGE3				_IQ(100)
 
+// Допустимое отклонение напряжения первичной стороны (в %)
+#define PRIM_V_MAX_DELTA		5
+
 // Regulator parameters
 #define PWM_REDUCE_RATE			50				// in ticks per regulator cycle
 

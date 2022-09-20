@@ -45,6 +45,7 @@ Int16U MEMBUF_Values_Err[VALUES_x_SIZE];
 volatile Int16U MEMBUF_ScopeValues_Counter = 0;
 volatile Int16U MEMBUF_ErrorValues_Counter = 0;
 //
+static Int16U PrimaryVoltage;
 volatile Int64U CONTROL_TimeCounter = 0;
 volatile DeviceState CONTROL_State = DS_None;
 volatile Boolean CONTROL_DataReceiveAck = FALSE;
@@ -112,7 +113,7 @@ void CONTROL_Init()
 void CONTROL_Idle()
 {
 	DEVPROFILE_ProcessRequests();
-	DataTable[REG_ACTUAL_PRIM_VOLTAGE] = PS_GetBatteryVoltage();
+	DataTable[REG_ACTUAL_PRIM_VOLTAGE] = PrimaryVoltage = PS_GetBatteryVoltage();
 }
 // ----------------------------------------
 
@@ -302,10 +303,17 @@ void CONTROL_ReInitSPI_Rx()
 
 void CONTROL_StartSequence()
 {
-	MU_StartScope();
-	if(MAC_StartProcess())
-		CONTROL_SetDeviceState(DS_InProcess);
+	// Проверка напряжения первичной стороны
+	Int16U Delta = ABS((Int32S)PrimaryVoltage - DataTable[REG_PRIM_VOLTAGE]) * 100 / DataTable[REG_PRIM_VOLTAGE];
+	if(Delta <= PRIM_V_MAX_DELTA)
+	{
+		MU_StartScope();
+		if(MAC_StartProcess())
+			CONTROL_SetDeviceState(DS_InProcess);
+		else
+			CONTROL_SwitchStateToFault(DF_OPTICAL_INTERFACE);
+	}
 	else
-		CONTROL_SwitchStateToFault(DF_OPTICAL_INTERFACE);
+		CONTROL_SwitchStateToFault(DF_PRIMARY_VOLTAGE);
 }
 // ----------------------------------------

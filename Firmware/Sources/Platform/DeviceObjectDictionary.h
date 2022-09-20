@@ -142,6 +142,8 @@
 //
 #define DF_NONE						0	// No fault
 #define DF_OPTICAL_INTERFACE		1	// Optical interface failure
+#define DF_PRIMARY_VOLTAGE			2	// Primary voltage failure
+
 
 // WARNING CODES
 //
