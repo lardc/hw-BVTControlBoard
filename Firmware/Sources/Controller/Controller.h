@@ -40,6 +40,7 @@ extern Int16U MEMBUF_Values_Err[];
 
 extern volatile Int16U MEMBUF_ScopeValues_Counter;
 extern volatile Int16U MEMBUF_ErrorValues_Counter;
+extern volatile Boolean CONTROL_DataReceiveAck;
 
 // Functions
 // Initialize controller
@@ -47,7 +48,8 @@ void CONTROL_Init();
 // Do background idle operation
 void CONTROL_Idle();
 // Real-time control routine
-void CONTROL_RealTimeCycle();
+void CONTROL_DataRequestRoutine();
+void CONTROL_DataPostReceiveRoutine();
 // Switch-on/off real-time cycle
 void CONTROL_SwitchRTCycle(Boolean Enable);
 // Subscribe to real-time cycle

@@ -225,17 +225,16 @@ void InitializeController()
 //
 #pragma INTERRUPT(Timer0_ISR, HPI);
 
-ISRCALL Timer0_ISR(void)
+ISRCALL Timer0_ISR()
 {
-	// Request sample
-	SS_GetData(FALSE);
+	CONTROL_DataRequestRoutine();
 
 	// allow other interrupts from group 1
 	TIMER0_ISR_DONE;
 }
 // -----------------------------------------
 
-ISRCALL Timer2_ISR(void)
+ISRCALL Timer2_ISR()
 {
 	static Int16U dbgCounter = 0;
 
@@ -262,7 +261,7 @@ ISRCALL Timer2_ISR(void)
 // -----------------------------------------
 
 // ADC SEQ1 ISR
-ISRCALL SEQ1_ISR(void)
+ISRCALL SEQ1_ISR()
 {
 	// Handle interrupt
 	ZwADC_ProcessInterruptSEQ1();
@@ -275,7 +274,7 @@ ISRCALL SEQ1_ISR(void)
 // -----------------------------------------
 
 // Line 0 ISR
-ISRCALL CAN0_ISR(void)
+ISRCALL CAN0_ISR()
 {
     // handle CAN system events
 	ZwCANa_DispatchSysEvent();
@@ -296,7 +295,7 @@ ISRCALL SPIaRX_ISR()
 // -----------------------------------------
 
 // ILLEGAL ISR
-ISRCALL IllegalInstruction_ISR(void)
+ISRCALL IllegalInstruction_ISR()
 {
 	// Disable interrupts
 	DINT;

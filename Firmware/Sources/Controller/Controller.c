@@ -47,6 +47,7 @@ volatile Int16U MEMBUF_ErrorValues_Counter = 0;
 //
 volatile Int64U CONTROL_TimeCounter = 0;
 volatile DeviceState CONTROL_State = DS_None;
+volatile Boolean CONTROL_DataReceiveAck = FALSE;
 //
 static CONTROL_FUNC_RealTimeRoutine RealTimeRoutine = NULL;
 //
@@ -116,9 +117,28 @@ void CONTROL_Idle()
 // ----------------------------------------
 
 #ifdef BOOT_FROM_FLASH
-	#pragma CODE_SECTION(CONTROL_RealTimeCycle, "ramfuncs");
+	#pragma CODE_SECTION(CONTROL_DataRequestRoutine, "ramfuncs");
 #endif
-void CONTROL_RealTimeCycle()
+void CONTROL_DataRequestRoutine()
+{
+	if(CONTROL_DataReceiveAck)
+	{
+		CONTROL_DataReceiveAck = FALSE;
+		SS_GetData(FALSE);
+	}
+	else
+	{
+		CONTROL_SubcribeToCycle(NULL);
+		CONTROL_SwitchRTCycle(FALSE);
+		CONTROL_SwitchStateToFault(DF_OPTICAL_INTERFACE);
+	}
+}
+// ----------------------------------------
+
+#ifdef BOOT_FROM_FLASH
+	#pragma CODE_SECTION(CONTROL_DataPostReceiveRoutine, "ramfuncs");
+#endif
+void CONTROL_DataPostReceiveRoutine()
 {
 	if(RealTimeRoutine)
 		RealTimeRoutine();
@@ -128,7 +148,10 @@ void CONTROL_RealTimeCycle()
 void CONTROL_SwitchRTCycle(Boolean Enable)
 {
 	if(Enable)
+	{
+		CONTROL_DataReceiveAck = TRUE;
 		ZwTimer_StartT0();
+	}
 	else
 		ZwTimer_StopT0();
 }

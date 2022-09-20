@@ -95,7 +95,8 @@ void SS_HandleSlaveTransmission()
 					RxAck = TRUE;
 					SS_Voltage = InputBuffer[1];
 					SS_Current = InputBuffer[2];
-					CONTROL_RealTimeCycle();
+					CONTROL_DataReceiveAck = TRUE;
+					CONTROL_DataPostReceiveRoutine();
 					break;
 
 				case IBP_CMD_CFG_SWITCH:
