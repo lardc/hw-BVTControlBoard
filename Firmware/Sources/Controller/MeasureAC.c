@@ -64,17 +64,14 @@ static void MAC_HandleVI(pDataSampleIQ Instant, pDataSampleIQ RMS);
 static _iq MAC_SQRoot(Int32U Value);
 static _iq MAC_PeriodController();
 static void MAC_ControlCycle();
-static void MAC_CacheVariables();
+static Boolean MAC_InitStartState();
 
 // Functions
 Boolean MAC_StartProcess()
 {
-	MAC_CacheVariables();
+	if(!MAC_InitStartState())
+		return FALSE;
 
-	// Enable PWM generation
-	ZwPWMB_SetValue12(0);
-	ZwPWM_Enable(TRUE);
-	
 	// Enable control cycle
 	CONTROL_SubcribeToCycle(MAC_ControlCycle);
 	CONTROL_SwitchRTCycle(TRUE);
@@ -293,7 +290,7 @@ static Int16S MAC_CalculatePWM()
 }
 // ----------------------------------------
 
-static void MAC_CacheVariables()
+static void MAC_InitStartState()
 {
 	TargetVrms = _IQI(DataTable[REG_TARGET_VOLTAGE]);
 	LimitIrms = _IQI(DataTable[REG_LIMIT_CURRENT_mA]) + _FPtoIQ2(DataTable[REG_LIMIT_CURRENT_uA], 1000);
@@ -332,5 +329,15 @@ static void MAC_CacheVariables()
 	PeriodCorrection = 0;
 	State = PS_Ramp;
 	BreakReason = PBR_None;
+
+	// Конфигурация оцифровщика
+	SS_Ping();
+
+	if(LimitIrms <= I_RANGE1)
+		return SS_SelectShunt(SwitchConfig_I1);
+	else if(LimitIrms <= I_RANGE2)
+		return SS_SelectShunt(SwitchConfig_I2);
+	else if(LimitIrms <= I_RANGE3)
+		return SS_SelectShunt(SwitchConfig_I3);
 }
 // ----------------------------------------

@@ -283,6 +283,6 @@ void CONTROL_StartSequence()
 	if(MAC_StartProcess())
 		CONTROL_SetDeviceState(DS_InProcess);
 	else
-		CONTROL_SwitchStateToFault(0);
+		CONTROL_SwitchStateToFault(DF_OPTICAL_INTERFACE);
 }
 // ----------------------------------------

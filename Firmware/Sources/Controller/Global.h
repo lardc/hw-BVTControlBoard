@@ -16,12 +16,12 @@
 #define EP_COUNT				8
 #define VALUES_x_SIZE			500
 
+// RMS current range limits (in mA)
+#define I_RANGE1				_IQ(1)
+#define I_RANGE2				_IQ(10)
+#define I_RANGE3				_IQ(100)
+
 // Regulator parameters
 #define PWM_REDUCE_RATE			50				// in ticks per regulator cycle
-
-// Following error settings
-#define FE_MAX_ABSOLUTE			_IQ(500)		// in V
-#define FE_MAX_FRACTION			_IQ(0.2f)		// part of 1
-#define FE_MAX_COUNTER			3
 
 #endif // __GLOBAL_H

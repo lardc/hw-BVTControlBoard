@@ -196,6 +196,8 @@ void InitializeCAN()
 void InitializePWM()
 {
 	ZwPWMB_InitBridge12(CPU_FRQ, PWM_FREQUENCY, 0, 0, 0, PWM_SATURATION);
+	ZwPWMB_SetValue12(0);
+	ZwPWM_Enable(TRUE);
 }
 // -----------------------------------------
 
