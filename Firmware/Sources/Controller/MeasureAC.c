@@ -165,6 +165,10 @@ static void MAC_ControlCycle()
 	DataSampleIQ Instant, RMS;
 	MAC_HandleVI(&Instant, &RMS);
 
+	// Проверка превышения значения тока
+	if(RMS.Current >= LimitIrms)
+		MAC_RequestStop(PBR_CurrentLimit);
+
 	// Работа амплитудного регулятора
 	if(TimeCounter % SINE_PERIOD_PULSES == 0)
 	{
@@ -182,10 +186,8 @@ static void MAC_ControlCycle()
 
 		// Триггер ошибки следования
 		if(FECounter >= FECounterMax)
-		{
-			State = PS_Break;
-			BreakReason = PBR_FollowingError;
-		}
+			MAC_RequestStop(PBR_FollowingError);
+
 		// Нормальное функционирование
 		else
 		{
@@ -290,7 +292,7 @@ static Int16S MAC_CalculatePWM()
 }
 // ----------------------------------------
 
-static void MAC_InitStartState()
+static Boolean MAC_InitStartState()
 {
 	TargetVrms = _IQI(DataTable[REG_TARGET_VOLTAGE]);
 	LimitIrms = _IQI(DataTable[REG_LIMIT_CURRENT_mA]) + _FPtoIQ2(DataTable[REG_LIMIT_CURRENT_uA], 1000);
@@ -320,8 +322,6 @@ static void MAC_InitStartState()
 	MU_InitCoeffCurrent2();
 	MU_InitCoeffCurrent3();
 
-	MAC_CurrentCalc = MU_CalcCurrent1;
-
 	// Сброс переменных
 	PWM = 0;
 	FECounter = TimeCounter = 0;
@@ -334,10 +334,19 @@ static void MAC_InitStartState()
 	SS_Ping();
 
 	if(LimitIrms <= I_RANGE1)
+	{
+		MAC_CurrentCalc = MU_CalcCurrent1;
 		return SS_SelectShunt(SwitchConfig_I1);
+	}
 	else if(LimitIrms <= I_RANGE2)
+	{
+		MAC_CurrentCalc = MU_CalcCurrent2;
 		return SS_SelectShunt(SwitchConfig_I2);
-	else if(LimitIrms <= I_RANGE3)
+	}
+	else
+	{
+		MAC_CurrentCalc = MU_CalcCurrent3;
 		return SS_SelectShunt(SwitchConfig_I3);
+	}
 }
 // ----------------------------------------
