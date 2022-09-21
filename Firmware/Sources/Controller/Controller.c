@@ -90,7 +90,7 @@ void CONTROL_Init()
 	CONTROL_ResetValues();
 
 	// Device profile initialization
-	Boolean MaskChanges = FALSE;
+	static Boolean MaskChanges = FALSE;
 	DEVPROFILE_Init(&CONTROL_DispatchAction, &MaskChanges);
 	DEVPROFILE_InitEPService(EPIndexes, EPSized, EPCounters, EPDatas);
 	// Reset control values

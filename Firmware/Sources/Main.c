@@ -33,8 +33,6 @@ ISRCALL Timer0_ISR();
 ISRCALL Timer2_ISR();
 // CAN Line 0 ISR
 ISRCALL CAN0_ISR();
-// ADC SEQ1 ISR
-ISRCALL SEQ1_ISR();
 // SPI-A RX ISR
 ISRCALL SPIaRX_ISR();
 // ILLEGAL ISR
@@ -74,7 +72,6 @@ void main()
 		ADD_ISR(TINT0, Timer0_ISR);
 		ADD_ISR(TINT2, Timer2_ISR);
 		ADD_ISR(ECAN0INTA, CAN0_ISR);
-		ADD_ISR(SEQ1INT, SEQ1_ISR);
 		ADD_ISR(SPIRXINTA, SPIaRX_ISR);
 		ADD_ISR(ILLEGAL, IllegalInstruction_ISR);
 	END_ISR_MAP
@@ -219,7 +216,6 @@ void InitializeController()
 #ifdef BOOT_FROM_FLASH
 	#pragma CODE_SECTION(Timer0_ISR, "ramfuncs");
 	#pragma CODE_SECTION(Timer2_ISR, "ramfuncs");
-	#pragma CODE_SECTION(SEQ1_ISR, "ramfuncs");
 	#pragma CODE_SECTION(SPIaRX_ISR, "ramfuncs");
 #endif
 //
@@ -257,19 +253,6 @@ ISRCALL Timer2_ISR()
 
 	// no PIE
 	TIMER2_ISR_DONE;
-}
-// -----------------------------------------
-
-// ADC SEQ1 ISR
-ISRCALL SEQ1_ISR()
-{
-	// Handle interrupt
-	ZwADC_ProcessInterruptSEQ1();
-	// Dispatch results
-	ZwADC_Dispatch1();
-
-	// allow other interrupts from group 1
-	ADC_ISR_DONE;
 }
 // -----------------------------------------
 

@@ -26,6 +26,7 @@ Int16U PS_GetBatteryVoltage()
 {
 	ZwADC_StartSEQ1();
 	while(ZwADC_IsSEQ1Busy());
+	DELAY_US(10);
 
 	Int32U i, Result = 0;
 	pInt16U ResStartAddr = ZwADC_GetValues1();
