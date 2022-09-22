@@ -49,7 +49,7 @@ void CONTROL_Init();
 void CONTROL_Idle();
 // Real-time control routine
 void CONTROL_DataRequestRoutine();
-void CONTROL_DataPostReceiveRoutine();
+void CONTROL_RealTimeACRoutine();
 // Switch-on/off real-time cycle
 void CONTROL_SwitchRTCycle(Boolean Enable);
 // Subscribe to real-time cycle

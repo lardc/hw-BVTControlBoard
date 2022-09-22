@@ -126,6 +126,7 @@ void CONTROL_DataRequestRoutine()
 	{
 		CONTROL_DataReceiveAck = FALSE;
 		SS_GetData(FALSE);
+		CONTROL_RealTimeACRoutine();
 	}
 	else
 	{
@@ -137,9 +138,9 @@ void CONTROL_DataRequestRoutine()
 // ----------------------------------------
 
 #ifdef BOOT_FROM_FLASH
-	#pragma CODE_SECTION(CONTROL_DataPostReceiveRoutine, "ramfuncs");
+	#pragma CODE_SECTION(CONTROL_RealTimeACRoutine, "ramfuncs");
 #endif
-void CONTROL_DataPostReceiveRoutine()
+void CONTROL_RealTimeACRoutine()
 {
 	if(RealTimeRoutine)
 		RealTimeRoutine();
@@ -150,6 +151,7 @@ void CONTROL_SwitchRTCycle(Boolean Enable)
 {
 	if(Enable)
 	{
+		SS_Voltage = SS_Current = 0;
 		CONTROL_DataReceiveAck = TRUE;
 		ZwTimer_StartT0();
 	}
@@ -266,10 +268,7 @@ Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U UserError)
 			break;
 
 		case ACT_DBG_DIGI_GET_PACKET:
-			if(CONTROL_State == DS_None)
-				SS_GetLastMessage();
-			else
-				*UserError = ERR_OPERATION_BLOCKED;
+			SS_GetLastMessage();
 			break;
 
 		case ACT_DBG_DIGI_PING:
@@ -305,7 +304,7 @@ void CONTROL_StartSequence()
 {
 	// Проверка напряжения первичной стороны
 	Int16U Delta = ABS((Int32S)PrimaryVoltage - DataTable[REG_PRIM_VOLTAGE]) * 100 / DataTable[REG_PRIM_VOLTAGE];
-	if(Delta <= PRIM_V_MAX_DELTA)
+	if(Delta <= PRIM_V_MAX_DELTA || DataTable[REG_PRIM_IGNORE_CHECK])
 	{
 		MU_StartScope();
 		if(MAC_StartProcess())

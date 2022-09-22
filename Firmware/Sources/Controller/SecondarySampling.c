@@ -37,6 +37,7 @@ Boolean SS_SendX(Int16U Header, Int16U Data, Boolean WaitAck)
 
 	Buffer[0] = (IBP_PACKET_START_BYTE << 8) | Header;
 	Buffer[1] = Data;
+	Buffer[2] = 1;
 	if(WaitAck)
 		RxAck = FALSE;
 	ZwSPIb_BeginReceive(Buffer, IBP_PACKET_SIZE, IBP_CHAR_SIZE, STTStream);
@@ -96,7 +97,6 @@ void SS_HandleSlaveTransmission()
 					SS_Voltage = InputBuffer[1];
 					SS_Current = InputBuffer[2];
 					CONTROL_DataReceiveAck = TRUE;
-					CONTROL_DataPostReceiveRoutine();
 					break;
 
 				case IBP_CMD_CFG_SWITCH:

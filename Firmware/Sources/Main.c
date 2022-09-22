@@ -218,8 +218,6 @@ void InitializeController()
 	#pragma CODE_SECTION(Timer2_ISR, "ramfuncs");
 	#pragma CODE_SECTION(SPIaRX_ISR, "ramfuncs");
 #endif
-//
-#pragma INTERRUPT(Timer0_ISR, HPI);
 
 ISRCALL Timer0_ISR()
 {
@@ -268,9 +266,10 @@ ISRCALL CAN0_ISR()
 
 ISRCALL SPIaRX_ISR()
 {
+	SS_HandleSlaveTransmission();
+
 	// Handle interrupt
 	ZwSPIa_ProcessRXInterrupt();
-	SS_HandleSlaveTransmission();
 
 	// allow other interrupts from group 6
 	SPI_ISR_DONE;

@@ -36,8 +36,8 @@ typedef enum __ProcessState
 
 typedef struct __RingBufferElement
 {
-	Int16S Voltage;
-	Int16S Current;
+	Int32U Voltage;
+	Int32U Current;
 } RingBufferElement, *pRingBufferElement;
 
 typedef _iq (*CurrentCalc)(Int32S RawValue, Boolean RMSFineCorrection);
@@ -51,7 +51,7 @@ static Int16S MinSafePWM, PWM;
 static Int16U RawZeroVoltage, RawZeroCurrent, FECounter, FECounterMax;
 static _iq TransAndPWMCoeff, Ki_err, Kp, Ki, FEAbsolute, FERelative;
 static _iq TargetVrms, ControlVrms, PeriodCorrection, VrmsRateStep, LimitIrms;
-static Int32U TimeCounter, PlateCounterTop;
+static Int32U TimeCounter, PlateCounterTop, Vsq_sum, Isq_sum;
 static Boolean DbgMutePWM, DbgSRAM;
 
 static ProcessState State;
@@ -61,7 +61,7 @@ static CurrentCalc MAC_CurrentCalc;
 // Forward functions
 static Int16S MAC_CalculatePWM();
 static void MAC_HandleVI(pDataSampleIQ Instant, pDataSampleIQ RMS);
-static _iq MAC_SQRoot(Int32U Value);
+static Int32S MAC_SQRoot(Int32U Value);
 static _iq MAC_PeriodController();
 static void MAC_ControlCycle();
 static Boolean MAC_InitStartState();
@@ -114,11 +114,17 @@ static _iq MAC_PeriodController(_iq ActualVrms)
 #endif
 static void MAC_HandleVI(pDataSampleIQ Instant, pDataSampleIQ RMS)
 {
-	// Сохранение значения в кольцевой буфер
-	RingBufferElement RingSample;
-	RingSample.Voltage = (Int32S)SS_Voltage - RawZeroVoltage;
-	RingSample.Current = (Int32S)SS_Current - RawZeroCurrent;
+	// Вычитание из суммы затираемого значения
+	Vsq_sum -= RingBuffer[RingBufferPointer].Voltage;
+	Isq_sum -= RingBuffer[RingBufferPointer].Current;
 
+	// Сохранение нового значения в кольцевой буфер
+	Int32S Vraw = (Int32S)SS_Voltage - RawZeroVoltage;
+	Int32S Iraw = (Int32S)SS_Current - RawZeroCurrent;
+
+	RingBufferElement RingSample;
+	RingSample.Voltage = Vraw * Vraw;
+	RingSample.Current = Iraw * Iraw;
 	RingBuffer[RingBufferPointer] = RingSample;
 	RingBufferPointer++;
 
@@ -128,31 +134,28 @@ static void MAC_HandleVI(pDataSampleIQ Instant, pDataSampleIQ RMS)
 		RingBufferFull = TRUE;
 	}
 
+	// Суммирование добавленного значения
+	Vsq_sum += RingSample.Voltage;
+	Isq_sum += RingSample.Current;
+
 	// Сохранение пересчитанных мгновенных значений
-	Instant->Voltage = MU_CalcVoltage(RingSample.Voltage, FALSE);
-	Instant->Current = MAC_CurrentCalc(RingSample.Current, FALSE);
+	Instant->Voltage = MU_CalcVoltage(Vraw, FALSE);
+	Instant->Current = MAC_CurrentCalc(Iraw, FALSE);
 
 	// Расчёт действующих значений
-	Int32U Vrms_sum = 0, Irms_sum = 0;
-	Int16U i, cnt = RingBufferFull ? SINE_PERIOD_PULSES : RingBufferPointer;
-	for(i = 0; i < cnt; i++)
-	{
-		Vrms_sum += (Int32S)RingBuffer[i].Voltage * RingBuffer[i].Voltage;
-		Irms_sum += (Int32S)RingBuffer[i].Current * RingBuffer[i].Current;
-	}
-
-	RMS->Voltage = MU_CalcVoltage(MAC_SQRoot(Vrms_sum / cnt), TRUE);
-	RMS->Current = MAC_CurrentCalc(MAC_SQRoot(Irms_sum / cnt), TRUE);
+	Int16U cnt = RingBufferFull ? SINE_PERIOD_PULSES : RingBufferPointer;
+	RMS->Voltage = MU_CalcVoltage(MAC_SQRoot(Vsq_sum / cnt), TRUE);
+	RMS->Current = MAC_CurrentCalc(MAC_SQRoot(Isq_sum / cnt), TRUE);
 }
 // ----------------------------------------
 
 #ifdef BOOT_FROM_FLASH
 #pragma CODE_SECTION(MAC_SQRoot, "ramfuncs");
 #endif
-static _iq MAC_SQRoot(Int32U Value)
+static Int32S MAC_SQRoot(Int32U Value)
 {
 	_iq2 iq2_rms = _IQ2sqrt(_IQ2mpyI32(_IQ2(1), Value));
-	return _IQ2toIQ(iq2_rms);
+	return _IQ2int(iq2_rms);
 }
 // ----------------------------------------
 
@@ -166,8 +169,8 @@ static void MAC_ControlCycle()
 	MAC_HandleVI(&Instant, &RMS);
 
 	// Проверка превышения значения тока
-	if(RMS.Current >= LimitIrms)
-		MAC_RequestStop(PBR_CurrentLimit);
+	//if(RMS.Current >= LimitIrms)
+		//MAC_RequestStop(PBR_CurrentLimit);
 
 	// Работа амплитудного регулятора
 	if(TimeCounter % SINE_PERIOD_PULSES == 0)
@@ -225,6 +228,7 @@ static void MAC_ControlCycle()
 			switch(BreakReason)
 			{
 				case PBR_None:
+				case PBR_CurrentLimit:
 					DataTable[REG_RESULT_V] = _IQint(RMS.Voltage);
 					DataTable[REG_RESULT_I_mA] = _IQint(RMS.Current);
 					DataTable[REG_RESULT_I_uA] = _IQmpyI32int(_IQfrac(RMS.Current), 1000);
@@ -302,7 +306,7 @@ static Boolean MAC_InitStartState()
 	Kp = _FPtoIQ2(DataTable[REG_KP], 100);
 	Ki = _FPtoIQ2(DataTable[REG_KI], 100);
 	
-	VrmsRateStep = _FPtoIQ2(DataTable[REG_VOLTAGE_RATE], 10 * SINE_FREQUENCY);
+	VrmsRateStep = _FPtoIQ2(DataTable[REG_VOLTAGE_RATE] * 100, SINE_FREQUENCY);
 	PlateCounterTop = CONTROL_FREQUENCY * DataTable[REG_VOLTAGE_PLATE_TIME];
 	
 	TransAndPWMCoeff = _FPtoIQ2(ZW_PWM_DUTY_BASE, DataTable[REG_PRIM_VOLTAGE] * DataTable[REG_TRANSFORMER_COFF]);
@@ -325,14 +329,23 @@ static Boolean MAC_InitStartState()
 	// Сброс переменных
 	PWM = 0;
 	FECounter = TimeCounter = 0;
-	Ki_err = 0;
-	PeriodCorrection = 0;
+	Ki_err = PeriodCorrection = 0;
+
+	Vsq_sum = Isq_sum = 0;
+	// Очистка кольцевого буфера
+	Int16U i;
+	for(i = 0; i < SINE_PERIOD_PULSES; i++)
+	{
+		RingBuffer[i].Voltage = 0;
+		RingBuffer[i].Current = 0;
+	}
+	RingBufferFull = FALSE;
+	RingBufferPointer = 0;
+
 	State = PS_Ramp;
 	BreakReason = PBR_None;
 
 	// Конфигурация оцифровщика
-	SS_Ping();
-
 	if(LimitIrms <= I_RANGE1)
 	{
 		MAC_CurrentCalc = MU_CalcCurrent1;
