@@ -51,8 +51,8 @@ const TableItemConstraint NVConstraint[DATA_TABLE_NV_SIZE] =
 
 	{TRANS_COEFF_MIN, TRANS_COEFF_MAX, TRANS_COEFF_DEF},					// 26
 	{PRIM_VOLTAGE_MIN, PRIM_VOLTAGE_MAX, PRIM_VOLTAGE_DEF},					// 27
+	{NO, YES, NO},															// 28
 
-	{0, 0, 0},																// 28
 	{0, 0, 0},																// 29
 	{0, 0, 0},																// 30
 	{0, 0, 0},																// 31
