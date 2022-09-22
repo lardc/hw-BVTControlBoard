@@ -346,20 +346,33 @@ static Boolean MAC_InitStartState()
 	BreakReason = PBR_None;
 
 	// Конфигурация оцифровщика
+	Boolean res;
 	if(LimitIrms <= I_RANGE1)
 	{
 		MAC_CurrentCalc = MU_CalcCurrent1;
-		return SS_SelectShunt(SwitchConfig_I1);
+		res = SS_SelectShunt(SwitchConfig_I1);
 	}
 	else if(LimitIrms <= I_RANGE2)
 	{
 		MAC_CurrentCalc = MU_CalcCurrent2;
-		return SS_SelectShunt(SwitchConfig_I2);
+		res = SS_SelectShunt(SwitchConfig_I2);
 	}
 	else
 	{
 		MAC_CurrentCalc = MU_CalcCurrent3;
-		return SS_SelectShunt(SwitchConfig_I3);
+		res = SS_SelectShunt(SwitchConfig_I3);
 	}
+
+	if(res)
+	{
+		// Первый запрос данных
+		res = SS_GetData(TRUE);
+
+		// Задержка на переключение оптопар
+		if(res)
+			DELAY_US(5000);
+	}
+
+	return res;
 }
 // ----------------------------------------

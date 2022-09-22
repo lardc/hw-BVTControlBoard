@@ -151,7 +151,6 @@ void CONTROL_SwitchRTCycle(Boolean Enable)
 {
 	if(Enable)
 	{
-		SS_Voltage = SS_Current = 0;
 		CONTROL_DataReceiveAck = TRUE;
 		ZwTimer_StartT0();
 	}
