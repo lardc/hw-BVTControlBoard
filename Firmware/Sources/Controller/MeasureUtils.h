@@ -13,7 +13,8 @@
 // Definitions
 typedef struct __MeasureCoeff
 {
-	_iq K;
+	Int16U Kn;
+	Int32S Kd;
 	_iq P2;
 	_iq P1;
 	_iq P0;

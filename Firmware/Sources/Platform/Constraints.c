@@ -18,45 +18,45 @@ const TableItemConstraint NVConstraint[DATA_TABLE_NV_SIZE] =
 	{0, INT16U_MAX, 0},														// 1
 
 	{1, X_D_DEF3, X_D_DEF2},												// 2
-	{0, INT16U_MAX, 0},														// 3
-	{X_D_DEF1, X_D_DEF3, X_D_DEF2},											// 4
-	{0, INT16U_MAX, 0},														// 5
+	{1, X_D_DEF3, X_D_DEF1},												// 3
+	{0, INT16U_MAX, 0},														// 4
+	{X_D_DEF1, X_D_DEF3, X_D_DEF2},											// 5
+	{0, INT16U_MAX, 0},														// 6
 
-	{1, X_D_DEF3, X_D_DEF2},												// 6
-	{0, INT16U_MAX, 0},														// 7
-	{X_D_DEF1, X_D_DEF3, X_D_DEF2},											// 8
+	{1, X_D_DEF3, X_D_DEF2},												// 7
+	{1, X_D_DEF3, X_D_DEF1},												// 8
 	{0, INT16U_MAX, 0},														// 9
-
-	{1, X_D_DEF3, X_D_DEF2},												// 10
+	{X_D_DEF1, X_D_DEF3, X_D_DEF2},											// 10
 	{0, INT16U_MAX, 0},														// 11
-	{X_D_DEF1, X_D_DEF3, X_D_DEF2},											// 12
-	{0, INT16U_MAX, 0},														// 13
 
-	{1, X_D_DEF3, X_D_DEF2},												// 14
-	{0, INT16U_MAX, 0},														// 15
-	{X_D_DEF1, X_D_DEF3, X_D_DEF2},											// 16
-	{0, INT16U_MAX, 0},														// 17
+	{1, X_D_DEF3, X_D_DEF2},												// 12
+	{1, X_D_DEF3, X_D_DEF1},												// 13
+	{0, INT16U_MAX, 0},														// 14
+	{X_D_DEF1, X_D_DEF3, X_D_DEF2},											// 15
+	{0, INT16U_MAX, 0},														// 16
 
-	{0, INT16U_MAX, X_D_DEF2},												// 18
+	{1, X_D_DEF3, X_D_DEF2},												// 17
+	{1, X_D_DEF3, X_D_DEF1},												// 18
+	{0, INT16U_MAX, 0},														// 19
+	{X_D_DEF1, X_D_DEF3, X_D_DEF2},											// 20
+	{0, INT16U_MAX, 0},														// 21
 
-	{START_VOLTAGE_MIN, START_VOLTAGE_MAX, START_VOLTAGE_DEF},				// 19
-	{VOLTAGE_RATE_MIN, VOLTAGE_RATE_MAX, VOLTAGE_RATE_DEF},					// 20
+	{0, INT16U_MAX, X_D_DEF2},												// 22
 
-	{0, K_REG_MAX, 0},														// 21
-	{0, K_REG_MAX, 0},														// 22
+	{START_VOLTAGE_MIN, START_VOLTAGE_MAX, START_VOLTAGE_DEF},				// 23
+	{VOLTAGE_RATE_MIN, VOLTAGE_RATE_MAX, VOLTAGE_RATE_DEF},					// 24
 
-	{0, FE_ABS_MAX, FE_ABS_DEF},											// 23
-	{0, FE_REL_MAX, FE_REL_DEF},											// 24
-	{0, FE_COUNTER_MAX, FE_COUNTER_DEF},									// 25
+	{0, K_REG_MAX, 0},														// 25
+	{0, K_REG_MAX, 0},														// 26
 
-	{TRANS_COEFF_MIN, TRANS_COEFF_MAX, TRANS_COEFF_DEF},					// 26
-	{PRIM_VOLTAGE_MIN, PRIM_VOLTAGE_MAX, PRIM_VOLTAGE_DEF},					// 27
-	{NO, YES, NO},															// 28
+	{0, FE_ABS_MAX, FE_ABS_DEF},											// 27
+	{0, FE_REL_MAX, FE_REL_DEF},											// 28
+	{0, FE_COUNTER_MAX, FE_COUNTER_DEF},									// 29
 
-	{0, 0, 0},																// 29
-	{0, 0, 0},																// 30
-	{0, 0, 0},																// 31
-	{0, 0, 0},																// 32
+	{TRANS_COEFF_MIN, TRANS_COEFF_MAX, TRANS_COEFF_DEF},					// 30
+	{PRIM_VOLTAGE_MIN, PRIM_VOLTAGE_MAX, PRIM_VOLTAGE_DEF},					// 31
+	{NO, YES, NO},															// 32
+
 	{0, 0, 0},																// 33
 	{0, 0, 0},																// 34
 	{0, 0, 0},																// 35

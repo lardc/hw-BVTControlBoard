@@ -147,10 +147,11 @@ void MU_SeekScopeBack(Int16S Offset)
 
 void MU_InitCoeffX(pMeasureCoeff Coeff, Int16U StartRegister)
 {
-	Coeff->K =  _FPtoIQ2(DataTable[StartRegister], 1000);
-	Coeff->P2 = _IQI((Int16S)DataTable[StartRegister + 1]);
-	Coeff->P1 = _FPtoIQ2(DataTable[StartRegister + 2], 1000);
-	Coeff->P0 = _FPtoIQ2(DataTable[StartRegister + 3], 10);
+	Coeff->Kn = DataTable[StartRegister];
+	Coeff->Kd = 10l * DataTable[StartRegister + 1];
+	Coeff->P2 = _IQI((Int16S)DataTable[StartRegister + 2]);
+	Coeff->P1 = _FPtoIQ2(DataTable[StartRegister + 3], 1000);
+	Coeff->P0 = _FPtoIQ2(DataTable[StartRegister + 4], 10);
 }
 // ----------------------------------------
 
@@ -183,7 +184,8 @@ void MU_InitCoeffCurrent3()
 #endif
 _iq MU_CalcX(pMeasureCoeff Coeff, Int32S RawValue, Boolean RMSFineCorrection)
 {
-	_iq tmp = _IQmpyI32(Coeff->K, RawValue);
+	Int32S RawK = RawValue * Coeff->Kn;
+	_iq tmp = _IQI(RawK / Coeff->Kd) + _FPtoIQ2(RawK % Coeff->Kd, Coeff->Kd);
 
 	if(RMSFineCorrection)
 	{
