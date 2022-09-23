@@ -48,7 +48,7 @@ void ZbMemory_Init()
 	ZwSPIc_Init(TRUE, MEM_EPROM_BAUDRATE, 8, MEM_PLR, MEM_PHASE, ZW_SPI_INIT_TX | ZW_SPI_INIT_RX | ZW_SPI_INIT_CS, FALSE, FALSE);
 	ZwSPIc_InitFIFO(0, 0);
 	ZwSPIc_ConfigInterrupts(FALSE, FALSE);
-	ZwSPIc_EnableInterrupts(FALSE, TRUE);
+	ZwSPIc_EnableInterrupts(FALSE, FALSE);
 
 	// Initialize MUX pins
 	ZwGPIO_WritePin(PIN_MEM_A, TRUE);

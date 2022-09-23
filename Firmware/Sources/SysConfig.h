@@ -73,8 +73,8 @@
 
 // SRAM
 //--------------------------------------------------------
-#define MEM_EPROM_BAUDRATE	1000000L	// SPI clock = 1 MHz
-#define MEM_SRAM_BAUDRATE	5000000L	// SPI clock = 5 MHz
+#define MEM_EPROM_BAUDRATE	1000000L	// SPI in Hz
+#define MEM_SRAM_BAUDRATE	10000000L	// SPI in Hz
 #define MEM_PLR				FALSE		// CLK low in idle state
 #define MEM_PHASE			TRUE
 //--------------------------------------------------------
