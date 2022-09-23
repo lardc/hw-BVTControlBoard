@@ -38,7 +38,7 @@ void MU_StartScope()
 #ifdef BOOT_FROM_FLASH
 	#pragma CODE_SECTION(MU_LogScopeValues, "ramfuncs");
 #endif
-void MU_LogScopeValues(pDataSampleIQ Instant, pDataSampleIQ RMS, Int16S PWM, Boolean SRAMDebug)
+void MU_LogScopeValues(pDataSampleIQ Instant, pDataSampleIQ RMS, _iq CosPhi, Int16S PWM, Boolean SRAMDebug)
 {
 	static Int16U dbgVoltage = 0, dbgCurrent = 0;
 
@@ -70,6 +70,8 @@ void MU_LogScopeValues(pDataSampleIQ Instant, pDataSampleIQ RMS, Int16S PWM, Boo
 			Int32U CurrentRMS = (Int32U)_IQmpyI32int(RMS->Current, 1000);
 			SampleToSave.U.Data.CurrentRMS = (CurrentRMS >> 8) & 0xffff;
 			SampleToSave.U.Data.CurrentTails |= (CurrentRMS & 0xff) << 8;
+
+			SampleToSave.U.Data.CosPhi = _IQmpyI32int(CosPhi, 1000);
 		}
 
 		// Запись значений в SRAM
@@ -119,6 +121,8 @@ void MU_SaveSampleToEP(pDataSample Sample, Int16U Index)
 
 	MEMBUF_Values_Irms_mA[Index] = sCurrent / 1000;
 	MEMBUF_Values_Irms_uA[Index] = sCurrent % 1000;
+
+	MEMBUF_Values_PWM[Index] = Sample->U.Data.CosPhi;
 }
 // ----------------------------------------
 

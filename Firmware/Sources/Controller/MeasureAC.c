@@ -38,6 +38,7 @@ typedef struct __RingBufferElement
 {
 	Int32U Voltage;
 	Int32U Current;
+	Int32S Wreal;
 } RingBufferElement, *pRingBufferElement;
 
 typedef _iq (*CurrentCalc)(Int32S RawValue, Boolean RMSFineCorrection);
@@ -53,6 +54,7 @@ static _iq TransAndPWMCoeff, Ki_err, Kp, Ki, FEAbsolute, FERelative;
 static _iq TargetVrms, ControlVrms, PeriodCorrection, VrmsRateStep, LimitIrms;
 static Int32U TimeCounter, PlateCounterTop, Vsq_sum, Isq_sum;
 static Boolean DbgMutePWM, DbgSRAM;
+static Int32S Wreal_sum;
 
 static ProcessState State;
 static ProcessBreakReason BreakReason;
@@ -60,7 +62,7 @@ static CurrentCalc MAC_CurrentCalc;
 
 // Forward functions
 static Int16S MAC_CalculatePWM();
-static void MAC_HandleVI(pDataSampleIQ Instant, pDataSampleIQ RMS);
+static void MAC_HandleVI(pDataSampleIQ Instant, pDataSampleIQ RMS, _iq *CosPhi);
 static _iq MAC_SQRoot(Int32U Value);
 static _iq MAC_PeriodController();
 static void MAC_ControlCycle();
@@ -112,19 +114,25 @@ static _iq MAC_PeriodController(_iq ActualVrms)
 #ifdef BOOT_FROM_FLASH
 #pragma CODE_SECTION(MAC_HandleVI, "ramfuncs");
 #endif
-static void MAC_HandleVI(pDataSampleIQ Instant, pDataSampleIQ RMS)
+static void MAC_HandleVI(pDataSampleIQ Instant, pDataSampleIQ RMS, _iq *CosPhi)
 {
 	// Вычитание из суммы затираемого значения
 	Vsq_sum -= RingBuffer[RingBufferPointer].Voltage;
 	Isq_sum -= RingBuffer[RingBufferPointer].Current;
+	Wreal_sum -= RingBuffer[RingBufferPointer].Wreal;
 
-	// Сохранение нового значения в кольцевой буфер
+	// Расчёт мгновенных значений
 	Int32S Vraw = (Int32S)SS_Voltage - RawZeroVoltage;
 	Int32S Iraw = (Int32S)SS_Current - RawZeroCurrent;
 
+	Instant->Voltage = MU_CalcVoltage(_IQI(Vraw), FALSE);
+	Instant->Current = MAC_CurrentCalc(_IQI(Iraw), FALSE);
+
+	// Сохранение нового значения в кольцевой буфер
 	RingBufferElement RingSample;
 	RingSample.Voltage = Vraw * Vraw;
 	RingSample.Current = Iraw * Iraw;
+	RingSample.Wreal = Iraw * Vraw;
 	RingBuffer[RingBufferPointer] = RingSample;
 	RingBufferPointer++;
 
@@ -137,15 +145,34 @@ static void MAC_HandleVI(pDataSampleIQ Instant, pDataSampleIQ RMS)
 	// Суммирование добавленного значения
 	Vsq_sum += RingSample.Voltage;
 	Isq_sum += RingSample.Current;
-
-	// Сохранение пересчитанных мгновенных значений
-	Instant->Voltage = MU_CalcVoltage(_IQI(Vraw), FALSE);
-	Instant->Current = MAC_CurrentCalc(_IQI(Iraw), FALSE);
+	Wreal_sum += RingSample.Wreal;
 
 	// Расчёт действующих значений
 	Int16U cnt = RingBufferFull ? SINE_PERIOD_PULSES : RingBufferPointer;
 	RMS->Voltage = MU_CalcVoltage(MAC_SQRoot(Vsq_sum / cnt), TRUE);
 	RMS->Current = MAC_CurrentCalc(MAC_SQRoot(Isq_sum / cnt), TRUE);
+
+	// Расчёт активной составляющей тока
+	Int64U Wreal_abs = (Int64U)ABS(Wreal_sum) * cnt;
+	Int64U Wrms = (Int64U)Vsq_sum * Isq_sum;
+
+	if(Wreal_abs)
+	{
+		// Расчёт косинус-фи с предотвращением переполнения
+		while(Wreal_abs > BIT15 || Wrms > BIT15)
+		{
+			Wreal_abs >>= 1;
+			Wrms >>= 1;
+		}
+		_iq15 tmp15 = _IQ15div(_IQ15mpyI32(_IQ15(1), Wreal_abs), _IQ15mpyI32(_IQ15(1), Wrms));
+		*CosPhi = _IQ15toIQ(tmp15);
+
+		// Возвращение знака
+		if(Wreal_sum < 0)
+			*CosPhi = _IQmpy(_IQ(-1), *CosPhi);
+	}
+	else
+		*CosPhi = 0;
 }
 // ----------------------------------------
 
@@ -165,12 +192,13 @@ static _iq MAC_SQRoot(Int32U Value)
 static void MAC_ControlCycle()
 {
 	// Считывание оцифрованных значений
+	_iq CosPhi;
 	DataSampleIQ Instant, RMS;
-	MAC_HandleVI(&Instant, &RMS);
+	MAC_HandleVI(&Instant, &RMS, &CosPhi);
 
 	// Проверка превышения значения тока
-	//if(RMS.Current >= LimitIrms)
-		//MAC_RequestStop(PBR_CurrentLimit);
+	if(RMS.Current >= LimitIrms)
+		MAC_RequestStop(PBR_CurrentLimit);
 
 	// Работа амплитудного регулятора
 	if(TimeCounter % SINE_PERIOD_PULSES == 0)
@@ -263,7 +291,7 @@ static void MAC_ControlCycle()
 	MAC_SetPWM(PWM);
 
 	// Логгирование мгновенных данных
-	MU_LogScopeValues(&Instant, &RMS, PWM, DbgSRAM);
+	MU_LogScopeValues(&Instant, &RMS, CosPhi, PWM, DbgSRAM);
 	TimeCounter++;
 }
 // ----------------------------------------
@@ -338,9 +366,12 @@ static Boolean MAC_InitStartState()
 	{
 		RingBuffer[i].Voltage = 0;
 		RingBuffer[i].Current = 0;
+		RingBuffer[i].Wreal = 0;
 	}
 	RingBufferFull = FALSE;
 	RingBufferPointer = 0;
+
+	Wreal_sum = 0;
 
 	State = PS_Ramp;
 	BreakReason = PBR_None;

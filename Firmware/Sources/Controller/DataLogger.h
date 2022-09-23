@@ -10,7 +10,7 @@
 #include "IQmathLib.h"
 
 // Definitions
-#define RAW_FIELDS_COUNT	6
+#define RAW_FIELDS_COUNT	7
 
 // Types
 typedef struct __DataSample
@@ -26,6 +26,7 @@ typedef struct __DataSample
 			Int16U Current;
 			Int16U CurrentRMS;
 			Int16U CurrentTails;
+			Int16S CosPhi;
 		} Data;
 	} U;
 } DataSample, *pDataSample;
