@@ -101,7 +101,7 @@ void MAC_RequestStop(ProcessBreakReason Reason)
 #endif
 static _iq MAC_PeriodController(_iq ActualVrms)
 {
-	_iq err = ControlVrms - ActualVrms;
+	_iq err = TimeCounter ? (ControlVrms - ActualVrms) : 0;
 	Ki_err += _IQmpy(err, Ki);
 	PeriodCorrection = Ki_err + _IQmpy(err, Kp);
 
