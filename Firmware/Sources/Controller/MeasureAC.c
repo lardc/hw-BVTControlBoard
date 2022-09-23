@@ -61,7 +61,7 @@ static CurrentCalc MAC_CurrentCalc;
 // Forward functions
 static Int16S MAC_CalculatePWM();
 static void MAC_HandleVI(pDataSampleIQ Instant, pDataSampleIQ RMS);
-static Int32S MAC_SQRoot(Int32U Value);
+static _iq MAC_SQRoot(Int32U Value);
 static _iq MAC_PeriodController();
 static void MAC_ControlCycle();
 static Boolean MAC_InitStartState();
@@ -139,8 +139,8 @@ static void MAC_HandleVI(pDataSampleIQ Instant, pDataSampleIQ RMS)
 	Isq_sum += RingSample.Current;
 
 	// Сохранение пересчитанных мгновенных значений
-	Instant->Voltage = MU_CalcVoltage(Vraw, FALSE);
-	Instant->Current = MAC_CurrentCalc(Iraw, FALSE);
+	Instant->Voltage = MU_CalcVoltage(_IQI(Vraw), FALSE);
+	Instant->Current = MAC_CurrentCalc(_IQI(Iraw), FALSE);
 
 	// Расчёт действующих значений
 	Int16U cnt = RingBufferFull ? SINE_PERIOD_PULSES : RingBufferPointer;
@@ -152,10 +152,10 @@ static void MAC_HandleVI(pDataSampleIQ Instant, pDataSampleIQ RMS)
 #ifdef BOOT_FROM_FLASH
 #pragma CODE_SECTION(MAC_SQRoot, "ramfuncs");
 #endif
-static Int32S MAC_SQRoot(Int32U Value)
+static _iq MAC_SQRoot(Int32U Value)
 {
-	_iq2 iq2_rms = _IQ2sqrt(_IQ2mpyI32(_IQ2(1), Value));
-	return _IQ2int(iq2_rms);
+	_iq3 iq3_rms = _IQ3sqrt(_IQ3mpyI32(_IQ3(1), Value));
+	return _IQ3toIQ(iq3_rms);
 }
 // ----------------------------------------
 
