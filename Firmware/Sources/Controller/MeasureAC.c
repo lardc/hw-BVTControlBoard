@@ -88,11 +88,18 @@ void inline MAC_SetPWM(Int16S pwm)
 }
 // ----------------------------------------
 
+Int16S inline MAC_GetPWMReduceRate(Int16S PWMDelta)
+{
+	Int16S res = PWMDelta / PWM_REDUCE_RATE_MAX_STEPS + SIGN(PWMDelta);
+	return (ABS(res) > PWM_MIN_REDUCE_RATE) ? res : (PWM_MIN_REDUCE_RATE * SIGN(PWMDelta));
+}
+// ----------------------------------------
+
 void MAC_RequestStop(ProcessBreakReason Reason)
 {
 	if(State != PS_Break)
 	{
-		PWMReduceRate = PWM / 4 + SIGN(PWM);
+		PWMReduceRate = MAC_GetPWMReduceRate(PWM);
 		State = PS_Break;
 		BreakReason = Reason;
 	}
