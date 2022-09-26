@@ -40,6 +40,7 @@ Int16U MEMBUF_Values_Vrms[VALUES_x_SIZE];
 Int16U MEMBUF_Values_Irms_mA[VALUES_x_SIZE];
 Int16U MEMBUF_Values_Irms_uA[VALUES_x_SIZE];
 Int16U MEMBUF_Values_PWM[VALUES_x_SIZE];
+Int16U MEMBUF_Values_CosPhi[VALUES_x_SIZE];
 Int16U MEMBUF_Values_Err[VALUES_x_SIZE];
 //
 volatile Int16U MEMBUF_ScopeValues_Counter = 0;
@@ -70,14 +71,16 @@ void CONTROL_StartSequence();
 //
 void CONTROL_Init()
 {
-	Int16U EPIndexes[EP_COUNT] = {EP16_V, EP16_ImA, EP16_IuA, EP16_Vrms, EP16_Irms_mA, EP16_Irms_uA, EP16_PWM, EP16_Error};
+	Int16U EPIndexes[EP_COUNT] = {EP16_V, EP16_ImA, EP16_IuA, EP16_Vrms, EP16_Irms_mA, EP16_Irms_uA,
+			EP16_PWM, EP16_CosPhi, EP16_Error};
 	Int16U EPSized[EP_COUNT] = {VALUES_x_SIZE, VALUES_x_SIZE, VALUES_x_SIZE, VALUES_x_SIZE,
-			VALUES_x_SIZE, VALUES_x_SIZE, VALUES_x_SIZE, VALUES_x_SIZE};
+			VALUES_x_SIZE, VALUES_x_SIZE, VALUES_x_SIZE, VALUES_x_SIZE, VALUES_x_SIZE};
 	pInt16U cnt = (pInt16U)&MEMBUF_ScopeValues_Counter;
 	pInt16U EPCounters[EP_COUNT] =
-			{cnt, cnt, cnt, cnt, cnt, cnt, cnt, (pInt16U)&MEMBUF_ErrorValues_Counter};
+			{cnt, cnt, cnt, cnt, cnt, cnt, cnt, cnt, (pInt16U)&MEMBUF_ErrorValues_Counter};
 	pInt16U EPDatas[EP_COUNT] = {MEMBUF_Values_V, MEMBUF_Values_ImA, MEMBUF_Values_IuA,
-			MEMBUF_Values_Vrms, MEMBUF_Values_Irms_mA, MEMBUF_Values_Irms_uA, MEMBUF_Values_PWM, MEMBUF_Values_Err};
+			MEMBUF_Values_Vrms, MEMBUF_Values_Irms_mA, MEMBUF_Values_Irms_uA, MEMBUF_Values_PWM,
+			MEMBUF_Values_CosPhi, MEMBUF_Values_Err};
 
 	// Data-table EPROM service configuration
 	EPROMServiceConfig EPROMService = {&ZbMemory_WriteValuesEPROM, &ZbMemory_ReadValuesEPROM};
@@ -187,6 +190,8 @@ void CONTROL_ResetValues()
 	DataTable[REG_RESULT_V] = 0;
 	DataTable[REG_RESULT_I_mA] = 0;
 	DataTable[REG_RESULT_I_uA] = 0;
+	DataTable[REG_RESULT_I_ACT_mA] = 0;
+	DataTable[REG_RESULT_I_ACT_uA] = 0;
 }
 // ----------------------------------------
 
@@ -247,7 +252,7 @@ Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U UserError)
 		case ACT_READ_FRAGMENT:
 			{
 				Int16U i;
-				for(i = EP16_V; i <= EP16_PWM; i++)
+				for(i = EP16_V; i <= EP16_CosPhi; i++)
 					DEVPROFILE_ResetScopes(i);
 				DEVPROFILE_ResetEPReadState();
 				MU_LoadDataFragment();

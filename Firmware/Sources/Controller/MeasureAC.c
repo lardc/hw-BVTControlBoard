@@ -149,12 +149,14 @@ static void MAC_HandleVI(pDataSampleIQ Instant, pDataSampleIQ RMS, _iq *CosPhi)
 
 	// Расчёт действующих значений
 	Int16U cnt = RingBufferFull ? SINE_PERIOD_PULSES : RingBufferPointer;
-	RMS->Voltage = MU_CalcVoltage(MAC_SQRoot(Vsq_sum / cnt), TRUE);
-	RMS->Current = MAC_CurrentCalc(MAC_SQRoot(Isq_sum / cnt), TRUE);
+	_iq Vsqr = MAC_SQRoot(Vsq_sum / cnt);
+	_iq Isqr = MAC_SQRoot(Isq_sum / cnt);
+	RMS->Voltage = MU_CalcVoltage(Vsqr, TRUE);
+	RMS->Current = MAC_CurrentCalc(Isqr, TRUE);
 
 	// Расчёт активной составляющей тока
-	Int64U Wreal_abs = (Int64U)ABS(Wreal_sum) * cnt;
-	Int64U Wrms = (Int64U)Vsq_sum * Isq_sum;
+	Int32U Wreal_abs = ABS(Wreal_sum);
+	Int32U Wrms = _IQint(Vsqr) * _IQint(Isqr) * cnt;
 
 	if(Wreal_abs)
 	{
@@ -166,6 +168,10 @@ static void MAC_HandleVI(pDataSampleIQ Instant, pDataSampleIQ RMS, _iq *CosPhi)
 		}
 		_iq15 tmp15 = _IQ15div(_IQ15mpyI32(_IQ15(1), Wreal_abs), _IQ15mpyI32(_IQ15(1), Wrms));
 		*CosPhi = _IQ15toIQ(tmp15);
+
+		// Проверка насыщения значения из-за погрешностей расчёта
+		if(*CosPhi > _IQ(1))
+			*CosPhi = _IQ(1);
 
 		// Возвращение знака
 		if(Wreal_sum < 0)
@@ -257,10 +263,15 @@ static void MAC_ControlCycle()
 			{
 				case PBR_None:
 				case PBR_CurrentLimit:
-					DataTable[REG_RESULT_V] = _IQint(RMS.Voltage);
-					DataTable[REG_RESULT_I_mA] = _IQint(RMS.Current);
-					DataTable[REG_RESULT_I_uA] = _IQmpyI32int(_IQfrac(RMS.Current), 1000);
-					DataTable[REG_FINISHED] = OPRESULT_OK;
+					{
+						DataTable[REG_RESULT_V] = _IQint(RMS.Voltage);
+						DataTable[REG_RESULT_I_mA] = _IQint(RMS.Current);
+						DataTable[REG_RESULT_I_uA] = _IQmpyI32int(_IQfrac(RMS.Current), 1000);
+						_iq Iact = _IQmpy(RMS.Current, CosPhi);
+						DataTable[REG_RESULT_I_ACT_mA] = _IQint(Iact);
+						DataTable[REG_RESULT_I_ACT_uA] = _IQmpyI32int(_IQfrac(Iact), 1000);
+						DataTable[REG_FINISHED] = OPRESULT_OK;
+					}
 					break;
 
 				case PBR_FollowingError:

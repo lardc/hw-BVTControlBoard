@@ -90,9 +90,11 @@
 #define REG_PROBLEM					196	// Problem reason
 #define REG_FINISHED				197	// Indicates that test is done and there is result or fault
 //
-#define REG_RESULT_V				200	// Test result (in V)
-#define REG_RESULT_I_mA				201	// Test result (mA part)
-#define REG_RESULT_I_uA				202	// Test result (uA part)
+#define REG_RESULT_V				200	// Voltage test result (in V)
+#define REG_RESULT_I_mA				201	// Current test result (mA part)
+#define REG_RESULT_I_uA				202	// Current test result (uA part)
+#define REG_RESULT_I_ACT_mA			203	// Active current test result (mA part)
+#define REG_RESULT_I_ACT_uA			204	// Active current test result (uA part)
 //
 #define REG_ACTUAL_PRIM_VOLTAGE		210	// Primary side capacitor voltage based on sensing (in V)
 //
@@ -128,7 +130,8 @@
 #define EP16_Irms_mA				5	// Endpoint for Irms value sequence mA part
 #define EP16_Irms_uA				6	// Endpoint for Irms value sequence uA part
 #define EP16_PWM					7	// Endpoint for PWM value sequence
-#define EP16_Error					8	// Endpoint for V following error
+#define EP16_CosPhi					8	// Endpoint for cosinus Phi value sequence
+#define EP16_Error					9	// Endpoint for V following error
 
 // OPERATION RESULTS
 //

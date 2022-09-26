@@ -13,7 +13,7 @@
 // Global miscellaneous parameters
 #define	SCCI_TIMEOUT_TICKS		1000			// in ms
 #define DT_EPROM_ADDRESS		0
-#define EP_COUNT				8
+#define EP_COUNT				9
 #define VALUES_x_SIZE			500
 
 // RMS current range limits (in mA)

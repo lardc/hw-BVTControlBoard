@@ -36,6 +36,7 @@ extern Int16U MEMBUF_Values_Vrms[];
 extern Int16U MEMBUF_Values_Irms_mA[];
 extern Int16U MEMBUF_Values_Irms_uA[];
 extern Int16U MEMBUF_Values_PWM[];
+extern Int16U MEMBUF_Values_CosPhi[];
 extern Int16U MEMBUF_Values_Err[];
 
 extern volatile Int16U MEMBUF_ScopeValues_Counter;

@@ -60,17 +60,9 @@ void MU_LogScopeValues(pDataSampleIQ Instant, pDataSampleIQ RMS, _iq CosPhi, Int
 		{
 			SampleToSave.U.Data.Voltage = _IQint(Instant->Voltage);
 			SampleToSave.U.Data.VoltageRMS = _IQint(RMS->Voltage);
+			SampleToSave.U.Data.Current = _IQmpyI32int(Instant->Current, 1000);
+			SampleToSave.U.Data.CurrentRMS = _IQmpyI32int(RMS->Current, 1000);
 			SampleToSave.U.Data.PWM = PWM;
-
-			// Упаковка значений тока из расчёта 24бит на каждое значение
-			Int32U Current = (Int32U)_IQmpyI32int(Instant->Current, 1000);
-			SampleToSave.U.Data.Current = (Current >> 8) & 0xffff;
-			SampleToSave.U.Data.CurrentTails = Current & 0xff;
-
-			Int32U CurrentRMS = (Int32U)_IQmpyI32int(RMS->Current, 1000);
-			SampleToSave.U.Data.CurrentRMS = (CurrentRMS >> 8) & 0xffff;
-			SampleToSave.U.Data.CurrentTails |= (CurrentRMS & 0xff) << 8;
-
 			SampleToSave.U.Data.CosPhi = _IQmpyI32int(CosPhi, 1000);
 		}
 
@@ -99,30 +91,15 @@ void MU_SaveSampleToEP(pDataSample Sample, Int16U Index)
 {
 	MEMBUF_Values_V[Index] = Sample->U.Data.Voltage;
 	MEMBUF_Values_Vrms[Index] = Sample->U.Data.VoltageRMS;
+
+	MEMBUF_Values_ImA[Index] = Sample->U.Data.Current / 1000;
+	MEMBUF_Values_IuA[Index] = Sample->U.Data.Current % 1000;
+
+	MEMBUF_Values_Irms_mA[Index] = Sample->U.Data.CurrentRMS / 1000;
+	MEMBUF_Values_Irms_uA[Index] = Sample->U.Data.CurrentRMS % 1000;
+
+	MEMBUF_Values_CosPhi[Index] = Sample->U.Data.CosPhi;
 	MEMBUF_Values_PWM[Index] = Sample->U.Data.PWM;
-
-	// Распаковка значений тока
-	// Мгновенное
-	Int32U Current = Sample->U.Data.Current;
-	Current = (Current << 8) | (Sample->U.Data.CurrentTails & 0xff);
-	if(Current & BIT23)
-		Current |= 0xff000000;
-	Int32S sCurrent = (Int32S)Current;
-
-	MEMBUF_Values_ImA[Index] = sCurrent / 1000;
-	MEMBUF_Values_IuA[Index] = sCurrent % 1000;
-
-	// Действующее
-	Current = Sample->U.Data.CurrentRMS;
-	Current = (Current << 8) | (Sample->U.Data.CurrentTails >> 8);
-	if(Current & BIT23)
-		Current |= 0xff000000;
-	sCurrent = (Int32S)Current;
-
-	MEMBUF_Values_Irms_mA[Index] = sCurrent / 1000;
-	MEMBUF_Values_Irms_uA[Index] = sCurrent % 1000;
-
-	MEMBUF_Values_PWM[Index] = Sample->U.Data.CosPhi;
 }
 // ----------------------------------------
 
