@@ -48,7 +48,7 @@ static RingBufferElement RingBuffer[SINE_PERIOD_PULSES];
 static Int16U RingBufferPointer;
 static Boolean RingBufferFull;
 
-static Int16S MinSafePWM, PWM;
+static Int16S MinSafePWM, PWM, PWMReduceRate;
 static Int16U RawZeroVoltage, RawZeroCurrent, FECounter, FECounterMax;
 static _iq TransAndPWMCoeff, Ki_err, Kp, Ki, FEAbsolute, FERelative;
 static _iq TargetVrms, ControlVrms, PeriodCorrection, VrmsRateStep, LimitIrms;
@@ -92,6 +92,7 @@ void MAC_RequestStop(ProcessBreakReason Reason)
 {
 	if(State != PS_Break)
 	{
+		PWMReduceRate = PWM / 4 + SIGN(PWM);
 		State = PS_Break;
 		BreakReason = Reason;
 	}
@@ -249,7 +250,11 @@ static void MAC_ControlCycle()
 
 				case PS_Plate:
 					if(TimeCounter >= PlateCounterTop)
-						State = PS_Break;
+					{
+						SavedCosPhi = CosPhi;
+						SavedRMS = RMS;
+						MAC_RequestStop(PBR_None);
+					}
 					break;
 			}
 		}
@@ -258,7 +263,7 @@ static void MAC_ControlCycle()
 	// Расчёт и уставка ШИМ
 	if(State == PS_Break)
 	{
-		PWM = (ABS(PWM) >= PWM_REDUCE_RATE) ? (PWM - SIGN(PWM) * PWM_REDUCE_RATE) : 0;
+		PWM = (ABS(PWM) > ABS(PWMReduceRate)) ? (PWM - PWMReduceRate) : 0;
 
 		// Завершение процесса
 		if(PWM == 0)
@@ -269,8 +274,6 @@ static void MAC_ControlCycle()
 			switch(BreakReason)
 			{
 				case PBR_None:
-					SavedCosPhi = CosPhi;
-					SavedRMS = RMS;
 				case PBR_CurrentLimit:
 					{
 						DataTable[REG_RESULT_V] = _IQint(SavedRMS.Voltage);

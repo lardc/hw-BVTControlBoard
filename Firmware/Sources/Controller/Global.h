@@ -24,7 +24,4 @@
 // Допустимое отклонение напряжения первичной стороны (в %)
 #define PRIM_V_MAX_DELTA		5
 
-// Regulator parameters
-#define PWM_REDUCE_RATE			50				// in ticks per regulator cycle
-
 #endif // __GLOBAL_H
