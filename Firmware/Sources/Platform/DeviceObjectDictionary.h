@@ -74,7 +74,7 @@
 #define REG_TARGET_VOLTAGE			128	// Действующее напряжение уставки (в В)
 #define REG_LIMIT_CURRENT_mA		129	// Предельный ток (часть мА)
 #define REG_LIMIT_CURRENT_uA		130	// Предельный ток (часть мкА)
-#define REG_ACTIVE_MODE				131	// Режим измерения активной составляющей тока
+#define REG_STOP_BY_ACTIVE_CURRENT	131	// Режим остановки по активной составляющей тока
 #define REG_VOLTAGE_PLATE_TIME		132	// Длительность формирования полки (в сек)
 #define REG_SCOPE_RATE				133	// Делитель логгирования данных
 //

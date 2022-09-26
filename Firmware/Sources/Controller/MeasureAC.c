@@ -53,7 +53,7 @@ static Int16U RawZeroVoltage, RawZeroCurrent, FECounter, FECounterMax;
 static _iq TransAndPWMCoeff, Ki_err, Kp, Ki, FEAbsolute, FERelative;
 static _iq TargetVrms, ControlVrms, PeriodCorrection, VrmsRateStep, LimitIrms;
 static Int32U TimeCounter, PlateCounterTop, Vsq_sum, Isq_sum;
-static Boolean DbgMutePWM, DbgSRAM;
+static Boolean DbgMutePWM, DbgSRAM, StopByActiveCurrent;
 static Int32S Wreal_sum;
 
 static ProcessState State;
@@ -200,11 +200,18 @@ static void MAC_ControlCycle()
 	// Считывание оцифрованных значений
 	_iq CosPhi;
 	DataSampleIQ Instant, RMS;
+	static _iq SavedCosPhi;
+	static DataSampleIQ SavedRMS;
 	MAC_HandleVI(&Instant, &RMS, &CosPhi);
 
 	// Проверка превышения значения тока
-	if(RMS.Current >= LimitIrms)
+	_iq CompareCurrent = _IQmpy(StopByActiveCurrent ? _IQabs(CosPhi) : _IQ(1), RMS.Current);
+	if(State != PS_Break && CompareCurrent >= LimitIrms)
+	{
+		SavedCosPhi = CosPhi;
+		SavedRMS = RMS;
 		MAC_RequestStop(PBR_CurrentLimit);
+	}
 
 	// Работа амплитудного регулятора
 	if(TimeCounter % SINE_PERIOD_PULSES == 0)
@@ -262,12 +269,14 @@ static void MAC_ControlCycle()
 			switch(BreakReason)
 			{
 				case PBR_None:
+					SavedCosPhi = CosPhi;
+					SavedRMS = RMS;
 				case PBR_CurrentLimit:
 					{
-						DataTable[REG_RESULT_V] = _IQint(RMS.Voltage);
-						DataTable[REG_RESULT_I_mA] = _IQint(RMS.Current);
-						DataTable[REG_RESULT_I_uA] = _IQmpyI32int(_IQfrac(RMS.Current), 1000);
-						_iq Iact = _IQmpy(RMS.Current, CosPhi);
+						DataTable[REG_RESULT_V] = _IQint(SavedRMS.Voltage);
+						DataTable[REG_RESULT_I_mA] = _IQint(SavedRMS.Current);
+						DataTable[REG_RESULT_I_uA] = _IQmpyI32int(_IQfrac(SavedRMS.Current), 1000);
+						_iq Iact = _IQmpy(SavedRMS.Current, _IQabs(SavedCosPhi));
 						DataTable[REG_RESULT_I_ACT_mA] = _IQint(Iact);
 						DataTable[REG_RESULT_I_ACT_uA] = _IQmpyI32int(_IQfrac(Iact), 1000);
 						DataTable[REG_FINISHED] = OPRESULT_OK;
@@ -352,6 +361,7 @@ static Boolean MAC_InitStartState()
 	MinSafePWM = (PWM_FREQUENCY / 1000L) * PWM_MIN_TH * ZW_PWM_DUTY_BASE / 1000000L;
 	RawZeroVoltage = DataTable[REG_RAW_ZERO_SVOLTAGE];
 	RawZeroCurrent = DataTable[REG_RAW_ZERO_SCURRENT];
+	StopByActiveCurrent = DataTable[REG_STOP_BY_ACTIVE_CURRENT];
 	
 	FEAbsolute = _IQI(DataTable[REG_FE_ABSOLUTE]);
 	FERelative = _FPtoIQ2(DataTable[REG_FE_RELATIVE], 100);
