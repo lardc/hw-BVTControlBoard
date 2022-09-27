@@ -61,7 +61,8 @@ static ProcessBreakReason BreakReason;
 static CurrentCalc MAC_CurrentCalc;
 
 // Forward functions
-static Int16S MAC_CalculatePWM();
+static _iq MAC_CalcTargetInstantVoltage();
+static Int16S MAC_CalcPWMFromInstantVoltage(_iq Voltage);
 static void MAC_HandleVI(pDataSampleIQ Instant, pDataSampleIQ RMS, _iq *CosPhi);
 static _iq MAC_SQRoot(Int32U Value);
 static _iq MAC_PeriodController();
@@ -228,7 +229,7 @@ static void MAC_ControlCycle()
 		MU_LogScopeError(PeriodError);
 
 		// Проверка на ошибку следования
-		if(State != PS_Break && Kp && Ki &&
+		if(State != PS_Break && Kp && Ki && !DbgMutePWM &&
 				_IQdiv(_IQabs(PeriodError), ControlVrms) > FERelative && _IQabs(PeriodError) > FEAbsolute)
 		{
 			FECounter++;
@@ -314,7 +315,8 @@ static void MAC_ControlCycle()
 	}
 	else
 	{
-		PWM = MAC_CalculatePWM();
+		_iq TargetInstV = MAC_CalcTargetInstantVoltage();
+		PWM = MAC_CalcPWMFromInstantVoltage(TargetInstV);
 		if(ABS(PWM) == PWM_LIMIT)
 			MAC_RequestStop(PBR_PWMSaturation);
 	}
@@ -327,18 +329,25 @@ static void MAC_ControlCycle()
 // ----------------------------------------
 
 #ifdef BOOT_FROM_FLASH
-#pragma CODE_SECTION(MAC_CalculatePWM, "ramfuncs");
+#pragma CODE_SECTION(MAC_CalcTargetInstantVoltage, "ramfuncs");
 #endif
-static Int16S MAC_CalculatePWM()
+static _iq MAC_CalcTargetInstantVoltage()
 {
 	// Расчёт мгновенного значения напряжения
 	// Отбрасывание целых периодов счётчика времени
 	Int32U TrimmedCounter = TimeCounter - (TimeCounter % SINE_PERIOD_PULSES) * SINE_PERIOD_PULSES;
 	_iq SinValue = _IQsinPU(_FPtoIQ2(TrimmedCounter, SINE_PERIOD_PULSES));
-	_iq InstantVoltage = _IQmpy(_IQmpy(SQROOT2, ControlVrms + PeriodCorrection), SinValue);
+	return _IQmpy(_IQmpy(SQROOT2, ControlVrms + PeriodCorrection), SinValue);
+}
+// ----------------------------------------
 
+#ifdef BOOT_FROM_FLASH
+#pragma CODE_SECTION(MAC_CalcPWMFromInstantVoltage, "ramfuncs");
+#endif
+static Int16S MAC_CalcPWMFromInstantVoltage(_iq Voltage)
+{
 	// Пересчёт в ШИМ
-	Int16S pwm = _IQint(_IQmpy(InstantVoltage, TransAndPWMCoeff));
+	Int16S pwm = _IQint(_IQmpy(Voltage, TransAndPWMCoeff));
 
 	// Обрезка верхних значений
 	if(ABS(pwm) > PWM_LIMIT)
