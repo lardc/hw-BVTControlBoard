@@ -418,20 +418,20 @@ static Boolean MAC_InitStartState()
 
 	// Конфигурация оцифровщика
 	Boolean res;
-	if(LimitIrms <= I_RANGE1)
+	if(LimitIrms <= I_RANGE_LOW)
 	{
-		MAC_CurrentCalc = MU_CalcCurrent1;
-		res = SS_SelectShunt(SwitchConfig_I1);
+		MAC_CurrentCalc = MU_CalcCurrent3;
+		res = SS_SelectShunt(SwitchConfig_I3);
 	}
-	else if(LimitIrms <= I_RANGE2)
+	else if(LimitIrms <= I_RANGE_MID)
 	{
 		MAC_CurrentCalc = MU_CalcCurrent2;
 		res = SS_SelectShunt(SwitchConfig_I2);
 	}
 	else
 	{
-		MAC_CurrentCalc = MU_CalcCurrent3;
-		res = SS_SelectShunt(SwitchConfig_I3);
+		MAC_CurrentCalc = MU_CalcCurrent1;
+		res = SS_SelectShunt(SwitchConfig_I1);
 	}
 
 	if(res)

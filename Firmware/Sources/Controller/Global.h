@@ -17,9 +17,9 @@
 #define VALUES_x_SIZE			500
 
 // RMS current range limits (in mA)
-#define I_RANGE1				_IQ(1)
-#define I_RANGE2				_IQ(10)
-#define I_RANGE3				_IQ(100)
+#define I_RANGE_LOW				_IQ(1)
+#define I_RANGE_MID				_IQ(10)
+#define I_RANGE_HIGH			_IQ(100)
 
 // Допустимое отклонение напряжения первичной стороны (в %)
 #define PRIM_V_MAX_DELTA		5
