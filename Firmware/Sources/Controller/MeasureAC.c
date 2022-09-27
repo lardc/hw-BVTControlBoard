@@ -51,7 +51,7 @@ static Boolean RingBufferFull;
 static Int16S MinSafePWM, PWM, PWMReduceRate;
 static Int16U RawZeroVoltage, RawZeroCurrent, FECounter, FECounterMax;
 static _iq TransAndPWMCoeff, Ki_err, Kp, Ki, FEAbsolute, FERelative;
-static _iq TargetVrms, ControlVrms, PeriodCorrection, VrmsRateStep, LimitIrms, Isat_level;
+static _iq TargetVrms, ControlVrms, PeriodCorrection, VrmsRateStep, LimitIrms, Isat_level, Irange;
 static Int32U TimeCounter, PlateCounterTop, Vsq_sum, Isq_sum;
 static Boolean DbgMutePWM, DbgSRAM, StopByActiveCurrent;
 static Int32S Wreal_sum;
@@ -281,7 +281,7 @@ static void MAC_ControlCycle()
 			switch(BreakReason)
 			{
 				case PBR_None:
-				case PBR_OutputShort:
+				case PBR_CurrentSaturation:
 				case PBR_CurrentLimit:
 					{
 						DataTable[REG_RESULT_V] = _IQint(SavedRMS.Voltage);
@@ -320,10 +320,10 @@ static void MAC_ControlCycle()
 		{
 			SavedCosPhi = _IQ(1);
 			SavedRMS.Voltage = RMS.Voltage;
-			SavedRMS.Current = Isat_level;
+			SavedRMS.Current = Irange;
 
-			DataTable[REG_WARNING] = WARNING_SC_DETECTED;
-			MAC_RequestStop(PBR_OutputShort);
+			DataTable[REG_WARNING] = WARNING_CURR_RANGE_SAT;
+			MAC_RequestStop(PBR_CurrentSaturation);
 		}
 		else
 		{
@@ -430,22 +430,23 @@ static Boolean MAC_InitStartState()
 	Boolean res;
 	if(LimitIrms <= I_RANGE_LOW)
 	{
-		Isat_level = _IQmpy(I_RANGE_LOW, SQROOT2);
+		Irange = I_RANGE_LOW;
 		MAC_CurrentCalc = MU_CalcCurrent3;
 		res = SS_SelectShunt(SwitchConfig_I3);
 	}
 	else if(LimitIrms <= I_RANGE_MID)
 	{
-		Isat_level = _IQmpy(I_RANGE_MID, SQROOT2);
+		Irange = I_RANGE_MID;
 		MAC_CurrentCalc = MU_CalcCurrent2;
 		res = SS_SelectShunt(SwitchConfig_I2);
 	}
 	else
 	{
-		Isat_level = _IQmpy(I_RANGE_HIGH, SQROOT2);
+		Irange = I_RANGE_HIGH;
 		MAC_CurrentCalc = MU_CalcCurrent1;
 		res = SS_SelectShunt(SwitchConfig_I1);
 	}
+	Isat_level = _IQmpy(Irange, SQROOT2);
 
 	if(res)
 	{
