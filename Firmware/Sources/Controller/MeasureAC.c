@@ -51,7 +51,7 @@ static Boolean RingBufferFull;
 static Int16S MinSafePWM, PWM, PWMReduceRate;
 static Int16U RawZeroVoltage, RawZeroCurrent, FECounter, FECounterMax;
 static _iq TransAndPWMCoeff, Ki_err, Kp, Ki, FEAbsolute, FERelative;
-static _iq TargetVrms, ControlVrms, PeriodCorrection, VrmsRateStep, LimitIrms;
+static _iq TargetVrms, ControlVrms, PeriodCorrection, VrmsRateStep, LimitIrms, Isat_level;
 static Int32U TimeCounter, PlateCounterTop, Vsq_sum, Isq_sum;
 static Boolean DbgMutePWM, DbgSRAM, StopByActiveCurrent;
 static Int32S Wreal_sum;
@@ -62,7 +62,6 @@ static CurrentCalc MAC_CurrentCalc;
 
 // Forward functions
 static Int16S MAC_CalcPWMFromVoltageAmplitude();
-static Int16S MAC_CalcPWMFromPWMAmplitude(Int16U MaxPWM);
 static void MAC_HandleVI(pDataSampleIQ Instant, pDataSampleIQ RMS, _iq *CosPhi);
 static _iq MAC_SQRoot(Int32U Value);
 static _iq MAC_PeriodController();
@@ -217,7 +216,7 @@ static void MAC_ControlCycle()
 	_iq CompareCurrent = _IQmpy(StopByActiveCurrent ? _IQabs(CosPhi) : _IQ(1), RMS.Current);
 	if(State != PS_Break && CompareCurrent >= LimitIrms)
 	{
-		SavedCosPhi = CosPhi;
+		SavedCosPhi = (_IQabs(RMS.Voltage) > SC_VOLTAGE_THR) ? CosPhi : _IQ(1);
 		SavedRMS = RMS;
 		MAC_RequestStop(PBR_CurrentLimit);
 	}
@@ -282,6 +281,7 @@ static void MAC_ControlCycle()
 			switch(BreakReason)
 			{
 				case PBR_None:
+				case PBR_OutputShort:
 				case PBR_CurrentLimit:
 					{
 						DataTable[REG_RESULT_V] = _IQint(SavedRMS.Voltage);
@@ -315,9 +315,22 @@ static void MAC_ControlCycle()
 	}
 	else
 	{
-		PWM = MAC_CalcPWMFromVoltageAmplitude();
-		if(ABS(PWM) == PWM_LIMIT)
-			MAC_RequestStop(PBR_PWMSaturation);
+		// Условие определения КЗ
+		if(_IQabs(Instant.Current) >= Isat_level && _IQabs(Instant.Voltage) < SC_VOLTAGE_THR)
+		{
+			SavedCosPhi = _IQ(1);
+			SavedRMS.Voltage = RMS.Voltage;
+			SavedRMS.Current = Isat_level;
+
+			DataTable[REG_WARNING] = WARNING_SC_DETECTED;
+			MAC_RequestStop(PBR_OutputShort);
+		}
+		else
+		{
+			PWM = MAC_CalcPWMFromVoltageAmplitude();
+			if(ABS(PWM) == PWM_LIMIT)
+				MAC_RequestStop(PBR_PWMSaturation);
+		}
 	}
 	MAC_SetPWM(PWM);
 
@@ -356,21 +369,6 @@ static Int16S MAC_CalcPWMFromVoltageAmplitude()
 
 	// Пересчёт в ШИМ
 	Int16S pwm = _IQint(_IQmpy(Voltage, TransAndPWMCoeff));
-	return MAC_PWMTrim(pwm);
-}
-// ----------------------------------------
-
-#ifdef BOOT_FROM_FLASH
-#pragma CODE_SECTION(MAC_CalcPWMFromPWMAmplitude, "ramfuncs");
-#endif
-static Int16S MAC_CalcPWMFromPWMAmplitude(Int16U MaxPWM)
-{
-	// Расчёт мгновенного значения напряжения
-	// Отбрасывание целых периодов счётчика времени
-	Int32U TrimmedCounter = TimeCounter - (TimeCounter % SINE_PERIOD_PULSES) * SINE_PERIOD_PULSES;
-	_iq SinValue = _IQsinPU(_FPtoIQ2(TrimmedCounter, SINE_PERIOD_PULSES));
-
-	Int16S pwm = _IQmpyI32int(SinValue, MaxPWM);
 	return MAC_PWMTrim(pwm);
 }
 // ----------------------------------------
@@ -432,16 +430,19 @@ static Boolean MAC_InitStartState()
 	Boolean res;
 	if(LimitIrms <= I_RANGE_LOW)
 	{
+		Isat_level = _IQmpy(I_RANGE_LOW, SQROOT2);
 		MAC_CurrentCalc = MU_CalcCurrent3;
 		res = SS_SelectShunt(SwitchConfig_I3);
 	}
 	else if(LimitIrms <= I_RANGE_MID)
 	{
+		Isat_level = _IQmpy(I_RANGE_MID, SQROOT2);
 		MAC_CurrentCalc = MU_CalcCurrent2;
 		res = SS_SelectShunt(SwitchConfig_I2);
 	}
 	else
 	{
+		Isat_level = _IQmpy(I_RANGE_HIGH, SQROOT2);
 		MAC_CurrentCalc = MU_CalcCurrent1;
 		res = SS_SelectShunt(SwitchConfig_I1);
 	}

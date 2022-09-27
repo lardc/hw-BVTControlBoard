@@ -156,6 +156,7 @@
 // WARNING CODES
 //
 #define WARNING_NONE				0	// No warning
+#define WARNING_SC_DETECTED			1	// Зафиксировано КЗ/пробой на выходе
 #define WARNING_WATCHDOG_RESET		1001	// System has been reseted by WD
 
 // USER ERROR CODES
