@@ -61,8 +61,8 @@ static ProcessBreakReason BreakReason;
 static CurrentCalc MAC_CurrentCalc;
 
 // Forward functions
-static _iq MAC_CalcTargetInstantVoltage();
-static Int16S MAC_CalcPWMFromInstantVoltage(_iq Voltage);
+static Int16S MAC_CalcPWMFromVoltageAmplitude();
+static Int16S MAC_CalcPWMFromPWMAmplitude(Int16U MaxPWM);
 static void MAC_HandleVI(pDataSampleIQ Instant, pDataSampleIQ RMS, _iq *CosPhi);
 static _iq MAC_SQRoot(Int32U Value);
 static _iq MAC_PeriodController();
@@ -315,8 +315,7 @@ static void MAC_ControlCycle()
 	}
 	else
 	{
-		_iq TargetInstV = MAC_CalcTargetInstantVoltage();
-		PWM = MAC_CalcPWMFromInstantVoltage(TargetInstV);
+		PWM = MAC_CalcPWMFromVoltageAmplitude();
 		if(ABS(PWM) == PWM_LIMIT)
 			MAC_RequestStop(PBR_PWMSaturation);
 	}
@@ -328,27 +327,8 @@ static void MAC_ControlCycle()
 }
 // ----------------------------------------
 
-#ifdef BOOT_FROM_FLASH
-#pragma CODE_SECTION(MAC_CalcTargetInstantVoltage, "ramfuncs");
-#endif
-static _iq MAC_CalcTargetInstantVoltage()
+Int16S inline MAC_PWMTrim(Int16S pwm)
 {
-	// Расчёт мгновенного значения напряжения
-	// Отбрасывание целых периодов счётчика времени
-	Int32U TrimmedCounter = TimeCounter - (TimeCounter % SINE_PERIOD_PULSES) * SINE_PERIOD_PULSES;
-	_iq SinValue = _IQsinPU(_FPtoIQ2(TrimmedCounter, SINE_PERIOD_PULSES));
-	return _IQmpy(_IQmpy(SQROOT2, ControlVrms + PeriodCorrection), SinValue);
-}
-// ----------------------------------------
-
-#ifdef BOOT_FROM_FLASH
-#pragma CODE_SECTION(MAC_CalcPWMFromInstantVoltage, "ramfuncs");
-#endif
-static Int16S MAC_CalcPWMFromInstantVoltage(_iq Voltage)
-{
-	// Пересчёт в ШИМ
-	Int16S pwm = _IQint(_IQmpy(Voltage, TransAndPWMCoeff));
-
 	// Обрезка верхних значений
 	if(ABS(pwm) > PWM_LIMIT)
 		return SIGN(pwm) * PWM_LIMIT;
@@ -360,6 +340,38 @@ static Int16S MAC_CalcPWMFromInstantVoltage(_iq Voltage)
 		return MinSafePWM * SIGN(pwm);
 	else
 		return pwm;
+}
+// ----------------------------------------
+
+#ifdef BOOT_FROM_FLASH
+#pragma CODE_SECTION(MAC_CalcPWMFromVoltageAmplitude, "ramfuncs");
+#endif
+static Int16S MAC_CalcPWMFromVoltageAmplitude()
+{
+	// Расчёт мгновенного значения напряжения
+	// Отбрасывание целых периодов счётчика времени
+	Int32U TrimmedCounter = TimeCounter - (TimeCounter % SINE_PERIOD_PULSES) * SINE_PERIOD_PULSES;
+	_iq SinValue = _IQsinPU(_FPtoIQ2(TrimmedCounter, SINE_PERIOD_PULSES));
+	_iq Voltage = _IQmpy(_IQmpy(SQROOT2, ControlVrms + PeriodCorrection), SinValue);
+
+	// Пересчёт в ШИМ
+	Int16S pwm = _IQint(_IQmpy(Voltage, TransAndPWMCoeff));
+	return MAC_PWMTrim(pwm);
+}
+// ----------------------------------------
+
+#ifdef BOOT_FROM_FLASH
+#pragma CODE_SECTION(MAC_CalcPWMFromPWMAmplitude, "ramfuncs");
+#endif
+static Int16S MAC_CalcPWMFromPWMAmplitude(Int16U MaxPWM)
+{
+	// Расчёт мгновенного значения напряжения
+	// Отбрасывание целых периодов счётчика времени
+	Int32U TrimmedCounter = TimeCounter - (TimeCounter % SINE_PERIOD_PULSES) * SINE_PERIOD_PULSES;
+	_iq SinValue = _IQsinPU(_FPtoIQ2(TrimmedCounter, SINE_PERIOD_PULSES));
+
+	Int16S pwm = _IQmpyI32int(SinValue, MaxPWM);
+	return MAC_PWMTrim(pwm);
 }
 // ----------------------------------------
 
