@@ -346,11 +346,16 @@ Int16S inline MAC_PWMTrim(Int16S pwm)
 	if(ABS(pwm) > PWM_LIMIT)
 		return SIGN(pwm) * PWM_LIMIT;
 
-	// Обрезка нижних значений
-	else if(ABS(pwm) < (MinSafePWM / 2))
-		return 0;
-	else if(ABS(pwm) < MinSafePWM)
-		return MinSafePWM * SIGN(pwm);
+	// Порог обрезки нижних значений
+	else if((ControlVrms + PeriodCorrection) > PWM_TRIM_CTRL_VOLTAGE)
+	{
+		if(ABS(pwm) < (MinSafePWM / 2))
+			return 0;
+		else if(ABS(pwm) < MinSafePWM)
+			return MinSafePWM * SIGN(pwm);
+		else
+			return pwm;
+	}
 	else
 		return pwm;
 }

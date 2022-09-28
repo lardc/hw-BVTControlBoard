@@ -105,9 +105,9 @@
 
 // PWM
 //--------------------------------------------------------
-#define PWM_FREQUENCY		20000L      // in Hz
-#define PWM_MIN_TH			1000	    // in ns
-#define PWM_MAX_SAT			95			// in %
+#define PWM_FREQUENCY		20000L		// in Hz
+#define PWM_MIN_TH			1000		// in ns
+#define PWM_MAX_SAT			99			// in %
 #define PWM_SATURATION		((Int16S)(ZW_PWM_DUTY_BASE * 0.95f))
 //--------------------------------------------------------
 
