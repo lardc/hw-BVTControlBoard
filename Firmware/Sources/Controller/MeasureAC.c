@@ -51,7 +51,8 @@ static Boolean RingBufferFull;
 static Int16S MinSafePWM, PWM, PWMReduceRate;
 static Int16U RawZeroVoltage, RawZeroCurrent, FECounter, FECounterMax;
 static _iq TransAndPWMCoeff, Ki_err, Kp, Ki, FEAbsolute, FERelative;
-static _iq TargetVrms, ControlVrms, PeriodCorrection, VrmsRateStep, LimitIrms, Isat_level, Irange;
+static _iq TargetVrms, ControlVrms, PeriodCorrection, VrmsRateStep, ActualInstantVoltageSet;
+static _iq LimitIrms, Isat_level, Irange;
 static Int32U TimeCounter, PlateCounterTop, Vsq_sum, Isq_sum;
 static Boolean DbgMutePWM, DbgSRAM, StopByActiveCurrent;
 static Int32S Wreal_sum;
@@ -316,7 +317,8 @@ static void MAC_ControlCycle()
 	else
 	{
 		// Условие определения КЗ
-		if(_IQabs(Instant.Current) >= Isat_level && _IQabs(Instant.Voltage) < SC_VOLTAGE_THR)
+		if(_IQabs(Instant.Current) >= Isat_level && _IQabs(ActualInstantVoltageSet) > BR_DOWM_VOLTAGE_SET_MIN &&
+				_IQabs(_IQdiv(Instant.Voltage, ActualInstantVoltageSet)) < BR_DOWN_VOLTAGE_RATIO)
 		{
 			SavedCosPhi = _IQ(1);
 			SavedRMS.Voltage = RMS.Voltage;
@@ -370,10 +372,10 @@ static Int16S MAC_CalcPWMFromVoltageAmplitude()
 	// Отбрасывание целых периодов счётчика времени
 	Int32U TrimmedCounter = TimeCounter - (TimeCounter % SINE_PERIOD_PULSES) * SINE_PERIOD_PULSES;
 	_iq SinValue = _IQsinPU(_FPtoIQ2(TrimmedCounter, SINE_PERIOD_PULSES));
-	_iq Voltage = _IQmpy(_IQmpy(SQROOT2, ControlVrms + PeriodCorrection), SinValue);
+	ActualInstantVoltageSet = _IQmpy(_IQmpy(SQROOT2, ControlVrms + PeriodCorrection), SinValue);
 
 	// Пересчёт в ШИМ
-	Int16S pwm = _IQint(_IQmpy(Voltage, TransAndPWMCoeff));
+	Int16S pwm = _IQint(_IQmpy(ActualInstantVoltageSet, TransAndPWMCoeff));
 	return MAC_PWMTrim(pwm);
 }
 // ----------------------------------------
@@ -413,6 +415,7 @@ static Boolean MAC_InitStartState()
 	PWM = 0;
 	FECounter = TimeCounter = 0;
 	Ki_err = PeriodCorrection = 0;
+	ActualInstantVoltageSet = 0;
 
 	Vsq_sum = Isq_sum = 0;
 	// Очистка кольцевого буфера
