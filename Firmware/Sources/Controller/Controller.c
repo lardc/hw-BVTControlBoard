@@ -158,7 +158,10 @@ void CONTROL_SwitchRTCycle(Boolean Enable)
 		ZwTimer_StartT0();
 	}
 	else
+	{
+		ZwPWMB_SetValue12(0);
 		ZwTimer_StopT0();
+	}
 }
 // ----------------------------------------
 

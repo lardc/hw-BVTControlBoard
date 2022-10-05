@@ -1,7 +1,6 @@
 ﻿#ifndef __DEV_OBJ_DIC_H
 #define __DEV_OBJ_DIC_H
 
-
 // ACTIONS
 //
 #define ACT_ENABLE_POWER			1	// Enable charging cells
@@ -22,7 +21,6 @@
 #define ACT_RESET_TO_DEFAULT		202	// Reset parameters to default values (only in controller memory)
 //
 #define ACT_BOOT_LOADER_REQUEST		320	// Request reboot to bootloader
-
 
 // REGISTERS
 //
@@ -120,7 +118,6 @@
 #define REG_FWINFO_STR_LEN			260	// Length of the information string record
 #define REG_FWINFO_STR_BEGIN		261	// Begining of the information string record
 
-
 // ENDPOINTS
 //
 #define EP16_V						1	// Endpoint for V value sequence
@@ -151,7 +148,6 @@
 #define DF_NONE						0	// No fault
 #define DF_OPTICAL_INTERFACE		1	// Optical interface failure
 #define DF_PRIMARY_VOLTAGE			2	// Primary voltage failure
-
 
 // WARNING CODES
 //
