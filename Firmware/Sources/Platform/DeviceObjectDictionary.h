@@ -148,9 +148,10 @@
 #define REG_WARNING					195	// Warning if present
 #define REG_PROBLEM					196	// Problem reason
 #define REG_FINISHED				197	// Indicates that test is done and there is result or fault
-#define REG_RESULT_V				198	// Test result (in V)
-#define REG_RESULT_I				199	// Test result (mA * 10 or uA)
-#define REG_RESULT_I_UA_R			200	// Resistance result R for DC-mode (in MOhm * 10) or Test result mA fraction for AC mode (in uA)
+#define REG_RESULT_V				198	// Voltage test result (in V)
+#define REG_RESULT_I				199	// Current test result (in mA * 10)
+#define REG_RESULT_I_UA				200	// Current test result, uA fractional part (in uA)
+#define REG_RESULT_R				201	// Resistance result R for DC-mode (in MOhm * 10)
 //
 #define REG_ACTUAL_PRIM_VOLTAGE		210	// Primary side capacitor voltage based on sensing (in V)
 #define REG_PRIM_VOLTAGE_CTRL		211	// Primary side capacitor voltage used by control system (in V)

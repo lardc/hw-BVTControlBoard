@@ -29,8 +29,6 @@ typedef void (*FUNC_AsyncDelegate)();
 typedef struct __EndTestDPCClosure
 {
 	Boolean SavedRequestToDisable;
-	Int16S SavedResultV;
-	Int16S SavedResultI;
 	Int16U SavedDFReason;
 	Int16U SavedWarning;
 	Int16U SavedProblem;
@@ -53,7 +51,7 @@ volatile DeviceState CONTROL_State = DS_None;
 volatile BatteryVoltageState CONTROL_Battery = BVS_None;
 //
 static CONTROL_FUNC_RealTimeRoutine RealTimeRoutine = NULL;
-static EndTestDPCClosure EndXDPCArgument = { FALSE, 0, 0, DF_NONE, WARNING_NONE, PROBLEM_NONE };
+static EndTestDPCClosure EndXDPCArgument = { FALSE, DF_NONE, WARNING_NONE, PROBLEM_NONE };
 //
 static volatile Boolean CycleActive = FALSE, BatteryVoltageIsReady;
 static volatile FUNC_AsyncDelegate DPCDelegate = NULL;
@@ -104,7 +102,9 @@ void CONTROL_Init()
 	// Init data table
 	DT_Init(EPROMService, FALSE);
 	DT_SaveFirmwareInfo(DEVICE_CAN_ADDRESS, 0);
+
 	// Fill state variables with default values
+	CONTROL_SetDeviceState(DS_None);
 	CONTROL_FillWPPartDefault();
 
 	// Device profile initialization
@@ -257,20 +257,12 @@ void CONTROL_RequestStop(Int16U Reason, Boolean HWSignal)
 
 void CONTROL_NotifyEndTest(_iq BVTResultV, _iq BVTResultI, Int16U DFReason, Int16U Problem, Int16U Warning)
 {
-	// Save values for further processing
-	EndXDPCArgument.SavedResultV = _IQint(BVTResultV);
+	if(BVTResultI < 0)
+		BVTResultI = 0;
 
-	if (CurrentMeasurementType == MEASUREMENT_TYPE_DC ||
-		CurrentMeasurementType == MEASUREMENT_TYPE_DC_STEP ||
-		CurrentMeasurementType == MEASUREMENT_TYPE_DC_RES)
-	{
-		EndXDPCArgument.SavedResultI = _IQint(BVTResultI);
-	}
-	else
-	{
-		EndXDPCArgument.SavedResultI = _IQmpyI32int(BVTResultI, 10);
-		DataTable[REG_RESULT_I_UA_R] = (BVTResultI > 0) ? _IQmpyI32int(_IQfrac(BVTResultI), 1000) : 0;
-	}
+	DataTable[REG_RESULT_V] = _IQint(BVTResultV);
+	DataTable[REG_RESULT_I] = _IQmpyI32int(BVTResultI, 10);
+	DataTable[REG_RESULT_I_UA] = _IQmpyI32int(_IQfrac(BVTResultI), 1000);
 
 	EndXDPCArgument.SavedDFReason = DFReason;
 	EndXDPCArgument.SavedProblem = Problem;
@@ -322,8 +314,6 @@ static void CONTROL_EndTestDPC()
 		DataTable[REG_FINISHED] = (EndXDPCArgument.SavedProblem == PROBLEM_NONE) ? OPRESULT_OK : OPRESULT_FAIL;
 		DataTable[REG_WARNING] = EndXDPCArgument.SavedWarning;
 		DataTable[REG_PROBLEM] = (EndXDPCArgument.SavedProblem == PROBLEM_OUTPUT_SHORT) ? PROBLEM_NONE : EndXDPCArgument.SavedProblem;
-		DataTable[REG_RESULT_V] = EndXDPCArgument.SavedResultV;
-		DataTable[REG_RESULT_I] = EndXDPCArgument.SavedResultI;
 		CONTROL_SwitchStateToPowered();
 	}
 
@@ -345,8 +335,6 @@ static void CONTROL_EndPassiveDPC()
 
 static void CONTROL_FillWPPartDefault()
 {
-	// Set volatile states
-	DataTable[REG_DEV_STATE] = (Int16U)DS_None;
 	DataTable[REG_FAULT_REASON] = DF_NONE;
 	DataTable[REG_DISABLE_REASON] = DF_NONE;
 	DataTable[REG_WARNING] = WARNING_NONE;
@@ -354,9 +342,8 @@ static void CONTROL_FillWPPartDefault()
 	DataTable[REG_FINISHED] = OPRESULT_OK;
 	DataTable[REG_RESULT_V] = 0;
 	DataTable[REG_RESULT_I] = 0;
-	DataTable[REG_RESULT_I_UA_R] = 0;
-	//
-	DataTable[REG_ACTUAL_PRIM_VOLTAGE] = 0;
+	DataTable[REG_RESULT_I_UA] = 0;
+	DataTable[REG_RESULT_R] = 0;
 }
 // ----------------------------------------
 
@@ -376,6 +363,7 @@ static void CONTROL_SwitchStateToNone()
 	ZbGPIO_SwitchIndicator(FALSE);
 	// Switch off power supply
 	DRIVER_SwitchPower(FALSE, FALSE);
+	DataTable[REG_ACTUAL_PRIM_VOLTAGE] = 0;
 
 	DataTable[REG_FAULT_REASON] = DF_NONE;
 	CONTROL_SetDeviceState(DS_None);
@@ -467,12 +455,7 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U UserError)
 				}
 				else if(CONTROL_State == DS_Powered)
 				{
-					DataTable[REG_FINISHED] = OPRESULT_NONE;
-					DataTable[REG_PROBLEM] = PROBLEM_NONE;
-					DataTable[REG_WARNING] = WARNING_NONE;
-					DataTable[REG_RESULT_V] = 0;
-					DataTable[REG_RESULT_I] = 0;
-					DataTable[REG_RESULT_I_UA_R] = 0;
+					CONTROL_FillWPPartDefault();
 					DEVPROFILE_ResetScopes(0, IND_EP_I | IND_EP_V | IND_EP_DBG | IND_EP_ERR | IND_EP_PEAK_I | IND_EP_PEAK_V);
 					DEVPROFILE_ResetEPReadState();
 

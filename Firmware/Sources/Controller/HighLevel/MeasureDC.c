@@ -396,8 +396,8 @@ static void MEASURE_DC_ControlCycle()
 					if(!TripCurrentDetected)
 						MEASURE_DC_HandleNonTripCondition();
 
-					DataTable[REG_RESULT_I_UA_R] = ResultR;
-					CONTROL_NotifyEndTest(ResultV, ResultI, Fault, Problem, Warning);
+					DataTable[REG_RESULT_R] = ResultR;
+					CONTROL_NotifyEndTest(ResultV, _IQdiv(ResultI, _IQ(1000)), Fault, Problem, Warning);
 					State = DCPS_None;
 				}
 			}
