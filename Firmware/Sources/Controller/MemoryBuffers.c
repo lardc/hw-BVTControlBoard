@@ -1,0 +1,29 @@
+// -----------------------------------------
+// Declarations of special memory buffers
+// ----------------------------------------
+
+// Header
+#include "MemoryBuffers.h"
+
+
+// Variables
+//
+#pragma DATA_SECTION(MEMBUF_Values_I, "data_mem");
+Int16U MEMBUF_Values_I[VALUES_x_SIZE];
+#pragma DATA_SECTION(MEMBUF_Values_V, "data_mem");
+Int16U MEMBUF_Values_V[VALUES_x_SIZE];
+#pragma DATA_SECTION(MEMBUF_Values_Err, "data_mem");
+Int16U MEMBUF_Values_Err[VALUES_x_SIZE];
+#pragma DATA_SECTION(MEMBUF_Values_DIAG, "data_mem");
+Int16U MEMBUF_Values_DIAG[VALUES_x_SIZE];
+#pragma DATA_SECTION(MEMBUF_Values_Ipeak, "data_mem");
+Int16U MEMBUF_Values_Ipeak[VALUES_x_SIZE];
+#pragma DATA_SECTION(MEMBUF_Values_Vpeak, "data_mem");
+Int16U MEMBUF_Values_Vpeak[VALUES_x_SIZE];
+//
+volatile Int16U MEMBUF_ValuesIV_Counter = 0;
+volatile Int16U MEMBUF_ValuesDIAG_Counter = 0;
+volatile Int16U MEMBUF_ValuesErr_Counter = 0;
+volatile Int16U MEMBUF_ValuesIVpeak_Counter = 0;
+
+// No more
