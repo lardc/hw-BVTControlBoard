@@ -40,7 +40,7 @@ typedef struct __TableItemConstraint
 #define STEP_DC_T_MAX			200		// in ms
 #define STEP_DC_T_DEF			100		// in ms
 //
-#define RES_VOLTAGE_MIN			1000	// in V
+#define RES_VOLTAGE_MIN			500		// in V
 #define RES_VOLTAGE_MAX			2500	// in V
 #define RES_VOLTAGE_DEF			1000	// in V
 //
