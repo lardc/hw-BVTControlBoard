@@ -10,6 +10,7 @@
 
 // Program build mode
 //
+#define BOOT_ALT_ADDRESS
 #define BOOT_FROM_FLASH					// normal mode
 #define RAM_CACHE_SPI_ABCD				// cache SPI-A(BCD) functions
 
