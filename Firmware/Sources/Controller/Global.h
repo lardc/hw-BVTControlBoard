@@ -61,7 +61,7 @@
 
 // --- Measure DC section
 // Resistance limits
-#define RES_LIMIT_LOW			10				// in MOhm
+#define RES_LIMIT_LOW			1				// in MOhm
 #define RES_LIMIT_HIGH			999				// in MOhm
 
 // Regulator parameters
