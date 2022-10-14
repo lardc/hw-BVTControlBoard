@@ -63,6 +63,7 @@
 // Resistance limits
 #define RES_LIMIT_LOW			1				// in MOhm
 #define RES_LIMIT_HIGH			999				// in MOhm
+#define RES_LIMIT_CURRENT		2000.0f			// in uA
 
 // Regulator parameters
 #define CTRL_VOLT_TO_PWM_DIV	10				// Divisor to convert voltage to PWM

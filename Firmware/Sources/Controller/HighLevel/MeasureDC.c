@@ -445,7 +445,7 @@ static void MEASURE_DC_CacheVariables()
 			LimitVoltage = _IQI(DataTable[REG_RES_VOLTAGE]);
 			VDCRateStep = _FPtoIQ2(DataTable[REG_RES_VOLTAGE_RATE] * 100, CONTROL_FREQUENCY);
 			PlateTimeCounterTop = (CONTROL_FREQUENCY * DC_RES_VPLATE) / 1000;;
-			LimitCurrent = _IQ(100.0f);
+			LimitCurrent = _IQ(RES_LIMIT_CURRENT);
 			ResCurrentOffset = (Int16S)(DataTable[REG_RES_CURR_OFFSET]);
 			break;
 	}
