@@ -152,6 +152,7 @@
 #define REG_RESULT_I				199	// Current test result (in mA * 10)
 #define REG_RESULT_I_UA				200	// Current test result, uA fractional part (in uA)
 #define REG_RESULT_R				201	// Resistance result R for DC-mode (in MOhm * 10)
+#define REG_RESULT_I_PA				202	// Current test result, uA fractional part (in pA)
 //
 #define REG_ACTUAL_PRIM_VOLTAGE		210	// Primary side capacitor voltage based on sensing (in V)
 #define REG_PRIM_VOLTAGE_CTRL		211	// Primary side capacitor voltage used by control system (in V)
