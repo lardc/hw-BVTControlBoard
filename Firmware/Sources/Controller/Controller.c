@@ -262,7 +262,7 @@ void CONTROL_NotifyEndTest(_iq BVTResultV, _iq BVTResultI, Int16U DFReason, Int1
 
 	DataTable[REG_RESULT_V] = _IQint(BVTResultV);
 	DataTable[REG_RESULT_I] = _IQmpyI32int(BVTResultI, 10);
-	_iq uA = _IQmpy(_IQfrac(BVTResultI), 1000);
+	_iq uA = _IQmpyI32(_IQfrac(BVTResultI), 1000);
 	DataTable[REG_RESULT_I_UA] = _IQint(uA);
 	DataTable[REG_RESULT_I_NA] = _IQmpyI32int(_IQfrac(uA), 1000);
 
