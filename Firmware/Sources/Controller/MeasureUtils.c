@@ -152,7 +152,7 @@ void MU_InitCoeffX(pMeasureCoeff Coeff, Int16U StartRegister)
 	Coeff->Kd = 10l * DataTable[StartRegister + 1];
 	Coeff->P2 = _IQI((Int16S)DataTable[StartRegister + 2]);
 	Coeff->P1 = _FPtoIQ2(DataTable[StartRegister + 3], 1000);
-	Coeff->P0 = _FPtoIQ2(DataTable[StartRegister + 4], 10);
+	Coeff->P0 = _FPtoIQ2((Int16S)DataTable[StartRegister + 4], 10);
 }
 // ----------------------------------------
 
