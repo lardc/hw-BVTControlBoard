@@ -252,6 +252,7 @@ static void MAC_ControlCycle()
 					{
 						PlateCounterTop += TimeCounter;
 						ControlVrms = TargetVrms;
+						DataTable[REG_VOLTAGE_READY] = 1;
 						State = PS_Plate;
 					}
 					break;

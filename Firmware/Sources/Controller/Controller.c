@@ -190,6 +190,7 @@ void CONTROL_ResetValues()
 	DataTable[REG_WARNING] = WARNING_NONE;
 	DataTable[REG_PROBLEM] = PROBLEM_NONE;
 	DataTable[REG_FINISHED] = OPRESULT_NONE;
+	DataTable[REG_VOLTAGE_READY] = 0;
 	DataTable[REG_RESULT_V] = 0;
 	DataTable[REG_RESULT_I_mA] = 0;
 	DataTable[REG_RESULT_I_uA] = 0;

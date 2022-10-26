@@ -87,6 +87,7 @@
 #define REG_WARNING					195	// Warning if present
 #define REG_PROBLEM					196	// Problem reason
 #define REG_FINISHED				197	// Indicates that test is done and there is result or fault
+#define REG_VOLTAGE_READY			198	// Флаг выхода на уставку по напряжению
 //
 #define REG_RESULT_V				200	// Voltage test result (in V)
 #define REG_RESULT_I_mA				201	// Current test result (mA part)
