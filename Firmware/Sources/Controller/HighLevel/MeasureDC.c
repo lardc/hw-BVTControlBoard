@@ -45,7 +45,7 @@ static _iq SSCurrentCoff, SSCurrentP1, SSCurrentP0, SSVoltageCoff, SSVoltageP1, 
 static _iq LimitCurrent, LimitVoltage;
 static _iq KpVDC, KiVDC, SIDCerr;
 static _iq ResultV, ResultI;
-static Int16U ResultR;
+static Int16U ResultR, RFineK;
 static Int32S CollectI, CollectV, CollectCounter, ResCurrentOffset;
 static _iq DesiredVDC, VDCRateStep, StepDCVoltageStep, FollowingError;
 static _iq MaxCurrent, MaxVoltage;
@@ -396,7 +396,7 @@ static void MEASURE_DC_ControlCycle()
 					if(!TripCurrentDetected)
 						MEASURE_DC_HandleNonTripCondition();
 
-					DataTable[REG_RESULT_R] = ResultR;
+					DataTable[REG_RESULT_R] = (Int32U)ResultR * RFineK / 1000;
 					CONTROL_NotifyEndTest(ResultV, _IQdiv(ResultI, _IQ(1000)), Fault, Problem, Warning);
 					State = DCPS_None;
 				}
@@ -468,6 +468,7 @@ static void MEASURE_DC_CacheVariables()
 	// Optical connection monitor
 	OptoConnectionMonMax = DataTable[REG_OPTO_CONNECTION_MON];
 
+	RFineK = DataTable[REG_R_RESULT_FINE_K];
 	CurrentMultiply = 10;
 	if (LimitCurrent <= HVD_DC_IL_TH)
 	{

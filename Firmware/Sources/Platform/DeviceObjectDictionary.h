@@ -100,6 +100,7 @@
 #define REG_SCURRENT2_FINE_P0		117	// Secondary current 2 tune quadratic coefficient P0 (in uA)
 #define REG_SCURRENT_DCL_FINE_P0	118	// Secondary current DC low tune quadratic coefficient P0 (in nA)
 #define REG_RES_CURR_OFFSET			119	// Offset current for resistor measurement (in uA x10)
+#define REG_R_RESULT_FINE_K			120	// Fine tuning proportional coefficient for resistance measurement (x1000)
 //
 #define REG_SP__1					127
 //
