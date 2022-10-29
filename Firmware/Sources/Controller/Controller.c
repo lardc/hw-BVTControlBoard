@@ -196,6 +196,7 @@ void CONTROL_ResetValues()
 	DataTable[REG_RESULT_I_uA] = 0;
 	DataTable[REG_RESULT_I_ACT_mA] = 0;
 	DataTable[REG_RESULT_I_ACT_uA] = 0;
+	DataTable[REG_RESULT_COS_PHI] = 0;
 }
 // ----------------------------------------
 

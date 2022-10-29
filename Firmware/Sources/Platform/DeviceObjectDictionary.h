@@ -94,6 +94,7 @@
 #define REG_RESULT_I_uA				202	// Current test result (uA part)
 #define REG_RESULT_I_ACT_mA			203	// Active current test result (mA part)
 #define REG_RESULT_I_ACT_uA			204	// Active current test result (uA part)
+#define REG_RESULT_COS_PHI			205	// Cos Phi value x1000
 //
 #define REG_ACTUAL_PRIM_VOLTAGE		210	// Primary side capacitor voltage based on sensing (in V)
 //

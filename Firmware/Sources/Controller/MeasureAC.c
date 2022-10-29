@@ -209,16 +209,16 @@ static void MAC_ControlCycle()
 	// Считывание оцифрованных значений
 	_iq CosPhi;
 	DataSampleIQ Instant, RMS;
-	static _iq SavedCosPhi;
-	static DataSampleIQ SavedRMS;
 	MAC_HandleVI(&Instant, &RMS, &CosPhi);
+
+	_iq SavedCosPhi = CosPhi;
+	DataSampleIQ SavedRMS = RMS;
 
 	// Проверка превышения значения тока
 	_iq CompareCurrent = _IQmpy(StopByActiveCurrent ? _IQabs(CosPhi) : _IQ(1), RMS.Current);
 	if(State != PS_Break && CompareCurrent >= LimitIrms)
 	{
 		SavedCosPhi = (_IQabs(RMS.Voltage) > SC_VOLTAGE_THR) ? CosPhi : _IQ(1);
-		SavedRMS = RMS;
 		MAC_RequestStop(PBR_CurrentLimit);
 	}
 
@@ -261,7 +261,6 @@ static void MAC_ControlCycle()
 					if(TimeCounter >= PlateCounterTop)
 					{
 						SavedCosPhi = CosPhi;
-						SavedRMS = RMS;
 						MAC_RequestStop(PBR_None);
 					}
 					break;
@@ -285,15 +284,7 @@ static void MAC_ControlCycle()
 				case PBR_None:
 				case PBR_CurrentSaturation:
 				case PBR_CurrentLimit:
-					{
-						DataTable[REG_RESULT_V] = _IQint(SavedRMS.Voltage);
-						DataTable[REG_RESULT_I_mA] = _IQint(SavedRMS.Current);
-						DataTable[REG_RESULT_I_uA] = _IQmpyI32int(_IQfrac(SavedRMS.Current), 1000);
-						_iq Iact = _IQmpy(SavedRMS.Current, _IQabs(SavedCosPhi));
-						DataTable[REG_RESULT_I_ACT_mA] = _IQint(Iact);
-						DataTable[REG_RESULT_I_ACT_uA] = _IQmpyI32int(_IQfrac(Iact), 1000);
-						DataTable[REG_FINISHED] = OPRESULT_OK;
-					}
+					DataTable[REG_FINISHED] = OPRESULT_OK;
 					break;
 
 				case PBR_FollowingError:
@@ -322,7 +313,6 @@ static void MAC_ControlCycle()
 				_IQabs(_IQdiv(Instant.Voltage, ActualInstantVoltageSet)) < BR_DOWN_VOLTAGE_RATIO)
 		{
 			SavedCosPhi = _IQ(1);
-			SavedRMS.Voltage = RMS.Voltage;
 			SavedRMS.Current = Irange;
 
 			DataTable[REG_WARNING] = WARNING_CURR_RANGE_SAT;
@@ -339,6 +329,16 @@ static void MAC_ControlCycle()
 
 	// Логгирование мгновенных данных
 	MU_LogScopeValues(&Instant, &RMS, CosPhi, PWM, DbgSRAM);
+
+	// Запись значений в регистры
+	DataTable[REG_RESULT_V] = _IQint(SavedRMS.Voltage);
+	DataTable[REG_RESULT_I_mA] = _IQint(SavedRMS.Current);
+	DataTable[REG_RESULT_I_uA] = _IQmpyI32int(_IQfrac(SavedRMS.Current), 1000);
+	_iq Iact = _IQmpy(SavedRMS.Current, _IQabs(SavedCosPhi));
+	DataTable[REG_RESULT_I_ACT_mA] = _IQint(Iact);
+	DataTable[REG_RESULT_I_ACT_uA] = _IQmpyI32int(_IQfrac(Iact), 1000);
+	DataTable[REG_RESULT_COS_PHI] = (Int16S)_IQmpyI32int(SavedCosPhi, 1000);
+
 	TimeCounter++;
 }
 // ----------------------------------------
