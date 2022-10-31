@@ -104,6 +104,9 @@ void CONTROL_Init()
 
 	// Use quadratic correction for block
 	DataTable[REG_QUADRATIC_CORR] = 1;
+	DataTable[REG_I_LIMIT_RANGE1] = _IQint(I_RANGE_HIGH);
+	DataTable[REG_I_LIMIT_RANGE2] = _IQint(I_RANGE_MID);
+	DataTable[REG_I_LIMIT_RANGE3] = _IQint(I_RANGE_LOW);
 
 	if(ZwSystem_GetDogAlarmFlag())
 	{

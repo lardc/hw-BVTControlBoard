@@ -98,6 +98,10 @@
 //
 #define REG_ACTUAL_PRIM_VOLTAGE		210	// Primary side capacitor voltage based on sensing (in V)
 //
+#define REG_I_LIMIT_RANGE1			215	// Limit value for current range 1 (in mA)
+#define REG_I_LIMIT_RANGE2			216	// Limit value for current range 2 (in mA)
+#define REG_I_LIMIT_RANGE3			217	// Limit value for current range 3 (in mA)
+//
 #define REG_CAN_BUSOFF_COUNTER		220	// Counter of bus-off states
 #define REG_CAN_STATUS_REG			221	// CAN status register (32 bit)
 #define REG_CAN_STATUS_REG_32		222
