@@ -63,7 +63,6 @@
 // Resistance limits
 #define RES_LIMIT_LOW			10				// in MOhm * 10
 #define RES_LIMIT_HIGH			2000			// in MOhm * 10
-#define RES_LIMIT_CURRENT		2000.0f			// in uA
 
 // Regulator parameters
 #define CTRL_VOLT_TO_PWM_DIV	10				// Divisor to convert voltage to PWM
@@ -73,12 +72,16 @@
 #define HVD_DC_VL_TH			_IQ(500)		// < 500V		(low range)
 #define HVD_DC_IL_TH			_IQ(100)		// <= 100uA		(low range)
 #define HVD_DC_IH_TH			_IQ(5000)		// <= 5000uA	(high range)
+//
+#define RES_CURRENT_HIGH		_IQ(2000)		// in uA
+#define RES_CURRENT_LOW			HVD_DC_IL_TH	// in uA
 
 // Avg sampling period
 #define DC_PLATE_SMPL_TIME		500				// in us
 
 // --- Measure resistance section
 #define DC_RES_VPLATE			1000			// in ms
+#define DC_RES_PULSE_TO_PULSE	2000			// in ms
 // ----------------------------------------
 
 // Following error settings

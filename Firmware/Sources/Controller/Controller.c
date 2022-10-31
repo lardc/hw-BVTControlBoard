@@ -49,6 +49,9 @@ volatile Int64U CONTROL_TimeCounter = 0;
 volatile Int64U CONTROL_BatteryTimeout;
 volatile DeviceState CONTROL_State = DS_None;
 volatile BatteryVoltageState CONTROL_Battery = BVS_None;
+static _iq ResCurrent;
+static Int64U PulseToPulsePause;
+static Boolean WaitSecondPulse;
 //
 static CONTROL_FUNC_RealTimeRoutine RealTimeRoutine = NULL;
 static EndTestDPCClosure EndXDPCArgument = { FALSE, DF_NONE, WARNING_NONE, PROBLEM_NONE };
@@ -141,10 +144,23 @@ void CONTROL_DelayedInit()
 }
 // ----------------------------------------
 
+void inline CONTROL_RequestDPC(FUNC_AsyncDelegate Action)
+{
+	DPCDelegate = Action;
+}
+// ----------------------------------------
+
 void CONTROL_Idle()
 {
 	CONTROL_UpdateIdle();
 	DEVPROFILE_ProcessRequests();
+
+	// Process second pulse
+	if(WaitSecondPulse && !DPCDelegate && PulseToPulsePause < CONTROL_TimeCounter)
+	{
+		WaitSecondPulse = FALSE;
+		CONTROL_RequestDPC(&CONTROL_StartSequence);
+	}
 
 	// Process deferred procedures
 	if(DPCDelegate)
@@ -153,12 +169,6 @@ void CONTROL_Idle()
 		DPCDelegate = NULL;
 		del();
 	}
-}
-// ----------------------------------------
-
-void inline CONTROL_RequestDPC(FUNC_AsyncDelegate Action)
-{
-	DPCDelegate = Action;
 }
 // ----------------------------------------
 
@@ -255,16 +265,24 @@ void CONTROL_RequestStop(Int16U Reason, Boolean HWSignal)
 }
 // ----------------------------------------
 
-void CONTROL_NotifyEndTest(_iq BVTResultV, _iq BVTResultI, Int16U DFReason, Int16U Problem, Int16U Warning)
+void CONTROL_NotifyEndTest(_iq BVTResultV, _iq BVTResultI, _iq BVTResultIuA, Int16U DFReason, Int16U Problem, Int16U Warning)
 {
 	if(BVTResultI < 0)
 		BVTResultI = 0;
 
+	if(CurrentMeasurementType == MEASUREMENT_TYPE_DC_RES && DFReason == DF_NONE && Problem == PROBLEM_NONE &&
+			ResCurrent == RES_CURRENT_HIGH && _IQabs(BVTResultIuA) < RES_CURRENT_LOW)
+	{
+		ResCurrent = RES_CURRENT_LOW;
+		PulseToPulsePause = CONTROL_TimeCounter + DC_RES_PULSE_TO_PULSE;
+		WaitSecondPulse = TRUE;
+		return;
+	}
+
 	DataTable[REG_RESULT_V] = _IQint(BVTResultV);
 	DataTable[REG_RESULT_I] = _IQmpyI32int(BVTResultI, 10);
-	_iq uA = _IQmpyI32(_IQfrac(BVTResultI), 1000);
-	DataTable[REG_RESULT_I_UA] = _IQint(uA);
-	DataTable[REG_RESULT_I_NA] = _IQmpyI32int(_IQfrac(uA), 1000);
+	DataTable[REG_RESULT_I_UA] = _IQint(BVTResultIuA);
+	DataTable[REG_RESULT_I_NA] = _IQmpyI32int(_IQfrac(BVTResultIuA), 1000);
 
 	EndXDPCArgument.SavedDFReason = DFReason;
 	EndXDPCArgument.SavedProblem = Problem;
@@ -460,7 +478,8 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U UserError)
 					CONTROL_FillWPPartDefault();
 					DEVPROFILE_ResetScopes(0, IND_EP_I | IND_EP_V | IND_EP_DBG | IND_EP_ERR | IND_EP_PEAK_I | IND_EP_PEAK_V);
 					DEVPROFILE_ResetEPReadState();
-
+					
+					ResCurrent = RES_CURRENT_HIGH;
 					CONTROL_RequestDPC(&CONTROL_StartSequence);
 				}
 				else
@@ -547,7 +566,8 @@ static void CONTROL_TriggerMeasurementDPC()
 	Boolean success = FALSE;
 	Int16U DFReason = DF_NONE, problem = PROBLEM_NONE;
 
-	MU_StartScope();
+	if(!(ResCurrent == RES_CURRENT_LOW && CurrentMeasurementType == MEASUREMENT_TYPE_DC_RES))
+		MU_StartScope();
 
 	// Re-init RX SPI channel and send dummy request
 	CONTROL_ReInitSPI_Rx();
@@ -566,13 +586,15 @@ static void CONTROL_TriggerMeasurementDPC()
 			break;
 		case MEASUREMENT_TYPE_DC:
 		case MEASUREMENT_TYPE_DC_STEP:
+			success = MEASURE_DC_StartProcess(CurrentMeasurementType, &DFReason, &problem, NULL);
+			break;
 		case MEASUREMENT_TYPE_DC_RES:
-			success = MEASURE_DC_StartProcess(CurrentMeasurementType, &DFReason, &problem);
+			success = MEASURE_DC_StartProcess(CurrentMeasurementType, &DFReason, &problem, &ResCurrent);
 			break;
 	}
 
 	if(!success)
-		CONTROL_NotifyEndTest(0, 0, DFReason, problem, WARNING_NONE);
+		CONTROL_NotifyEndTest(0, 0, 0, DFReason, problem, WARNING_NONE);
 }
 // ----------------------------------------
 

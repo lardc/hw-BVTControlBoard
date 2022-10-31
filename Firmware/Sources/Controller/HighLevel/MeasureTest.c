@@ -170,7 +170,7 @@ static void MEASURE_TEST_ControlCycle()
 				if(BrakeCounter >= BrakeCounterMax)
 				{
 					CONTROL_SubcribeToCycle(NULL);
-					CONTROL_NotifyEndTest(0, 0, Fault, Problem, Warning);
+					CONTROL_NotifyEndTest(0, 0, 0, Fault, Problem, Warning);
 
 					State = TPS_None;
 				}

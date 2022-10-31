@@ -55,7 +55,7 @@ void CONTROL_SubcribeToCycle(CONTROL_FUNC_RealTimeRoutine Routine);
 // Emergency stop process
 void CONTROL_RequestStop(Int16U Reason, Boolean HWSignal);
 // Set test result
-void CONTROL_NotifyEndTest(_iq BVTResultV, _iq BVTResultI, Int16U DFReason, Int16U Problem, Int16U Warning);
+void CONTROL_NotifyEndTest(_iq BVTResultV, _iq BVTResultI, _iq BVTResultIuA, Int16U DFReason, Int16U Problem, Int16U Warning);
 // Notify that CAN system fault occurs
 void CONTROL_NotifyCANFault(ZwCAN_SysFlags Flag);
 // Re-init RX SPI channels

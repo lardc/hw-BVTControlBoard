@@ -515,7 +515,7 @@ static void MEASURE_AC_ControlCycle()
 					else
 						MEASURE_AC_HandleNonTripCondition();
 
-					CONTROL_NotifyEndTest(ResultV, ResultI, Fault, Problem, Warning);
+					CONTROL_NotifyEndTest(ResultV, ResultI, _IQmpyI32(ResultI, 1000), Fault, Problem, Warning);
 					ZwPWM_Enable(FALSE);
 					State = ACPS_None;
 				}

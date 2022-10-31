@@ -59,7 +59,7 @@ static volatile DCProcessState State = DCPS_None;
 
 // Forward functions
 //
-static void MEASURE_DC_CacheVariables();
+static void MEASURE_DC_CacheVariables(_iq *OverrideLimitCurrent);
 static void MEASURE_DC_ControlCycle();
 static void MEASURE_DC_HandleVI();
 static void MEASURE_DC_HandleTripCondition();
@@ -67,13 +67,14 @@ static void MEASURE_DC_HandleTripCondition();
 
 // Functions
 //
-Boolean MEASURE_DC_StartProcess(Int16U Type, pInt16U pDFReason, pInt16U pProblem)
+Boolean MEASURE_DC_StartProcess(Int16U Type, pInt16U pDFReason, pInt16U pProblem, _iq *OverrideLimitCurrent)
 {
 	// Save parameters
 	MeasurementType = Type;
 
 	// Cache data
-	MEASURE_DC_CacheVariables();
+	MEASURE_DC_CacheVariables(OverrideLimitCurrent);
+
 	// Enable RT cycle
 	CONTROL_SwitchRTCycle(TRUE);
 
@@ -290,8 +291,8 @@ void MEASURE_DC_HandleNonTripCondition()
 		}
 	}
 
-	ResultV = _IQI(CollectV / CollectCounter);
-	ResultI = _IQI(CollectI / CollectCounter);
+	ResultV = _IQdiv(CollectV, CollectCounter);
+	ResultI = _IQdiv(CollectI, CollectCounter);
 }
 // ----------------------------------------
 
@@ -397,7 +398,7 @@ static void MEASURE_DC_ControlCycle()
 						MEASURE_DC_HandleNonTripCondition();
 
 					DataTable[REG_RESULT_R] = (Int32U)ResultR * RFineK / 1000;
-					CONTROL_NotifyEndTest(ResultV, _IQdiv(ResultI, _IQ(1000)), Fault, Problem, Warning);
+					CONTROL_NotifyEndTest(ResultV, _IQdiv(ResultI, _IQ(1000)), ResultI, Fault, Problem, Warning);
 					State = DCPS_None;
 				}
 			}
@@ -422,7 +423,7 @@ static void MEASURE_DC_ControlCycle()
 }
 // ----------------------------------------
 
-static void MEASURE_DC_CacheVariables()
+static void MEASURE_DC_CacheVariables(_iq *OverrideLimitCurrent)
 {
 	switch (MeasurementType)
 	{
@@ -444,8 +445,8 @@ static void MEASURE_DC_CacheVariables()
 		case MEASUREMENT_TYPE_DC_RES:
 			LimitVoltage = _IQI(DataTable[REG_RES_VOLTAGE]);
 			VDCRateStep = _FPtoIQ2(DataTable[REG_RES_VOLTAGE_RATE] * 100, CONTROL_FREQUENCY);
-			PlateTimeCounterTop = (CONTROL_FREQUENCY * DC_RES_VPLATE) / 1000;;
-			LimitCurrent = _IQ(RES_LIMIT_CURRENT);
+			PlateTimeCounterTop = (CONTROL_FREQUENCY * DC_RES_VPLATE) / 1000;
+			LimitCurrent = OverrideLimitCurrent ? *OverrideLimitCurrent : RES_CURRENT_HIGH;
 			ResCurrentOffset = (Int16S)(DataTable[REG_RES_CURR_OFFSET]);
 			break;
 	}

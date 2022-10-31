@@ -13,7 +13,7 @@
 // Functions
 //
 // Start measurement process
-Boolean MEASURE_DC_StartProcess(Int16U Type, pInt16U pDFReason, pInt16U pProblem);
+Boolean MEASURE_DC_StartProcess(Int16U Type, pInt16U pDFReason, pInt16U pProblem, _iq *OverrideLimitCurrent);
 // Finish and clean up
 void MEASURE_DC_FinishProcess();
 // Emergency stop during measurement process
