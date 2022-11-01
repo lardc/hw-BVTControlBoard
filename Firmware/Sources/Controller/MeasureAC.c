@@ -170,13 +170,12 @@ static void MAC_HandleVI(pDataSampleIQ Instant, pDataSampleIQ RMS, _iq *CosPhi)
 	if(Wreal_abs)
 	{
 		// Расчёт косинус-фи с предотвращением переполнения
-		while(Wreal_abs > BIT15 || Wrms > BIT15)
+		if((Wreal_abs & BIT31) || (Wrms & BIT31))
 		{
 			Wreal_abs >>= 1;
 			Wrms >>= 1;
 		}
-		_iq15 tmp15 = _IQ15div(_IQ15mpyI32(_IQ15(1), Wreal_abs), _IQ15mpyI32(_IQ15(1), Wrms));
-		*CosPhi = _IQ15toIQ(tmp15);
+		*CosPhi = _IQdiv(Wreal_abs, Wrms);
 
 		// Проверка насыщения значения из-за погрешностей расчёта
 		if(*CosPhi > _IQ(1))
@@ -184,7 +183,7 @@ static void MAC_HandleVI(pDataSampleIQ Instant, pDataSampleIQ RMS, _iq *CosPhi)
 
 		// Возвращение знака
 		if(Wreal_sum < 0)
-			*CosPhi = _IQmpy(_IQ(-1), *CosPhi);
+			*CosPhi = _IQmpyI32(*CosPhi, -1);
 	}
 	else
 		*CosPhi = 0;
