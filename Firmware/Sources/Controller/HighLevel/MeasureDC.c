@@ -279,6 +279,7 @@ void MEASURE_DC_HandleNonTripCondition()
 	{
 		CollectI += ResCurrentOffset * CollectCounter / 10;
 		ResultR = (CollectV * 10) / CollectI;
+		ResultR = (Int32U)ResultR * RFineK / 1000;
 		if (ResultR > (10 * RES_LIMIT_HIGH) || CollectI <= 0)
 		{
 			ResultR = RES_LIMIT_HIGH * 10;
@@ -289,6 +290,7 @@ void MEASURE_DC_HandleNonTripCondition()
 			ResultR = RES_LIMIT_LOW * 10;
 			Warning = WARNING_RES_OUT_OF_RANGE;
 		}
+		DataTable[REG_RESULT_R] = ResultR;
 	}
 
 	ResultV = _IQdiv(CollectV, CollectCounter);
@@ -397,7 +399,6 @@ static void MEASURE_DC_ControlCycle()
 					if(!TripCurrentDetected)
 						MEASURE_DC_HandleNonTripCondition();
 
-					DataTable[REG_RESULT_R] = (Int32U)ResultR * RFineK / 1000;
 					CONTROL_NotifyEndTest(ResultV, _IQdiv(ResultI, _IQ(1000)), ResultI, Fault, Problem, Warning);
 					State = DCPS_None;
 				}
