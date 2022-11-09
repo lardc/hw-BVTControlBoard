@@ -281,7 +281,7 @@ void CONTROL_NotifyEndTest(_iq BVTResultV, _iq BVTResultI, _iq BVTResultIuA, Int
 
 	DataTable[REG_RESULT_V] = _IQint(BVTResultV);
 	DataTable[REG_RESULT_I] = _IQmpyI32int(BVTResultI, 10);
-	DataTable[REG_RESULT_I_UA] = _IQint(BVTResultIuA);
+	DataTable[REG_RESULT_I_UA] = _IQint(BVTResultIuA) % 1000;
 	DataTable[REG_RESULT_I_NA] = _IQmpyI32int(_IQfrac(BVTResultIuA), 1000);
 
 	EndXDPCArgument.SavedDFReason = DFReason;
