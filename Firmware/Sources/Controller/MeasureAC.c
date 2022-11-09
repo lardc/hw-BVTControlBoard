@@ -54,7 +54,7 @@ static _iq TransAndPWMCoeff, Ki_err, Kp, Ki, FEAbsolute, FERelative;
 static _iq TargetVrms, ControlVrms, PeriodCorrection, VrmsRateStep, ActualInstantVoltageSet;
 static _iq LimitIrms, Isat_level, Irange;
 static Int32U TimeCounter, PlateCounterTop, Vsq_sum, Isq_sum;
-static Boolean DbgMutePWM, DbgSRAM, StopByActiveCurrent;
+static Boolean DbgMutePWM, DbgSRAM, StopByActiveCurrent, RequireSoftStop;
 static Int32S Wreal_sum;
 
 static ProcessState State;
@@ -100,8 +100,16 @@ void MAC_RequestStop(ProcessBreakReason Reason)
 {
 	if(State != PS_Break)
 	{
-		PWMReduceRate = MAC_GetPWMReduceRate(PWM);
-		State = PS_Break;
+		if(Reason == PBR_RequestSoftStop)
+			RequireSoftStop = TRUE;
+
+		// Запрос на мягкую остановку имеет низший приоритет
+		else
+		{
+			PWMReduceRate = MAC_GetPWMReduceRate(PWM);
+			State = PS_Break;
+			RequireSoftStop = FALSE;
+		}
 		BreakReason = Reason;
 	}
 }
@@ -227,6 +235,13 @@ static void MAC_ControlCycle()
 		_iq PeriodError = MAC_PeriodController(RMS.Voltage);
 		MU_LogScopeError(PeriodError);
 
+		// Проверка на запрос остановки
+		if(State != PS_Break && RequireSoftStop)
+		{
+			PWMReduceRate = MAC_GetPWMReduceRate(PWM);
+			State = PS_Break;
+		}
+
 		// Проверка на ошибку следования
 		if(State != PS_Break && Kp && Ki && !DbgMutePWM &&
 				_IQdiv(_IQabs(PeriodError), ControlVrms) > FERelative && _IQabs(PeriodError) > FEAbsolute)
@@ -291,7 +306,8 @@ static void MAC_ControlCycle()
 					DataTable[REG_FINISHED] = OPRESULT_FAIL;
 					break;
 
-				case PBR_RequestStop:
+				case PBR_RequestSoftStop:
+				case PBR_RequestFastStop:
 					DataTable[REG_PROBLEM] = PROBLEM_STOP;
 					DataTable[REG_FINISHED] = OPRESULT_FAIL;
 					break;
@@ -416,6 +432,7 @@ static Boolean MAC_InitStartState()
 	FECounter = TimeCounter = 0;
 	Ki_err = PeriodCorrection = 0;
 	ActualInstantVoltageSet = 0;
+	RequireSoftStop = FALSE;
 
 	Vsq_sum = Isq_sum = 0;
 	// Очистка кольцевого буфера

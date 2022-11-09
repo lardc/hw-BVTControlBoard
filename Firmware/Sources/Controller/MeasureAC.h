@@ -13,7 +13,8 @@ typedef enum __ProcessBreakReason
 {
 	PBR_None = 0,
 	PBR_CurrentLimit,
-	PBR_RequestStop,
+	PBR_RequestFastStop,
+	PBR_RequestSoftStop,
 	PBR_FollowingError,
 	PBR_PWMSaturation,
 	PBR_CurrentSaturation

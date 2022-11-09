@@ -254,7 +254,7 @@ Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U UserError)
 
 		case ACT_STOP:
 			if(CONTROL_State == DS_InProcess)
-				MAC_RequestStop(PBR_RequestStop);
+				MAC_RequestStop(PBR_RequestSoftStop);
 			break;
 
 		case ACT_READ_FRAGMENT:
