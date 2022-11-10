@@ -359,7 +359,7 @@ static void CONTROL_FillWPPartDefault()
 	DataTable[REG_DISABLE_REASON] = DF_NONE;
 	DataTable[REG_WARNING] = WARNING_NONE;
 	DataTable[REG_PROBLEM] = PROBLEM_NONE;
-	DataTable[REG_FINISHED] = OPRESULT_OK;
+	DataTable[REG_FINISHED] = OPRESULT_NONE;
 	DataTable[REG_RESULT_V] = 0;
 	DataTable[REG_RESULT_I] = 0;
 	DataTable[REG_RESULT_I_UA] = 0;
