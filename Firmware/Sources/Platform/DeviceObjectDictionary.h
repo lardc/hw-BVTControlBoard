@@ -43,13 +43,13 @@
 #define REG_COEFF_CURRENT2_D		13	// Делитель пропорционального коэффициента x0.1
 #define REG_COEFF_CURRENT2_P2		14	// Коэффициент тонкой подстройки тока 2 P2 x1e6
 #define REG_COEFF_CURRENT2_P1		15	// Коэффициент тонкой подстройки тока 2 P1 x1000
-#define REG_COEFF_CURRENT2_P0		16	// Коэффициент тонкой подстройки тока 2 P0 x10
+#define REG_COEFF_CURRENT2_P0		16	// Коэффициент тонкой подстройки тока 2 P0 x100
 
 #define REG_COEFF_CURRENT3_K		17	// Пропорциональный коэффициент пересёта напряжения х1000
 #define REG_COEFF_CURRENT3_D		18	// Делитель пропорционального коэффициента x0.1
 #define REG_COEFF_CURRENT3_P2		19	// Коэффициент тонкой подстройки тока 3 P2 x1e6
 #define REG_COEFF_CURRENT3_P1		20	// Коэффициент тонкой подстройки тока 3 P1 x1000
-#define REG_COEFF_CURRENT3_P0		21	// Коэффициент тонкой подстройки тока 3 P0 x10
+#define REG_COEFF_CURRENT3_P0		21	// Коэффициент тонкой подстройки тока 3 P0 x1000
 
 #define REG_CAP_COEFF				22	// Коэффициент пересчёта напряжения первичной стороны х1000
 
