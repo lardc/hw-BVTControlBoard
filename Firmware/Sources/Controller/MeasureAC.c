@@ -213,6 +213,8 @@ static _iq MAC_SQRoot(Int32U Value)
 #endif
 static void MAC_ControlCycle()
 {
+	static ProcessState PrevState = PS_None;
+
 	// Считывание оцифрованных значений
 	_iq CosPhi;
 	DataSampleIQ Instant, RMS;
@@ -346,14 +348,18 @@ static void MAC_ControlCycle()
 	MU_LogScopeValues(&Instant, &RMS, CosPhi, PWM, DbgSRAM);
 
 	// Запись значений в регистры
-	DataTable[REG_RESULT_V] = _IQint(SavedRMS.Voltage);
-	DataTable[REG_RESULT_I_mA] = _IQint(SavedRMS.Current);
-	DataTable[REG_RESULT_I_uA] = _IQmpyI32int(_IQfrac(SavedRMS.Current), 1000);
-	_iq Iact = _IQmpy(SavedRMS.Current, _IQabs(SavedCosPhi));
-	DataTable[REG_RESULT_I_ACT_mA] = _IQint(Iact);
-	DataTable[REG_RESULT_I_ACT_uA] = _IQmpyI32int(_IQfrac(Iact), 1000);
-	DataTable[REG_RESULT_COS_PHI] = (Int16S)_IQmpyI32int(SavedCosPhi, 1000);
+	if(PrevState == PS_Ramp || PrevState == PS_Plate)
+	{
+		DataTable[REG_RESULT_V] = _IQint(SavedRMS.Voltage);
+		DataTable[REG_RESULT_I_mA] = _IQint(SavedRMS.Current);
+		DataTable[REG_RESULT_I_uA] = _IQmpyI32int(_IQfrac(SavedRMS.Current), 1000);
+		_iq Iact = _IQmpy(SavedRMS.Current, _IQabs(SavedCosPhi));
+		DataTable[REG_RESULT_I_ACT_mA] = _IQint(Iact);
+		DataTable[REG_RESULT_I_ACT_uA] = _IQmpyI32int(_IQfrac(Iact), 1000);
+		DataTable[REG_RESULT_COS_PHI] = (Int16S)_IQmpyI32int(SavedCosPhi, 1000);
+	}
 
+	PrevState = State;
 	TimeCounter++;
 }
 // ----------------------------------------
