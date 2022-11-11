@@ -66,7 +66,7 @@
 #define PIN_POWER_EN2		13
 #define PIN_POWER_EN3		17
 #define PIN_WD_RST			32
-#define PIN_DEBUG			33
+#define PIN_OUT_SYNC		33
 #define PIN_MEM_A			10
 #define PIN_MEM_B			25
 #define PIN_MEM_C			7

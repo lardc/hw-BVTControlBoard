@@ -16,14 +16,14 @@ void ZbGPIO_Init()
    	ZwGPIO_WritePin(PIN_POWER_EN2, TRUE);
    	ZwGPIO_WritePin(PIN_POWER_EN3, FALSE);
    	ZwGPIO_WritePin(PIN_EXT_IND, FALSE);
+   	ZwGPIO_WritePin(PIN_OUT_SYNC, FALSE);
    	// Configure pins
    	ZwGPIO_PinToOutput(PIN_LED_1);
    	ZwGPIO_PinToOutput(PIN_POWER_EN1);
    	ZwGPIO_PinToOutput(PIN_POWER_EN2);
    	ZwGPIO_PinToOutput(PIN_POWER_EN3);
    	ZwGPIO_PinToOutput(PIN_EXT_IND);
-   	//
-   	ZwGPIO_PinToInput(PIN_DEBUG, TRUE, 0);
+   	ZwGPIO_PinToOutput(PIN_OUT_SYNC);
 }
 // ----------------------------------------
 
@@ -58,4 +58,8 @@ void ZbGPIO_SwitchIndicator(Boolean Set)
 }
 // ----------------------------------------
 
-// No more.
+void ZbGPIO_SetSync(Boolean Set)
+{
+   	ZwGPIO_WritePin(PIN_OUT_SYNC, Set);
+}
+// ----------------------------------------
