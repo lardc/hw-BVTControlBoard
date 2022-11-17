@@ -69,11 +69,11 @@
 //
 // ----------------------------------------
 //
-#define REG_TARGET_VOLTAGE			128	// Действующее напряжение уставки (в В)
+#define REG_TEST_VOLTAGE			128	// Действующее напряжение уставки (в В)
 #define REG_LIMIT_CURRENT_mA		129	// Предельный ток (часть мА)
 #define REG_LIMIT_CURRENT_uA		130	// Предельный ток (часть мкА)
 #define REG_STOP_BY_ACTIVE_CURRENT	131	// Режим остановки по активной составляющей тока
-#define REG_VOLTAGE_PLATE_TIME		132	// Длительность формирования полки (в сек)
+#define REG_TEST_TIME				132	// Длительность формирования полки (в сек)
 #define REG_SCOPE_RATE				133	// Делитель логгирования данных
 //
 #define REG_DBG_SRAM				170	// Write saw-shape debug sequence to SRAM
@@ -145,7 +145,7 @@
 // PROBLEM CODES
 //
 #define PROBLEM_NONE				0	// No problem
-#define PROBLEM_STOP				1	// Stop by user command
+#define PROBLEM_STOP				1	// Stop by user command or safety signal
 #define PROBLEM_FOLLOWING_ERROR		2	// Following error
 #define PROBLEM_PWM_SATURATION		3	// PWM reached upper limit
 
@@ -158,7 +158,7 @@
 // WARNING CODES
 //
 #define WARNING_NONE				0	// No warning
-#define WARNING_CURR_RANGE_SAT		1	// Превышение выходным током границы диапазона
+#define WARNING_CURR_RANGE_SAT		1	// Current exceeds upper limit level
 #define WARNING_WATCHDOG_RESET		1001	// System has been reseted by WD
 
 // USER ERROR CODES

@@ -404,7 +404,7 @@ static Int16S MAC_CalcPWMFromVoltageAmplitude()
 
 static Boolean MAC_InitStartState()
 {
-	TargetVrms = _IQI(DataTable[REG_TARGET_VOLTAGE]);
+	TargetVrms = _IQI(DataTable[REG_TEST_VOLTAGE]);
 	LimitIrms = _IQI(DataTable[REG_LIMIT_CURRENT_mA]) + _FPtoIQ2(DataTable[REG_LIMIT_CURRENT_uA], 1000);
 	
 	ControlVrms = _IQI(DataTable[REG_START_VOLTAGE]);
@@ -413,7 +413,7 @@ static Boolean MAC_InitStartState()
 	Ki = _FPtoIQ2(DataTable[REG_KI], 100);
 	
 	VrmsRateStep = _FPtoIQ2(DataTable[REG_VOLTAGE_RATE] * 100, SINE_FREQUENCY);
-	PlateCounterTop = CONTROL_FREQUENCY * DataTable[REG_VOLTAGE_PLATE_TIME];
+	PlateCounterTop = CONTROL_FREQUENCY * DataTable[REG_TEST_TIME];
 	
 	TransAndPWMCoeff = _FPtoIQ2(ZW_PWM_DUTY_BASE, DataTable[REG_PRIM_VOLTAGE] * DataTable[REG_TRANSFORMER_COFF]);
 	MinSafePWM = (PWM_FREQUENCY / 1000L) * PWM_MIN_TH * ZW_PWM_DUTY_BASE / 1000000L;
