@@ -392,7 +392,7 @@ static Int16S MAC_CalcPWMFromVoltageAmplitude()
 {
 	// Расчёт мгновенного значения напряжения
 	// Отбрасывание целых периодов счётчика времени
-	Int32U TrimmedCounter = TimeCounter - (TimeCounter % SINE_PERIOD_PULSES) * SINE_PERIOD_PULSES;
+	Int32U TrimmedCounter = TimeCounter % SINE_PERIOD_PULSES;
 	_iq SinValue = _IQsinPU(_FPtoIQ2(TrimmedCounter, SINE_PERIOD_PULSES));
 	ActualInstantVoltageSet = _IQmpy(_IQmpy(SQROOT2, ControlVrms + PeriodCorrection), SinValue);
 
