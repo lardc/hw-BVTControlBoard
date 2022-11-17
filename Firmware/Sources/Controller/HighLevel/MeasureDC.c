@@ -129,6 +129,7 @@ void MEASURE_DC_FinishProcess()
 	SS_Dummy(TRUE);
 
 	CONTROL_SwitchRTCycle(FALSE);
+	DELAY_US(1500000);
 }
 // ----------------------------------------
 
