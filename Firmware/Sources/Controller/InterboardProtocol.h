@@ -37,9 +37,9 @@ typedef void (*IBP_FUNC_HighSpeedTimeoutRoutine)();
 // Current sensing chain
 typedef enum __CurrentInputs
 {
-	CurrentInput_Low = 0,
-	CurrentInput_High,
-	CurrentInput_High2
+	CurrentInput_Lowest = 0,
+	CurrentInput_Low,
+	CurrentInput_High
 } CurrentInputs;
 
 // Voltage sensing chain

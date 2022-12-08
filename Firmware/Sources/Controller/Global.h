@@ -49,6 +49,7 @@
 
 // Modes for HVDigitizer
 #define HVD_VL_TH				_IQ(1000)		// < 1000V
+#define HVD_ILL_TH				_IQ(5)			// <= 5mA		(lowest range)
 #define HVD_IL_TH				_IQ(30.0f)		// <= 30mA		(low range)
 
 #if USE_DIRTY_PATCH

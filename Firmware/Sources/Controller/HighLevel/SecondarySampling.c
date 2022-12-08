@@ -34,12 +34,12 @@ void SS_ConfigureSensingCircuits(_iq CurrentSet, _iq VoltageSet)
 	// Voltage configuration
 	cmdBuffer[0] = (IBP_PACKET_START_BYTE << 8) | IBP_CMD_SET_ADC;
 
-	if (CurrentSet <= HVD_IL_TH)
+	if (CurrentSet <= HVD_ILL_TH)
+		tmp = CurrentInput_Lowest;
+	else if (CurrentSet <= HVD_IL_TH)
 		tmp = CurrentInput_Low;
-	else if (CurrentSet <= HVD_IH_TH)
-		tmp = CurrentInput_High;
 	else
-		tmp = CurrentInput_High2;
+		tmp = CurrentInput_High;
 	cmdBuffer[1] |= tmp;
 
 	if (VoltageSet < HVD_VL_TH)
