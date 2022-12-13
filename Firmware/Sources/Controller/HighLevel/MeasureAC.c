@@ -193,6 +193,7 @@ Int16S inline MEASURE_AC_SetPWM(Int16S Duty)
 	{
 		Int16S PWMOutput = MEASURE_AC_TrimPWM(Duty);
 		ZwPWMB_SetValue12(PWMOutput);
+		PrevDuty = Duty;
 		return PWMOutput;
 	}
 }
