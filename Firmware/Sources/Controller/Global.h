@@ -25,14 +25,14 @@
 
 // Debug modes
 #define DBG_USE_BRIDGE_SHORT	TRUE
-#define DBG_USE_TEMP_MON		TRUE
+#define DBG_USE_TEMP_MON		FALSE
 #define DBG_USE_OPTO_TIMEOUT	TRUE
 #define DBG_USE_FOLLOWING_ERR	FALSE
 
 // Regulator parameters
 #define PWM_REDUCE_RATE			50				// in ticks per regulator cycle
-#define PWM_USE_BRIDGE_RECTIF	FALSE			// Use full-bridge rectifier on secondary side
-#define PWM_SKIP_NEG_PULSES		FALSE			// Skip measurement at negative primary pulses
+#define PWM_USE_BRIDGE_RECTIF	TRUE			// Use full-bridge rectifier on secondary side
+#define PWM_SKIP_NEG_PULSES		TRUE			// Skip measurement at negative primary pulses
 #define USE_DIRTY_PATCH			TRUE			// Dirty patch for 300mA
 
 // Redefine skip pulses setting
