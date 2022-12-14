@@ -22,6 +22,6 @@ void ZbGPIO_ToggleLED1();
 void ZbGPIO_SwitchPower(Boolean Enabled1, Boolean Enabled2);
 // Switch external indicator
 void ZbGPIO_SwitchIndicator(Boolean Set);
-
+void ZbGPIO_SetSync(Boolean Set);
 
 #endif // __ZBGPIO_H
