@@ -22,6 +22,8 @@ void ZbGPIO_Init()
 	ZwGPIO_PinToOutput(PIN_POWER_EN2);
 	ZwGPIO_PinToOutput(PIN_POWER_EN3);
 	ZwGPIO_PinToOutput(PIN_EXT_IND);
+
+	ZwGPIO_PinToInput(PIN_SAFETY, TRUE, 0);
 }
 // ----------------------------------------
 

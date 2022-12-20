@@ -97,6 +97,7 @@
 #define REG_RESULT_COS_PHI			205	// Cos Phi value x1000
 //
 #define REG_ACTUAL_PRIM_VOLTAGE		210	// Primary side capacitor voltage based on sensing (in V)
+#define REG_SAFETY_IN_STATE			211	// State of the safety input
 //
 #define REG_I_LIMIT_RANGE1			215	// Limit value for current range 1 (in mA)
 #define REG_I_LIMIT_RANGE2			216	// Limit value for current range 2 (in mA)

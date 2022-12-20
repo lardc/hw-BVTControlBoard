@@ -120,6 +120,7 @@ void CONTROL_Idle()
 {
 	DEVPROFILE_ProcessRequests();
 	DataTable[REG_ACTUAL_PRIM_VOLTAGE] = PrimaryVoltage = PS_GetBatteryVoltage();
+	DataTable[REG_SAFETY_IN_STATE] = ZwGPIO_ReadPin(PIN_SAFETY);
 }
 // ----------------------------------------
 
