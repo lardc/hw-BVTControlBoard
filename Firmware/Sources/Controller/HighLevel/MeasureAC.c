@@ -59,7 +59,7 @@ static _iq MaxPosVoltage, MaxPosCurrent, MaxPosInstantCurrent, PeakThresholdDete
 static DataSample ActualSecondarySample;
 static Boolean TripConditionDetected, UseInstantMethod, FrequencyRateSwitch, ModifySine;
 static Boolean DbgDualPolarity, DbgSRAM, DbgMutePWM, SkipRegulation, SkipLoggingVoids, SkipNegativeLogging;
-static Boolean InvertPolarity;
+static Boolean InvertPolarity, FastStop;
 static Int16S PrevDuty;
 static Int16U AmplitudePeriodCounter;
 static Int16U Problem, Warning, Fault;
@@ -109,6 +109,7 @@ Boolean MEASURE_AC_StartProcess(Int16U Type, pInt16U pDFReason, pInt16U pProblem
 	InvertPolarity = PWM_USE_BRIDGE_RECTIF;
 	SkipRegulation = TRUE;
 	SIVAerr = 0;
+	FastStop = FALSE;
 	//
 	ActualSecondarySample.IQFields.Voltage = 0;
 	ActualSecondarySample.IQFields.Current = 0;
@@ -423,7 +424,12 @@ static void MEASURE_AC_HandleVI()
 	if(UseInstantMethod)
 	{
 		if(ActualSecondarySample.IQFields.Current >= LimitCurrentHaltLevel)
+		{
+			// Условие быстрой остановки ШИМ
+			_iq RelVoltageRatio = _IQabs(_IQdiv(ActualSecondarySample.IQFields.Voltage, DesiredVoltageHistory));
+			FastStop = (FAST_STOP_REL_RATIO > RelVoltageRatio && _IQabs(DesiredVoltageHistory) > FAST_STOP_MIN_VSET);
 			MEASURE_AC_Stop(PROBLEM_OUTPUT_SHORT);
+		}
 	}
 	else
 	{
@@ -561,6 +567,9 @@ static void MEASURE_AC_ControlCycle()
 			
 		case ACPS_Brake:
 			{
+				if(FastStop)
+					PrevCorrection = 0;
+
 				// Reduce correction value smoothly
 				correction =
 						(ABS(PrevCorrection) >= PWM_REDUCE_RATE) ?
