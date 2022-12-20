@@ -200,7 +200,11 @@ Int16S inline MEASURE_AC_SetPWM(Int16S Duty)
 
 void MEASURE_AC_Stop(Int16U Reason)
 {
-	TripConditionDetected = TRUE;
+	if(Reason == DF_INTERNAL || Reason == PROBLEM_OUTPUT_SHORT || Reason == DF_BRIDGE_SHORT)
+	{
+		ZbGPIO_SwitchSYNC(TRUE);
+		TripConditionDetected = TRUE;
+	}
 
 	switch (Reason)
 	{
@@ -576,6 +580,7 @@ static void MEASURE_AC_ControlCycle()
 					
 					CONTROL_NotifyEndTest(ResultV, ResultI, Fault, Problem, Warning);
 					ZwPWM_Enable(FALSE);
+					ZbGPIO_SwitchSYNC(FALSE);
 					State = ACPS_None;
 				}
 			}

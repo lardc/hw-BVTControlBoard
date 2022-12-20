@@ -556,9 +556,9 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U UserError)
 		case ACT_DBG_PULSE_SYNC:
 			if(CONTROL_State == DS_None)
 			{
-				ZbGPIO_SetSync(TRUE);
+				ZbGPIO_SwitchSYNC(TRUE);
 				DELAY_US(1000000);
-				ZbGPIO_SetSync(FALSE);
+				ZbGPIO_SwitchSYNC(FALSE);
 			}
 			else
 				*UserError = ERR_OPERATION_BLOCKED;

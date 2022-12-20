@@ -58,7 +58,7 @@ void ZbGPIO_SwitchIndicator(Boolean Set)
 }
 // ----------------------------------------
 
-void ZbGPIO_SetSync(Boolean Set)
+void ZbGPIO_SwitchSYNC(Boolean Set)
 {
    	ZwGPIO_WritePin(PIN_OUT_SYNC, Set);
 }
