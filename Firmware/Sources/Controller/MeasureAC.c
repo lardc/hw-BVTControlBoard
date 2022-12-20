@@ -350,10 +350,12 @@ static void MAC_ControlCycle()
 	// Запись значений в регистры
 	if(PrevState == PS_Ramp || PrevState == PS_Plate)
 	{
-		DataTable[REG_RESULT_V] = _IQint(SavedRMS.Voltage);
-		DataTable[REG_RESULT_I_mA] = _IQint(SavedRMS.Current);
-		DataTable[REG_RESULT_I_uA] = _IQmpyI32int(_IQfrac(SavedRMS.Current), 1000);
-		_iq Iact = _IQmpy(SavedRMS.Current, _IQabs(SavedCosPhi));
+		_iq V = _IQabs(SavedRMS.Voltage);
+		_iq I = _IQabs(SavedRMS.Current);
+		DataTable[REG_RESULT_V] = _IQint(V);
+		DataTable[REG_RESULT_I_mA] = _IQint(I);
+		DataTable[REG_RESULT_I_uA] = _IQmpyI32int(_IQfrac(I), 1000);
+		_iq Iact = _IQmpy(I, _IQabs(SavedCosPhi));
 		DataTable[REG_RESULT_I_ACT_mA] = _IQint(Iact);
 		DataTable[REG_RESULT_I_ACT_uA] = _IQmpyI32int(_IQfrac(Iact), 1000);
 		DataTable[REG_RESULT_COS_PHI] = (Int16S)_IQmpyI32int(SavedCosPhi, 1000);
