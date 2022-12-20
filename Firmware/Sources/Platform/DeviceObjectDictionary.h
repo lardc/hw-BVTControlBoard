@@ -13,6 +13,7 @@
 #define ACT_DBG_DIGI_START_SMPL		12	// Digitizer start sampling
 #define ACT_DBG_DIGI_STOP_SMPL		13	// Digitizer stop sampling
 #define ACT_DBG_PULSE_SWITCH		14	// Pulse discharge switch
+#define ACT_DBG_PULSE_INDICATOR		15	// Pulse indicator
 //
 #define ACT_START_TEST				100	// Start test with defined parameters
 #define ACT_STOP					101	// Stop test sequence
