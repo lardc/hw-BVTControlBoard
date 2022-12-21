@@ -60,7 +60,7 @@ static _iq LimitCurrent, LimitCurrentHaltLevel, LimitVoltage, VoltageRateStep, N
 static _iq KpVAC, KiVAC, SIVAerr;
 static _iq FollowingErrorFraction, FollowingErrorAbsolute;
 static _iq ResultV, ResultI;
-static _iq DesiredAmplitudeV, DesiredAmplitudeVHistory, ControlledAmplitudeV, DesiredVoltageHistory;
+static _iq DesiredAmplitudeV, DesiredAmplitudeVHistory, ControlledAmplitudeV, DesiredVoltageHistory, SineValue;
 static _iq ActualMaxPosVoltage, ActualMaxPosCurrent;
 static _iq MaxPosVoltage, MaxPosCurrent, MaxPosInstantCurrent, PeakThresholdDetect;
 static DataSample ActualSecondarySample;
@@ -127,6 +127,7 @@ Boolean MEASURE_AC_StartProcess(Int16U Type, pInt16U pDFReason, pInt16U pProblem
 	DesiredVoltageHistory = -1;
 	PrevDuty = -1;
 	PeakDetectorCounter = 0;
+	SineValue = 0;
 	//
 	ResultV = ResultI = 0;
 	State = ACPS_Ramp;
@@ -434,6 +435,7 @@ static void MEASURE_AC_HandleVI()
 	}
 	
 	// Check current conditions
+	_iq CurrentLimit = MEASURE_AC_GetCurrentLimit();
 	if(UseInstantMethod)
 	{
 		if(ActualSecondarySample.IQFields.Current >= LimitCurrentHaltLevel)
@@ -446,21 +448,19 @@ static void MEASURE_AC_HandleVI()
 	}
 	else
 	{
-		if(ActualSecondarySample.IQFields.Current >= MEASURE_AC_GetCurrentLimit())
+		if(ActualSecondarySample.IQFields.Current >= CurrentLimit)
 			MEASURE_AC_Stop(DF_INTERNAL);
 	}
 	
-	if(!ModifySine && !(SkipNegativeLogging && InvertPolarity))
+	// Store data for peak detection
+	if((_IQabs(SineValue) > PEAK_THR_COLLECT) && (PeakDetectorCounter < PEAK_DETECTOR_SIZE) &&
+			((ActualSecondarySample.IQFields.Voltage > _IQmpy(DesiredAmplitudeV, PEAK_THR_COLLECT)) ||
+					(ActualSecondarySample.IQFields.Current > _IQmpy(CurrentLimit, PEAK_THR_COLLECT))))
 	{
-		// Store data for peak detection
-		if ((_IQdiv(DesiredVoltageHistory, ControlledAmplitudeV) > PEAK_THR_COLLECT) &&
-			(PeakDetectorCounter < PEAK_DETECTOR_SIZE))
-		{
-			PeakDetectorData[PeakDetectorCounter].Current = ActualSecondarySample.IQFields.Current;
-			PeakDetectorData[PeakDetectorCounter].Voltage = ActualSecondarySample.IQFields.Voltage;
-			PeakDetectorData[PeakDetectorCounter].DesiredVoltage = DesiredVoltageHistory;
-			++PeakDetectorCounter;
-		}
+		PeakDetectorData[PeakDetectorCounter].Current = ActualSecondarySample.IQFields.Current;
+		PeakDetectorData[PeakDetectorCounter].Voltage = ActualSecondarySample.IQFields.Voltage;
+		PeakDetectorData[PeakDetectorCounter].DesiredVoltage = _IQabs(DesiredVoltageHistory);
+		++PeakDetectorCounter;
 	}
 }
 // ----------------------------------------
@@ -642,7 +642,7 @@ static Int16S MEASURE_AC_CCSub_Regulator(Boolean *PeriodTrigger)
 	_iq desiredSecondaryVoltage;
 	
 	// Calculate desired amplitude
-	_iq SineValue = _IQsinPU(_IQmpyI32(NormalizedFrequency, TimeCounter));
+	SineValue = _IQsinPU(_IQmpyI32(NormalizedFrequency, TimeCounter));
 	if(ModifySine)
 		desiredSecondaryVoltage = _IQmpy(_IQmpy(SineValue, _IQexp(_IQ(1) - _IQabs(SineValue))), ControlledAmplitudeV);
 	else
