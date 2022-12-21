@@ -37,6 +37,13 @@ typedef enum __ACProcessState
 	ACPS_Brake
 } ACProcessState;
 
+typedef struct __PeakPoint
+{
+	_iq Voltage;
+	_iq DesiredVoltage;
+	_iq Current;
+} PeakPoint;
+
 // Variables
 //
 static Int32U TimeCounter, StartPauseTimeCounterTop;
@@ -63,7 +70,7 @@ static Boolean InvertPolarity, FastStop;
 static Int16S PrevDuty;
 static Int16U AmplitudePeriodCounter;
 static Int16U Problem, Warning, Fault;
-static DataSampleIQ PeakDetectorData[PEAK_DETECTOR_SIZE], PeakSample;
+static PeakPoint PeakDetectorData[PEAK_DETECTOR_SIZE], PeakSample;
 static Int16U PeakDetectorCounter;
 //
 static volatile ACProcessState State = ACPS_None;
@@ -272,7 +279,11 @@ static void MEASURE_AC_HandlePeakLogic()
 				// Handle peak data
 				for (i = 0; i < PeakDetectorCounter; ++i)
 				{
-					if ((PeakDetectorData[i].Voltage > _IQmpy(MaxPosVoltage, PeakThresholdDetect)) &&
+					_iq RelVoltageRatio = _IQdiv(PeakDetectorData[i].Voltage, PeakDetectorData[i].DesiredVoltage);
+					Boolean OutShort = (OUT_SHORT_REL_RATIO > RelVoltageRatio &&
+							PeakDetectorData[i].DesiredVoltage > OUT_SHORT_MIN_VSET);
+
+					if ((PeakDetectorData[i].Voltage > _IQmpy(MaxPosVoltage, PeakThresholdDetect) || OutShort) &&
 						(PeakDetectorData[i].Current > PeakSample.Current) &&
 						(PeakDetectorData[i].Current > CurrentThr))
 					{
@@ -286,7 +297,10 @@ static void MEASURE_AC_HandlePeakLogic()
 				PeakSample.Voltage = 0;
 			}
 		}
-		MU_LogScopeIVpeak(PeakSample);
+		DataSampleIQ Sample;
+		Sample.Voltage = PeakSample.Voltage;
+		Sample.Current = PeakSample.Current;
+		MU_LogScopeIVpeak(Sample);
 		
 		// Handle overcurrent
 		if((State != ACPS_Brake) && (PeakSample.Current >= MEASURE_AC_GetCurrentLimit()))
@@ -425,8 +439,8 @@ static void MEASURE_AC_HandleVI()
 		if(ActualSecondarySample.IQFields.Current >= LimitCurrentHaltLevel)
 		{
 			// Условие быстрой остановки ШИМ
-			_iq RelVoltageRatio = _IQabs(_IQdiv(ActualSecondarySample.IQFields.Voltage, DesiredVoltageHistory));
-			FastStop = (FAST_STOP_REL_RATIO > RelVoltageRatio && _IQabs(DesiredVoltageHistory) > FAST_STOP_MIN_VSET);
+			_iq RelVoltageRatio = _IQdiv(ActualSecondarySample.IQFields.Voltage, DesiredVoltageHistory);
+			FastStop = (OUT_SHORT_REL_RATIO > RelVoltageRatio && DesiredVoltageHistory > OUT_SHORT_MIN_VSET);
 			MEASURE_AC_Stop(PROBLEM_OUTPUT_SHORT);
 		}
 	}
@@ -444,6 +458,7 @@ static void MEASURE_AC_HandleVI()
 		{
 			PeakDetectorData[PeakDetectorCounter].Current = ActualSecondarySample.IQFields.Current;
 			PeakDetectorData[PeakDetectorCounter].Voltage = ActualSecondarySample.IQFields.Voltage;
+			PeakDetectorData[PeakDetectorCounter].DesiredVoltage = DesiredVoltageHistory;
 			++PeakDetectorCounter;
 		}
 	}

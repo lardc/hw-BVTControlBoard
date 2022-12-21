@@ -66,9 +66,9 @@
 #define FE_MAX_FRACTION			_IQ(0.2f)		// part of 1
 #define FE_MAX_COUNTER			3
 
-// Параметры быстрой остановки при отпирании DUT
-#define FAST_STOP_REL_RATIO		_IQ(0.7)		// Порог относительной просадки напряжения
-#define FAST_STOP_MIN_VSET		_IQ(500)		// Минимальное значение формируемого напряжения (В)
+// Параметры определения КЗ на выходе
+#define OUT_SHORT_REL_RATIO		_IQ(0.5)		// Порог относительной просадки напряжения
+#define OUT_SHORT_MIN_VSET		_IQ(500)		// Минимальное значение формируемого напряжения (В)
 
 // Capacitor battery
 #define CAP_DELTA				5				// Detection voltage delta (in V)
