@@ -453,7 +453,7 @@ static void MEASURE_AC_HandleVI()
 	if(!ModifySine && !(SkipNegativeLogging && InvertPolarity))
 	{
 		// Store data for peak detection
-		if ((ActualSecondarySample.IQFields.Voltage > _IQmpy(DesiredAmplitudeV, PEAK_THR_COLLECT)) &&
+		if ((_IQdiv(DesiredVoltageHistory, ControlledAmplitudeV) > PEAK_THR_COLLECT) &&
 			(PeakDetectorCounter < PEAK_DETECTOR_SIZE))
 		{
 			PeakDetectorData[PeakDetectorCounter].Current = ActualSecondarySample.IQFields.Current;
