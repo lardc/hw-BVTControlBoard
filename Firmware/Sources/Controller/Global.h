@@ -68,7 +68,7 @@
 
 // Параметры определения КЗ на выходе
 #define OUT_SHORT_REL_RATIO		_IQ(0.5)		// Порог относительной просадки напряжения
-#define OUT_SHORT_MIN_VSET		_IQ(500)		// Минимальное значение формируемого напряжения (В)
+#define OUT_SHORT_MAX_V			_IQ(100)		// Максимальное значение напряжения при КЗ (В)
 
 // Capacitor battery
 #define CAP_DELTA				5				// Detection voltage delta (in V)
