@@ -57,7 +57,7 @@ static _iq DesiredAmplitudeV, DesiredAmplitudeVHistory, ControlledAmplitudeV, De
 static _iq ActualMaxPosVoltage, ActualMaxPosCurrent;
 static _iq MaxPosVoltage, MaxPosCurrent, MaxPosInstantCurrent, PeakThresholdDetect;
 static DataSample ActualSecondarySample;
-static Boolean TripConditionDetected, UseInstantMethod, FrequencyRateSwitch, ModifySine;
+static Boolean TripConditionDetected, UseInstantMethod, FrequencyRateSwitch, ModifySine, DUTOpened;
 static Boolean DbgDualPolarity, DbgSRAM, DbgMutePWM, SkipRegulation, SkipLoggingVoids, SkipNegativeLogging;
 static Boolean InvertPolarity;
 static Int16S PrevDuty;
@@ -96,7 +96,7 @@ Boolean MEASURE_AC_StartProcess(Int16U Type, pInt16U pDFReason, pInt16U pProblem
 	Problem = PROBLEM_NONE;
 	Warning = WARNING_NONE;
 	Fault = DF_NONE;
-	TripConditionDetected = FALSE;
+	DUTOpened = TripConditionDetected = FALSE;
 	OptoConnectionMon = 0;
 	TimeCounter = VRateCounter = 0;
 	VPrePlateTimeCounter = VPlateTimeCounter = BrakeTimeCounter = 0;
@@ -251,11 +251,16 @@ static void MEASURE_AC_HandlePeakLogic()
 {
 	Int16U i;
 	
-	if (UseInstantMethod)
+	if(UseInstantMethod)
 	{
-		if (ModifySine)
+		if(ModifySine)
 		{
 			PeakSample.Current = MaxPosInstantCurrent;
+			PeakSample.Voltage = MaxPosVoltage;
+		}
+		else if(DUTOpened)
+		{
+			PeakSample.Current = MaxPosCurrent;
 			PeakSample.Voltage = MaxPosVoltage;
 		}
 		else
@@ -288,7 +293,7 @@ static void MEASURE_AC_HandlePeakLogic()
 		MU_LogScopeIVpeak(PeakSample);
 		
 		// Handle overcurrent
-		if((State != ACPS_Brake) && (PeakSample.Current >= MEASURE_AC_GetCurrentLimit()))
+		if((State != ACPS_Brake) && (PeakSample.Current >= MEASURE_AC_GetCurrentLimit() || DUTOpened))
 			MEASURE_AC_Stop(DF_INTERNAL);
 	}
 }
@@ -422,12 +427,15 @@ static void MEASURE_AC_HandleVI()
 	_iq CurrentLimit = MEASURE_AC_GetCurrentLimit();
 	if(UseInstantMethod)
 	{
-		if(ActualSecondarySample.IQFields.Current >= ((CurrentLimit > HVD_IL_TH) ? CurrentLimit : LimitCurrentHaltLevel))
+		// Проверка условия отпирания прибора
+		_iq RelVoltageRatio = _IQdiv(ActualSecondarySample.IQFields.Voltage, _IQabs(DesiredVoltageHistory));
+		if(OUT_SHORT_REL_RATIO > RelVoltageRatio && ActualSecondarySample.IQFields.Voltage < OUT_SHORT_MAX_V)
 		{
-			// Условие быстрой остановки ШИМ
-			_iq RelVoltageRatio = _IQdiv(ActualSecondarySample.IQFields.Voltage, _IQabs(DesiredVoltageHistory));
-			if(OUT_SHORT_REL_RATIO > RelVoltageRatio && ActualSecondarySample.IQFields.Voltage < OUT_SHORT_MAX_V)
+			// Условие быстрой остановки ШИМ при превышении лимита тока
+			if(ActualSecondarySample.IQFields.Current >= ((CurrentLimit > HVD_IL_TH) ? CurrentLimit : LimitCurrentHaltLevel))
 				MEASURE_AC_Stop(PROBLEM_OUTPUT_SHORT);
+			else
+				DUTOpened = TRUE;
 		}
 	}
 	else
