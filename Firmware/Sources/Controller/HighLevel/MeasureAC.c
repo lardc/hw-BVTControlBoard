@@ -429,13 +429,17 @@ static void MEASURE_AC_HandleVI()
 	{
 		// Проверка условия отпирания прибора
 		_iq RelVoltageRatio = _IQdiv(ActualSecondarySample.IQFields.Voltage, _IQabs(DesiredVoltageHistory));
-		if(OUT_SHORT_REL_RATIO > RelVoltageRatio && ActualSecondarySample.IQFields.Voltage < OUT_SHORT_MAX_V)
+		if(OUT_SHORT_REL_V_RATIO > RelVoltageRatio && ActualSecondarySample.IQFields.Voltage < OUT_SHORT_MAX_V)
 		{
 			// Условие быстрой остановки ШИМ при превышении лимита тока
 			if(ActualSecondarySample.IQFields.Current >= ((CurrentLimit > HVD_IL_TH) ? CurrentLimit : LimitCurrentHaltLevel))
 				MEASURE_AC_Stop(PROBLEM_OUTPUT_SHORT);
-			else
+			else if ((ActualSecondarySample.IQFields.Current > _IQmpy(MaxPosInstantCurrent, OUT_SHORT_REL_I_RATIO)) &&
+					(ActualSecondarySample.IQFields.Voltage < _IQmpy(MaxPosVoltage, OUT_SHORT_REL_V_RATIO)) &&
+					(_IQabs(DesiredVoltageHistory) > OUT_SHORT_MIN_SET_V))
+			{
 				DUTOpened = TRUE;
+			}
 		}
 	}
 	else
