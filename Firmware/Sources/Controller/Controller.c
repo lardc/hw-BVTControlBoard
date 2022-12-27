@@ -120,7 +120,12 @@ void CONTROL_Idle()
 {
 	DEVPROFILE_ProcessRequests();
 	DataTable[REG_ACTUAL_PRIM_VOLTAGE] = PrimaryVoltage = PS_GetBatteryVoltage();
-	DataTable[REG_SAFETY_IN_STATE] = ZwGPIO_ReadPin(PIN_SAFETY);
+
+	// Обработка контура безопасности
+	Boolean SafetyOK = ZwGPIO_ReadPin(PIN_SAFETY);
+	DataTable[REG_SAFETY_IN_STATE] = SafetyOK ? 1 : 0;
+	if(!DataTable[REG_IGNORE_HW_SAFETY] && !SafetyOK && CONTROL_State == DS_InProcess)
+		MAC_RequestStop(PBR_RequestSoftStop);
 }
 // ----------------------------------------
 

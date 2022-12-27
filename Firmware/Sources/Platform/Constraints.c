@@ -57,7 +57,7 @@ const TableItemConstraint NVConstraint[DATA_TABLE_NV_SIZE] =
 	{PRIM_VOLTAGE_MIN, PRIM_VOLTAGE_MAX, PRIM_VOLTAGE_DEF},					// 31
 	{NO, YES, NO},															// 32
 
-	{0, 0, 0},																// 33
+	{NO, YES, NO},															// 33
 	{0, 0, 0},																// 34
 	{0, 0, 0},																// 35
 	{0, 0, 0},																// 36
