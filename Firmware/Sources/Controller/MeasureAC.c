@@ -298,6 +298,7 @@ static void MAC_ControlCycle()
 			switch(BreakReason)
 			{
 				case PBR_None:
+					DataTable[REG_TEST_PASSED] = 1;
 				case PBR_CurrentSaturation:
 				case PBR_CurrentLimit:
 					DataTable[REG_FINISHED] = OPRESULT_OK;
