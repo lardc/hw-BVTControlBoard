@@ -269,11 +269,13 @@ void CONTROL_NotifyEndTest(_iq BVTResultV, _iq BVTResultI, _iq BVTResultIuA, Int
 {
 	if(BVTResultI < 0)
 		BVTResultI = 0;
+	if(BVTResultIuA < 0)
+		BVTResultIuA = 0;
 
 	if(CurrentMeasurementType == MEASUREMENT_TYPE_DC_RES && DFReason == DF_NONE && Problem == PROBLEM_NONE &&
-			ResCurrent == RES_CURRENT_HIGH && _IQabs(BVTResultIuA) < RES_CURRENT_LOW)
+			ResCurrent == RES_CURRENT_LOW && Warning == WARNING_RES_OUT_OF_RANGE)
 	{
-		ResCurrent = RES_CURRENT_LOW;
+		ResCurrent = RES_CURRENT_HIGH;
 		PulseToPulsePause = CONTROL_TimeCounter + DC_RES_PULSE_TO_PULSE;
 		WaitSecondPulse = TRUE;
 		return;
@@ -479,7 +481,7 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U UserError)
 					DEVPROFILE_ResetScopes(0, IND_EP_I | IND_EP_V | IND_EP_DBG | IND_EP_ERR | IND_EP_PEAK_I | IND_EP_PEAK_V);
 					DEVPROFILE_ResetEPReadState();
 					
-					ResCurrent = RES_CURRENT_HIGH;
+					ResCurrent = RES_CURRENT_LOW;
 					CONTROL_RequestDPC(&CONTROL_StartSequence);
 				}
 				else
@@ -566,7 +568,7 @@ static void CONTROL_TriggerMeasurementDPC()
 	Boolean success = FALSE;
 	Int16U DFReason = DF_NONE, problem = PROBLEM_NONE;
 
-	if(!(ResCurrent == RES_CURRENT_LOW && CurrentMeasurementType == MEASUREMENT_TYPE_DC_RES))
+	if(!(ResCurrent == RES_CURRENT_HIGH && CurrentMeasurementType == MEASUREMENT_TYPE_DC_RES))
 		MU_StartScope();
 
 	// Re-init RX SPI channel and send dummy request
