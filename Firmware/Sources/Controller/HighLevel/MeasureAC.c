@@ -59,7 +59,7 @@ static _iq MaxPosVoltage, MaxPosCurrent, MaxPosInstantCurrent, PeakThresholdDete
 static DataSample ActualSecondarySample;
 static Boolean TripConditionDetected, UseInstantMethod, FrequencyRateSwitch, ModifySine, DUTOpened;
 static Boolean DbgDualPolarity, DbgSRAM, DbgMutePWM, SkipRegulation, SkipLoggingVoids, SkipNegativeLogging;
-static Boolean InvertPolarity;
+static Boolean InvertPolarity, ZeroPWM;
 static Int16S PrevDuty;
 static Int16U AmplitudePeriodCounter;
 static Int16U Problem, Warning, Fault;
@@ -108,6 +108,7 @@ Boolean MEASURE_AC_StartProcess(Int16U Type, pInt16U pDFReason, pInt16U pProblem
 	InvertPolarity = PWM_USE_BRIDGE_RECTIF;
 	SkipRegulation = TRUE;
 	SIVAerr = 0;
+	ZeroPWM = TRUE;
 	//
 	ActualSecondarySample.IQFields.Voltage = 0;
 	ActualSecondarySample.IQFields.Current = 0;
@@ -181,9 +182,13 @@ Int16S inline MEASURE_AC_SetPWM(Int16S Duty)
 		{
 			PWMOutput = MEASURE_AC_TrimPWM(InvertPolarity ? -Duty : Duty);
 			ZwPWMB_SetValue12(DbgMutePWM ? 0 : PWMOutput);
+			ZeroPWM = (PWMOutput == 0 || DbgMutePWM);
 		}
 		else
+		{
 			ZwPWMB_SetValue12(0);
+			ZeroPWM = TRUE;
+		}
 
 		PrevDuty = Duty;
 		return PWMOutput;
@@ -427,16 +432,14 @@ static void MEASURE_AC_HandleVI()
 	_iq CurrentLimit = MEASURE_AC_GetCurrentLimit();
 	if(UseInstantMethod)
 	{
-		// Проверка условия отпирания прибора
-		_iq RelVoltageRatio = _IQdiv(ActualSecondarySample.IQFields.Voltage, _IQabs(DesiredVoltageHistory));
-		if(OUT_SHORT_REL_V_RATIO > RelVoltageRatio && ActualSecondarySample.IQFields.Voltage < OUT_SHORT_MAX_V)
+		if(ActualSecondarySample.IQFields.Current >= LimitCurrentHaltLevel)
+			MEASURE_AC_Stop(PROBLEM_OUTPUT_SHORT);
+		else
 		{
-			// Условие быстрой остановки ШИМ при превышении лимита тока
-			if(ActualSecondarySample.IQFields.Current >= ((CurrentLimit > HVD_IL_TH) ? CurrentLimit : LimitCurrentHaltLevel))
-				MEASURE_AC_Stop(PROBLEM_OUTPUT_SHORT);
-			else if ((ActualSecondarySample.IQFields.Current > _IQmpy(MaxPosInstantCurrent, OUT_SHORT_REL_I_RATIO)) &&
-					(ActualSecondarySample.IQFields.Voltage < _IQmpy(MaxPosVoltage, OUT_SHORT_REL_V_RATIO)) &&
-					(_IQabs(DesiredVoltageHistory) > OUT_SHORT_MIN_SET_V))
+			// Проверка условия отпирания прибора
+			_iq SineValueShifted = _IQsinPU(_IQmpyI32(NormalizedFrequency, TimeCounter + NormalizedPIdiv2Shift));
+			if(!ZeroPWM && SineValueShifted > 0 && DesiredVoltageHistory > OUT_SHORT_MIN_SET_V && \
+					ActualSecondarySample.IQFields.Voltage < OUT_SHORT_MAX_V)
 			{
 				DUTOpened = TRUE;
 			}

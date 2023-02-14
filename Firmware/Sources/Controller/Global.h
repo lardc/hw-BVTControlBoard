@@ -67,11 +67,8 @@
 #define FE_MAX_COUNTER			3
 
 // Параметры определения КЗ на выходе
-#define OUT_SHORT_REL_V_RATIO	_IQ(0.5)		// Порог относительной просадки напряжения
-#define OUT_SHORT_MAX_V			_IQ(100)		// Максимальное значение напряжения при КЗ (В)
-// Параметры определения КЗ без срабатывания отсечки по току
+#define OUT_SHORT_MAX_V			_IQ(50)			// Максимальное значение напряжения при КЗ (В)
 #define OUT_SHORT_MIN_SET_V		_IQ(500)		// Минимальное значение уставки напряжения (В)
-#define OUT_SHORT_REL_I_RATIO	_IQ(1.5)		// Превышение тока в состоянии КЗ над током до переключения
 
 // Capacitor battery
 #define CAP_DELTA				5				// Detection voltage delta (in V)
