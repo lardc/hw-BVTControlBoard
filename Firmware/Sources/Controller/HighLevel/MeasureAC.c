@@ -48,14 +48,14 @@ static Int32U VRateCounter, VRateCounterTop;
 static Int32U VPlateTimeCounter, VPlateTimeCounterTop, VPrePlateTimeCounter, VPrePlateTimeCounterTop;
 static Int32U BrakeTimeCounter, BrakeTimeCounterTop, FrequencyDivisorCounter, FrequencyDivisorCounterTop;
 static Int16U OptoConnectionMon, OptoConnectionMonMax, CurrentMultiply;
-static Int16U FollowingErrorCounter;
+static Int16U FollowingErrorCounter, NormalizedPIdiv2Shift;
 static Int16S MaxSafePWM, MinSafePWM, SSVoltageP2, SSCurrentP2;
 static _iq SSVoltageCoff, SSCurrentCoff, SSVoltageP1, SSVoltageP0, SSCurrentP1, SSCurrentP0, TransCoffInv, PWMCoff;
 static _iq LimitCurrent, LimitCurrentHaltLevel, LimitVoltage, VoltageRateStep, NormalizedFrequency;
 static _iq KpVAC, KiVAC, SIVAerr;
 static _iq FollowingErrorFraction, FollowingErrorAbsolute, FollowingErrorCurrentDelta;
 static _iq ResultV, ResultI;
-static _iq DesiredAmplitudeV, DesiredAmplitudeVHistory, ControlledAmplitudeV, DesiredVoltageHistory;
+static _iq DesiredAmplitudeV, DesiredAmplitudeVHistory, ControlledAmplitudeV, DesiredVoltageHistory, SineValue;
 static _iq ActualMaxPosVoltage, ActualMaxPosCurrent;
 static _iq MaxPosVoltage, MaxPosCurrent, MaxPosInstantCurrent, PeakThresholdDetect;
 static DataSample ActualSecondarySample;
@@ -64,6 +64,7 @@ static Boolean DbgDualPolarity, DbgSRAM, DbgMutePWM, SkipRegulation, SkipLogging
 static Int16U MeasurementType, Problem, Warning, Fault;
 #pragma DATA_SECTION(PeakDetectorData, "data_mem");
 static DataSampleIQ PeakDetectorData[PEAK_DETECTOR_SIZE], PeakSample;
+static DataSampleIQ PeakSampleByCurrent;
 static Int16U PeakDetectorCounter;
 //
 static volatile ACProcessState State = ACPS_None;
@@ -109,6 +110,7 @@ Boolean MEASURE_AC_StartProcess(Int16U Type, pInt16U pDFReason, pInt16U pProblem
 	//
 	SkipRegulation = TRUE;
 	SIVAerr = 0;
+	SineValue = 0;
 	//
 	ActualSecondarySample.IQFields.VoltageRaw = 0;
 	ActualSecondarySample.IQFields.Voltage = 0;
@@ -120,6 +122,8 @@ Boolean MEASURE_AC_StartProcess(Int16U Type, pInt16U pDFReason, pInt16U pProblem
 	MaxPosInstantCurrent = 0;
 	DesiredVoltageHistory = 0;
 	PeakDetectorCounter = 0;
+	PeakSampleByCurrent.Voltage = 0;
+	PeakSampleByCurrent.Current = 0;
 	//
 	ResultV = ResultI = 0;
 	State = ACPS_Ramp;
@@ -246,6 +250,10 @@ static void MEASURE_AC_HandlePeakLogic()
 			PeakSample.Current = 0;
 			PeakSample.Voltage = 0;
 		}
+
+		if(PeakSample.Current < PeakSampleByCurrent.Current)
+			PeakSample = PeakSampleByCurrent;
+
 		MU_LogScopeIVpeak(PeakSample);
 
 		// Handle overcurrent
@@ -283,6 +291,8 @@ static Boolean MEASURE_AC_PIControllerSequence(_iq DesiredV)
 			MaxPosInstantCurrent = 0;
 			//
 			PeakDetectorCounter = 0;
+			PeakSampleByCurrent.Voltage = 0;
+			PeakSampleByCurrent.Current = 0;
 
 			if (!SkipRegulation)
 			{
@@ -387,6 +397,13 @@ static void MEASURE_AC_HandleVI()
 		PeakDetectorData[PeakDetectorCounter].Current = absCurrent;
 		PeakDetectorData[PeakDetectorCounter].Voltage = absVoltage;
 		++PeakDetectorCounter;
+
+		_iq SineValueShifted = _IQsinPU(_IQmpyI32(NormalizedFrequency, TimeCounter + NormalizedPIdiv2Shift));
+		if(_IQmpy(SineValue, SineValueShifted) > 0 && PeakSampleByCurrent.Current < absCurrent)
+		{
+			PeakSampleByCurrent.Current = absCurrent;
+			PeakSampleByCurrent.Voltage = absVoltage;
+		}
 	}
 }
 // ----------------------------------------
@@ -552,7 +569,8 @@ static Int16S MEASURE_AC_CCSub_Regulator(Boolean *PeriodTrigger)
 	_iq desiredSecondaryVoltage;
 
 	// Calculate desired amplitude
-	desiredSecondaryVoltage = _IQmpy(_IQsinPU(_IQmpyI32(NormalizedFrequency, TimeCounter)), ControlledAmplitudeV);
+	SineValue = _IQsinPU(_IQmpyI32(NormalizedFrequency, TimeCounter));
+	desiredSecondaryVoltage = _IQmpy(SineValue, ControlledAmplitudeV);
 	// Calculate correction
 	ret = MEASURE_AC_PIControllerSequence(desiredSecondaryVoltage);
 	if (PeriodTrigger) *PeriodTrigger = ret;
@@ -604,6 +622,7 @@ static void MEASURE_AC_CacheVariables()
 	//
 	StartPauseTimeCounterTop = (CONTROL_FREQUENCY / DataTable[REG_VOLTAGE_FREQUENCY]) * 2;
 	NormalizedFrequency = _IQdiv(_IQ(1.0f), _IQI(CONTROL_FREQUENCY / DataTable[REG_VOLTAGE_FREQUENCY]));
+	NormalizedPIdiv2Shift = CONTROL_FREQUENCY / (4L * DataTable[REG_VOLTAGE_FREQUENCY]);
 	VoltageRateStep = _IQmpy(_IQdiv(_IQ(1000.0f), _IQI(DataTable[REG_VOLTAGE_FREQUENCY])),
 							 _IQmpyI32(_IQ(0.1f), DataTable[REG_VOLTAGE_AC_RATE]));
 	MinSafePWM = (PWM_FREQUENCY / 1000L) * PWM_TH * ZW_PWM_DUTY_BASE / 1000000L;
