@@ -53,13 +53,13 @@ static _iq LimitCurrent, LimitCurrentHaltLevel, LimitVoltage, VoltageRateStep, N
 static _iq KpVAC, KiVAC, SIVAerr;
 static _iq FollowingErrorFraction, FollowingErrorAbsolute;
 static _iq ResultV, ResultI;
-static _iq DesiredAmplitudeV, DesiredAmplitudeVHistory, ControlledAmplitudeV, DesiredVoltageHistory;
+static _iq DesiredAmplitudeV, DesiredAmplitudeVHistory, ControlledAmplitudeV, DesiredVoltageHistory, SineValue;
 static _iq ActualMaxPosVoltage, ActualMaxPosCurrent;
 static _iq MaxPosVoltage, MaxPosCurrent, MaxPosInstantCurrent, PeakThresholdDetect;
 static DataSample ActualSecondarySample;
 static Boolean TripConditionDetected, UseInstantMethod, FrequencyRateSwitch, ModifySine, DUTOpened;
 static Boolean DbgDualPolarity, DbgSRAM, DbgMutePWM, SkipRegulation, SkipLoggingVoids, SkipNegativeLogging;
-static Boolean InvertPolarity, ZeroPWM;
+static Boolean InvertPolarity;
 static Int16S PrevDuty;
 static Int16U AmplitudePeriodCounter;
 static Int16U Problem, Warning, Fault;
@@ -108,7 +108,7 @@ Boolean MEASURE_AC_StartProcess(Int16U Type, pInt16U pDFReason, pInt16U pProblem
 	InvertPolarity = PWM_USE_BRIDGE_RECTIF;
 	SkipRegulation = TRUE;
 	SIVAerr = 0;
-	ZeroPWM = TRUE;
+	SineValue = 0;
 	//
 	ActualSecondarySample.IQFields.Voltage = 0;
 	ActualSecondarySample.IQFields.Current = 0;
@@ -182,13 +182,9 @@ Int16S inline MEASURE_AC_SetPWM(Int16S Duty)
 		{
 			PWMOutput = MEASURE_AC_TrimPWM(InvertPolarity ? -Duty : Duty);
 			ZwPWMB_SetValue12(DbgMutePWM ? 0 : PWMOutput);
-			ZeroPWM = (PWMOutput == 0 || DbgMutePWM);
 		}
 		else
-		{
 			ZwPWMB_SetValue12(0);
-			ZeroPWM = TRUE;
-		}
 
 		PrevDuty = Duty;
 		return PWMOutput;
@@ -437,9 +433,9 @@ static void MEASURE_AC_HandleVI()
 		else
 		{
 			// Проверка условия отпирания прибора
-			_iq SineValueShifted = _IQsinPU(_IQmpyI32(NormalizedFrequency, TimeCounter + NormalizedPIdiv2Shift));
-			if(!ZeroPWM && SineValueShifted > 0 && DesiredVoltageHistory > OUT_SHORT_MIN_SET_V && \
-					ActualSecondarySample.IQFields.Voltage < OUT_SHORT_MAX_V)
+			_iq SineValueShifted = _IQsinPU(_IQmpyI32(NormalizedFrequency, (Int32S)TimeCounter - NormalizedPIdiv2Shift));
+			if(_IQmpy(SineValue, SineValueShifted) > 0 && ActualSecondarySample.IQFields.Voltage < OUT_SHORT_MAX_V &&
+					ActualSecondarySample.IQFields.Current > OUT_SHORT_MIN_I)
 			{
 				DUTOpened = TRUE;
 			}
@@ -639,7 +635,7 @@ static Int16S MEASURE_AC_CCSub_Regulator(Boolean *PeriodTrigger)
 	_iq desiredSecondaryVoltage;
 	
 	// Calculate desired amplitude
-	_iq SineValue = _IQsinPU(_IQmpyI32(NormalizedFrequency, TimeCounter));
+	SineValue = _IQsinPU(_IQmpyI32(NormalizedFrequency, TimeCounter));
 	if(ModifySine)
 		desiredSecondaryVoltage = _IQmpy(_IQmpy(SineValue, _IQexp(_IQ(1) - _IQabs(SineValue))), ControlledAmplitudeV);
 	else

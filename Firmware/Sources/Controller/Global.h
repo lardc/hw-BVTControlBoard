@@ -68,7 +68,7 @@
 
 // Параметры определения КЗ на выходе
 #define OUT_SHORT_MAX_V			_IQ(50)			// Максимальное значение напряжения при КЗ (В)
-#define OUT_SHORT_MIN_SET_V		_IQ(500)		// Минимальное значение уставки напряжения (В)
+#define OUT_SHORT_MIN_I			_IQ(50)			// Минимальное значение тока при КЗ (мА)
 
 // Capacitor battery
 #define CAP_DELTA				5				// Detection voltage delta (in V)
