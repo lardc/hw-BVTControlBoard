@@ -53,7 +53,7 @@ static _iq LimitCurrent, LimitCurrentHaltLevel, LimitVoltage, VoltageRateStep, N
 static _iq KpVAC, KiVAC, SIVAerr;
 static _iq FollowingErrorFraction, FollowingErrorAbsolute;
 static _iq ResultV, ResultI;
-static _iq DesiredAmplitudeV, DesiredAmplitudeVHistory, ControlledAmplitudeV, DesiredVoltageHistory, SineValue;
+static _iq DesiredAmplitudeV, DesiredAmplitudeVHistory, ControlledAmplitudeV, DesiredVoltageHistory, SineValue, SineValueShifted;
 static _iq ActualMaxPosVoltage, ActualMaxPosCurrent;
 static _iq MaxPosVoltage, MaxPosCurrent, MaxPosInstantCurrent, PeakThresholdDetect;
 static DataSample ActualSecondarySample;
@@ -108,7 +108,7 @@ Boolean MEASURE_AC_StartProcess(Int16U Type, pInt16U pDFReason, pInt16U pProblem
 	InvertPolarity = PWM_USE_BRIDGE_RECTIF;
 	SkipRegulation = TRUE;
 	SIVAerr = 0;
-	SineValue = 0;
+	SineValue = SineValueShifted = 0;
 	//
 	ActualSecondarySample.IQFields.Voltage = 0;
 	ActualSecondarySample.IQFields.Current = 0;
@@ -294,7 +294,7 @@ static void MEASURE_AC_HandlePeakLogic()
 		MU_LogScopeIVpeak(PeakSample);
 		
 		// Handle overcurrent
-		if((State != ACPS_Brake) && (PeakSample.Current >= MEASURE_AC_GetCurrentLimit() || DUTOpened))
+		if((State != ACPS_Brake) && ((PeakSample.Current >= MEASURE_AC_GetCurrentLimit()) || DUTOpened))
 			MEASURE_AC_Stop(DF_INTERNAL);
 	}
 }
@@ -433,7 +433,7 @@ static void MEASURE_AC_HandleVI()
 		else
 		{
 			// Проверка условия отпирания прибора
-			_iq SineValueShifted = _IQsinPU(_IQmpyI32(NormalizedFrequency, (Int32S)TimeCounter - NormalizedPIdiv2Shift));
+			SineValueShifted = _IQsinPU(_IQmpyI32(NormalizedFrequency, (Int32S)TimeCounter - NormalizedPIdiv2Shift));
 			if(_IQmpy(SineValue, SineValueShifted) > 0 && ActualSecondarySample.IQFields.Voltage < OUT_SHORT_MAX_V &&
 					ActualSecondarySample.IQFields.Current > OUT_SHORT_MIN_I)
 			{
@@ -619,7 +619,7 @@ static void MEASURE_AC_CCSub_CorrectionAndLog(Int16S ActualCorrection)
 		{
 			MU_LogScope(&ActualSecondarySample, CurrentMultiply, DbgSRAM, DbgDualPolarity);
 			MU_LogScopeIV(ActualSecondarySample);
-			MU_LogScopeDIAG(PWMOutput);
+			MU_LogScopeDIAG(_IQmpy(SineValue, SineValueShifted) > 0 ? 5000 : PWMOutput);
 		}
 	}
 }
