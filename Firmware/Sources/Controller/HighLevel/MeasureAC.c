@@ -57,7 +57,7 @@ static _iq FollowingErrorFraction, FollowingErrorAbsolute, FollowingErrorCurrent
 static _iq ResultV, ResultI;
 static _iq DesiredAmplitudeV, DesiredAmplitudeVHistory, ControlledAmplitudeV, DesiredVoltageHistory, SineValue;
 static _iq ActualMaxPosVoltage, ActualMaxPosCurrent;
-static _iq MaxPosVoltage, MaxPosCurrent, MaxPosInstantCurrent, PeakThresholdDetect, PeakVoltageForRegulator;
+static _iq MaxPosVoltage, MaxPosCurrent, MaxPosInstantCurrent, PeakThresholdDetect;
 static DataSample ActualSecondarySample;
 static Boolean TripCurrentDetected, UseInstantMethod, FrequencyRateSwitch;
 static Boolean DbgDualPolarity, DbgSRAM, DbgMutePWM, SkipRegulation, SkipLoggingVoids;
@@ -124,7 +124,6 @@ Boolean MEASURE_AC_StartProcess(Int16U Type, pInt16U pDFReason, pInt16U pProblem
 	PeakDetectorCounter = 0;
 	PeakSampleByCurrent.Voltage = 0;
 	PeakSampleByCurrent.Current = 0;
-	PeakVoltageForRegulator = 0;
 	//
 	ResultV = ResultI = 0;
 	State = ACPS_Ramp;
@@ -252,9 +251,8 @@ static void MEASURE_AC_HandlePeakLogic()
 			PeakSample.Voltage = 0;
 		}
 
-		PeakVoltageForRegulator = PeakSample.Voltage;
 		if(PeakSample.Current < PeakSampleByCurrent.Current)
-			PeakSample = PeakSampleByCurrent;
+			PeakSample.Current = PeakSampleByCurrent.Current;
 
 		MU_LogScopeIVpeak(PeakSample);
 
@@ -285,7 +283,7 @@ static Boolean MEASURE_AC_PIControllerSequence(_iq DesiredV)
 			// Following error parameter: current
 			FollowingErrorCurrentDelta = MaxPosCurrent - ActualMaxPosCurrent;
 
-			ActualMaxPosVoltage = UseInstantMethod ? PeakVoltageForRegulator : MaxPosVoltage;
+			ActualMaxPosVoltage = UseInstantMethod ? PeakSample.Voltage : MaxPosVoltage;
 			ActualMaxPosCurrent = MaxPosCurrent;
 			//
 			MaxPosVoltage = 0;
