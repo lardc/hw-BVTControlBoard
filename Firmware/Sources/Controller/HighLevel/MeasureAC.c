@@ -400,7 +400,7 @@ static void MEASURE_AC_HandleVI()
 		PeakDetectorData[PeakDetectorCounter].Voltage = absVoltage;
 		++PeakDetectorCounter;
 
-		_iq SineValueShifted = _IQsinPU(_IQmpyI32(NormalizedFrequency, TimeCounter + NormalizedPIdiv2Shift));
+		_iq SineValueShifted = _IQsinPU(_IQmpyI32(NormalizedFrequency, (Int32S)TimeCounter - NormalizedPIdiv2Shift));
 		if(_IQmpy(SineValue, SineValueShifted) > 0 && PeakSampleByCurrent.Current < absCurrent)
 		{
 			PeakSampleByCurrent.Current = absCurrent;
