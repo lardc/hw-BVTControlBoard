@@ -53,7 +53,7 @@ static _iq LimitCurrent, LimitCurrentHaltLevel, LimitVoltage, VoltageRateStep, N
 static _iq KpVAC, KiVAC, SIVAerr;
 static _iq FollowingErrorFraction, FollowingErrorAbsolute;
 static _iq ResultV, ResultI;
-static _iq DesiredAmplitudeV, DesiredAmplitudeVHistory, ControlledAmplitudeV, DesiredVoltageHistory, SineValueShifted;
+static _iq DesiredAmplitudeV, DesiredAmplitudeVHistory, ControlledAmplitudeV, DesiredVoltageHistory;
 static _iq ActualMaxPosVoltage, ActualMaxPosCurrent;
 static _iq MaxPosVoltage, MaxPosCurrent, MaxPosInstantCurrent, PeakThresholdDetect;
 static DataSample ActualSecondarySample;
@@ -108,7 +108,6 @@ Boolean MEASURE_AC_StartProcess(Int16U Type, pInt16U pDFReason, pInt16U pProblem
 	InvertPolarity = PWM_USE_BRIDGE_RECTIF;
 	SkipRegulation = TRUE;
 	SIVAerr = 0;
-	SineValueShifted = 0;
 	ZeroPWM = TRUE;
 	//
 	ActualSecondarySample.IQFields.Voltage = 0;
@@ -438,7 +437,7 @@ static void MEASURE_AC_HandleVI()
 		else
 		{
 			// Проверка условия отпирания прибора
-			SineValueShifted = _IQsinPU(_IQmpyI32(NormalizedFrequency, (Int32S)TimeCounter - NormalizedPIdiv2Shift));
+			_iq SineValueShifted = _IQsinPU(_IQmpyI32(NormalizedFrequency, (Int32S)TimeCounter - NormalizedPIdiv2Shift));
 			if(!ZeroPWM && SineValueShifted > 0 && ActualSecondarySample.IQFields.Voltage < OUT_SHORT_MAX_V &&
 					ActualSecondarySample.IQFields.Current > OUT_SHORT_MIN_I)
 			{
@@ -624,7 +623,7 @@ static void MEASURE_AC_CCSub_CorrectionAndLog(Int16S ActualCorrection)
 		{
 			MU_LogScope(&ActualSecondarySample, CurrentMultiply, DbgSRAM, DbgDualPolarity);
 			MU_LogScopeIV(ActualSecondarySample);
-			MU_LogScopeDIAG((!ZeroPWM && SineValueShifted > 0) ? 5000 : PWMOutput);
+			MU_LogScopeDIAG(PWMOutput);
 		}
 	}
 }
