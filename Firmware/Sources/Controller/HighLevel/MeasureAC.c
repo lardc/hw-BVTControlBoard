@@ -53,7 +53,7 @@ static _iq LimitCurrent, LimitCurrentHaltLevel, LimitVoltage, VoltageRateStep, N
 static _iq KpVAC, KiVAC, SIVAerr;
 static _iq FollowingErrorFraction, FollowingErrorAbsolute;
 static _iq ResultV, ResultI;
-static _iq DesiredAmplitudeV, DesiredAmplitudeVHistory, ControlledAmplitudeV, DesiredVoltageHistory;
+static _iq DesiredAmplitudeV, DesiredAmplitudeVHistory, ControlledAmplitudeV, DesiredVoltageHistory, StartVoltage;
 static _iq ActualMaxPosVoltage, ActualMaxPosCurrent;
 static _iq MaxPosVoltage, MaxPosCurrent, MaxPosInstantCurrent, PeakThresholdDetect;
 static DataSample ActualSecondarySample;
@@ -419,7 +419,9 @@ static void MEASURE_AC_HandleVI()
 	// Check current conditions
 	if(UseInstantMethod)
 	{
-		if(ActualSecondarySample.IQFields.Current >= LimitCurrentHaltLevel)
+		Boolean IgnoreCurrent = TimeCounter < StartPauseTimeCounterTop &&
+				LimitCurrent <= HVD_ILL_TH && StartVoltage <= _IQ(1000);
+		if(!IgnoreCurrent && ActualSecondarySample.IQFields.Current >= LimitCurrentHaltLevel)
 			MEASURE_AC_Stop(PROBLEM_OUTPUT_SHORT);
 	}
 	else
@@ -706,7 +708,8 @@ static void MEASURE_AC_CacheVariables()
 	OptoConnectionMonMax = DataTable[REG_OPTO_CONNECTION_MON];
 	
 	// Select start voltage basing on measurement mode
-	ControlledAmplitudeV = DesiredAmplitudeV = DesiredAmplitudeVHistory = _IQI(DataTable[REG_START_VOLTAGE_AC]);
+	StartVoltage = ControlledAmplitudeV = DesiredAmplitudeV = \
+			DesiredAmplitudeVHistory = _IQI(DataTable[REG_START_VOLTAGE_AC]);
 	
 	ModifySine = FALSE;
 	CurrentMultiply = 10;
