@@ -457,6 +457,11 @@ static void MEASURE_AC_HandleTripCondition(Boolean UsePeakValues)
 {
 	if(UsePeakValues)
 	{
+		ResultI = PeakSample.Current;
+		ResultV = PeakSample.Voltage;
+	}
+	else
+	{
 		if(Problem == PROBLEM_OUTPUT_SHORT)
 		{
 			ResultI = ActualMaxPosCurrent;
@@ -464,14 +469,9 @@ static void MEASURE_AC_HandleTripCondition(Boolean UsePeakValues)
 		}
 		else
 		{
-			ResultI = PeakSample.Current;
-			ResultV = PeakSample.Voltage;
+			ResultI = ActualSecondarySample.IQFields.Current;
+			ResultV = ActualSecondarySample.IQFields.Voltage;
 		}
-	}
-	else
-	{
-		ResultI = ActualSecondarySample.IQFields.Current;
-		ResultV = ActualSecondarySample.IQFields.Voltage;
 	}
 }
 // ----------------------------------------
