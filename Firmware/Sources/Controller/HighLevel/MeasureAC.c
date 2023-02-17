@@ -457,8 +457,16 @@ static void MEASURE_AC_HandleTripCondition(Boolean UsePeakValues)
 {
 	if(UsePeakValues)
 	{
-		ResultI = PeakSample.Current;
-		ResultV = PeakSample.Voltage;
+		if(Problem == PROBLEM_OUTPUT_SHORT)
+		{
+			ResultI = ActualMaxPosCurrent;
+			ResultV = ActualMaxPosVoltage;
+		}
+		else
+		{
+			ResultI = PeakSample.Current;
+			ResultV = PeakSample.Voltage;
+		}
 	}
 	else
 	{
