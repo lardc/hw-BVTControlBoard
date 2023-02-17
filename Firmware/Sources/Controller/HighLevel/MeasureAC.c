@@ -210,7 +210,10 @@ void MEASURE_AC_Stop(Int16U Reason)
 			break;
 
 		case PROBLEM_OUTPUT_SHORT:
+			Problem = Reason;
 			MEASURE_AC_HandleTripCondition(FALSE);
+			break;
+
 		case DF_NONE:
 			Problem = Reason;
 			break;
