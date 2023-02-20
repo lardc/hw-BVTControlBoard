@@ -467,8 +467,8 @@ static void MEASURE_AC_HandleTripCondition(Boolean UsePeakValues)
 	{
 		if(Problem == PROBLEM_OUTPUT_SHORT)
 		{
-			ResultI = ActualMaxPosCurrent;
-			ResultV = ActualMaxPosVoltage;
+			ResultI = MaxPosCurrent;
+			ResultV = MaxPosVoltage;
 		}
 		else
 		{
