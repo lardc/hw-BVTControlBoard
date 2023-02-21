@@ -422,8 +422,7 @@ static void MEASURE_AC_HandleVI()
 	// Check current conditions
 	if(UseInstantMethod)
 	{
-		Boolean IgnoreCurrent = TimeCounter < StartPauseTimeCounterTop &&
-				LimitCurrent <= HVD_ILL_TH && StartVoltage <= _IQ(1000);
+		Boolean IgnoreCurrent = TimeCounter < StartPauseTimeCounterTop && LimitCurrent <= HVD_ILL_TH;
 		if(!IgnoreCurrent && ActualSecondarySample.IQFields.Current >= LimitCurrentHaltLevel)
 			MEASURE_AC_Stop(PROBLEM_OUTPUT_SHORT);
 	}
