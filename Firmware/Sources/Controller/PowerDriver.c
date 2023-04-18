@@ -22,7 +22,7 @@ MWPowerSettings MWPowerSettingsArray[POWER_OPTIONS_MAXNUM] = {
 		{24,	150,	DRIVER_SwitchPower24V},
 		{50,	500,	DRIVER_SwitchPower50V},
 		{100,	1000,	DRIVER_SwitchPower100V},
-		{200,	1500,	DRIVER_SwitchPower200V}
+		{150,	1500,	DRIVER_SwitchPower150V}
 };
 
 // Functions
@@ -61,7 +61,7 @@ void DRIVER_SwitchPower100V()
 }
 // ----------------------------------------
 
-void DRIVER_SwitchPower200V()
+void DRIVER_SwitchPower150V()
 {
 	ZwGPIO_WritePin(PIN_POWER_1, FALSE);
 	ZwGPIO_WritePin(PIN_POWER_2, TRUE);
