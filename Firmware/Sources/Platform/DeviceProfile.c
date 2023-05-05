@@ -327,6 +327,10 @@ static Boolean DEVPROFILE_DispatchAction(Int16U ActionID, pInt16U UserError)
 			FWLB_WriteBoardLabel(0);
 			break;
 
+		case ACT_WRITE_LABEL2:
+			FWLB_WriteBoardLabel(1);
+			break;
+
 		case ACT_READ_SYMBOL:
 			DataTable[REG_MEM_SYMBOL] = *(pInt16U)(MemoryPointer++);
 			break;
@@ -379,6 +383,4 @@ static Int16U DEVPROFILE_CallbackReadX(Int16U Endpoint, pInt16U *Buffer, Boolean
 
 	return pLen;
 }
-
-
-
+// ----------------------------------------
