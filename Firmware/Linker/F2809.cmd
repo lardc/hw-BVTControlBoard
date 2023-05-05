@@ -110,7 +110,17 @@ PAGE 1 :   /* Data Memory */
  
 SECTIONS
 {
- 
+Flash28_API:
+   {
+        -lFlash2809_API_V100.lib(.econst)
+        -lFlash2809_API_V100.lib(.text)
+   }                   LOAD = FLASHCD,
+                       RUN = RAM,
+                       LOAD_START(_Flash28_API_LoadStart),
+                       LOAD_END(_Flash28_API_LoadEnd),
+                       RUN_START(_Flash28_API_RunStart),
+                       PAGE = 0
+
    /* Allocate program areas: */
    .cinit              : > FLASHCD     PAGE = 0
    .pinit              : > FLASHCD     PAGE = 0
@@ -154,7 +164,7 @@ SECTIONS
 
    /* Constants caching */
    ramconsts		   : LOAD = FLASHCD, PAGE = 0
-						 RUN = RAM, PAGE = 0
+						 RUN = RAMM0, PAGE = 1
 						 LOAD_START(_RamconstsLoadStart),
                          LOAD_END(_RamconstsLoadEnd),
 						 RUN_START(_RamconstsRunStart)

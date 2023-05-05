@@ -26,9 +26,29 @@
 	</natures>
 	<linkedResources>
 		<link>
+			<name>FlashAPI</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
 			<name>IQmath</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>FlashAPI/Flash2809_API_V100.lib</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/hw-TMS-libs/FlashAPI/Flash2809_API_V100.lib</locationURI>
+		</link>
+		<link>
+			<name>FlashAPI/Flash280x_API_Config.h</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/hw-TMS-libs/FlashAPI/Flash280x_API_Config.h</locationURI>
+		</link>
+		<link>
+			<name>FlashAPI/Flash280x_API_Library.h</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/hw-TMS-libs/FlashAPI/Flash280x_API_Library.h</locationURI>
 		</link>
 		<link>
 			<name>IQmath/IQmath.lib</name>
@@ -324,6 +344,36 @@
 			<name>Sources/Library/_ZwXINT_Defs.h</name>
 			<type>1</type>
 			<locationURI>PARENT-2-PROJECT_LOC/hw-TMS-libs/Library/_ZwXINT_Defs.h</locationURI>
+		</link>
+		<link>
+			<name>Sources/Platform/FirmwareInfo.c</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/hw-TMS-libs/Firmware/FirmwareInfo.c</locationURI>
+		</link>
+		<link>
+			<name>Sources/Platform/FirmwareInfo.h</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/hw-TMS-libs/Firmware/FirmwareInfo.h</locationURI>
+		</link>
+		<link>
+			<name>Sources/Platform/FirmwareLabel.c</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/hw-TMS-libs/Firmware/FirmwareLabel.c</locationURI>
+		</link>
+		<link>
+			<name>Sources/Platform/FirmwareLabel.h</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/hw-TMS-libs/Firmware/FirmwareLabel.h</locationURI>
+		</link>
+		<link>
+			<name>Sources/Platform/Flash.c</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/hw-TMS-libs/BootLoader/Controller/Flash.c</locationURI>
+		</link>
+		<link>
+			<name>Sources/Platform/Flash.h</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/hw-TMS-libs/BootLoader/Controller/Flash.h</locationURI>
 		</link>
 		<link>
 			<name>Sources/RTS/boot28.asm</name>
