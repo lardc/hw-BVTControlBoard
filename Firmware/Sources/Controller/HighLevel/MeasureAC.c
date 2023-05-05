@@ -20,6 +20,7 @@
 #include "DataLogger.h"
 #include "PowerDriver.h"
 #include "FIRFilter.h"
+#include "FirmwareLabel.h"
 
 // Definitions
 //
@@ -59,7 +60,7 @@ static _iq MaxPosVoltage, MaxPosCurrent, MaxPosInstantCurrent, PeakThresholdDete
 static DataSample ActualSecondarySample;
 static Boolean TripConditionDetected, UseInstantMethod, FrequencyRateSwitch, ModifySine, DUTOpened;
 static Boolean DbgDualPolarity, DbgSRAM, DbgMutePWM, SkipRegulation, SkipLoggingVoids, SkipNegativeLogging;
-static Boolean InvertPolarity, ZeroPWM;
+static Boolean InvertPolarity, ZeroPWM, BridgeRectifier;
 static Int16S PrevDuty;
 static Int16U AmplitudePeriodCounter;
 static Int16U Problem, Warning, Fault;
@@ -105,7 +106,6 @@ Boolean MEASURE_AC_StartProcess(Int16U Type, pInt16U pDFReason, pInt16U pProblem
 	FollowingErrorCounter = 0;
 	//
 	AmplitudePeriodCounter = 0;
-	InvertPolarity = PWM_USE_BRIDGE_RECTIF;
 	SkipRegulation = TRUE;
 	SIVAerr = 0;
 	ZeroPWM = TRUE;
@@ -171,7 +171,7 @@ Int16S inline MEASURE_AC_TrimPWM(Int16S Duty)
 
 Int16S inline MEASURE_AC_SetPWM(Int16S Duty)
 {
-	if(PWM_USE_BRIDGE_RECTIF)
+	if(BridgeRectifier)
 	{
 		Int16S PWMOutput = 0;
 
@@ -319,7 +319,8 @@ static Boolean MEASURE_AC_PIControllerSequence(_iq DesiredV)
 		if(FrequencyRateSwitch)
 			++AmplitudePeriodCounter;
 
-		if((PWM_SKIP_NEG_PULSES && AmplitudePeriodCounter > 1) || (!PWM_SKIP_NEG_PULSES && AmplitudePeriodCounter > 0))
+		// Условие чередования импульсов для мостового и одиночного выпрямителя
+		if((BridgeRectifier && AmplitudePeriodCounter > 1) || (!BridgeRectifier && AmplitudePeriodCounter > 0))
 		{
 			AmplitudePeriodCounter = 0;
 			_iq err = 0, p;
@@ -658,7 +659,7 @@ static Int16S MEASURE_AC_CCSub_Regulator(Boolean *PeriodTrigger)
 	{
 		if((FollowingErrorFraction > FE_MAX_FRACTION) && (_IQabs(FollowingErrorAbsolute) > FE_MAX_ABSOLUTE))
 		{
-			if(FollowingErrorCounter++ > (FE_MAX_COUNTER * (PWM_SKIP_NEG_PULSES ? 2 : 1)))
+			if(FollowingErrorCounter++ > (FE_MAX_COUNTER * (BridgeRectifier ? 2 : 1)))
 			{
 				correction = 0;
 				MEASURE_AC_Stop(DF_FOLLOWING_ERROR);
@@ -709,10 +710,14 @@ static void MEASURE_AC_CacheVariables()
 	PWMCoff = _IQdiv(_IQ(ZW_PWM_DUTY_BASE), _IQI(DataTable[REG_PRIM_VOLTAGE_CTRL]));
 	MaxSafePWM = DataTable[REG_SAFE_MAX_PWM];
 	
+	// Параметр задаётся для полномостового выпрямления
+	BridgeRectifier = (FWLB_GetSelector() == SID_PCB2_0_Manufacturing_BridgeRectifier);
+	InvertPolarity = BridgeRectifier;
+
 	StartPauseTimeCounterTop = (CONTROL_FREQUENCY / DataTable[REG_VOLTAGE_FREQUENCY]) * 2;
 	NormalizedFrequency = _IQdiv(_IQ(1.0f), _IQI(CONTROL_FREQUENCY / DataTable[REG_VOLTAGE_FREQUENCY]));
 	NormalizedPIdiv2Shift = CONTROL_FREQUENCY / (4L * DataTable[REG_VOLTAGE_FREQUENCY]);
-	VoltageRateStep = _IQmpy(_IQdiv(_IQI(1000 / (PWM_SKIP_NEG_PULSES ? 2 : 1)), _IQI(DataTable[REG_VOLTAGE_FREQUENCY])),
+	VoltageRateStep = _IQmpy(_IQdiv(_IQI(1000 / (BridgeRectifier ? 2 : 1)), _IQI(DataTable[REG_VOLTAGE_FREQUENCY])),
 			_IQmpyI32(_IQ(0.1f), DataTable[REG_VOLTAGE_AC_RATE]));
 	MinSafePWM = (PWM_FREQUENCY / 1000L) * PWM_TH * ZW_PWM_DUTY_BASE / 1000000L;
 	
@@ -731,7 +736,7 @@ static void MEASURE_AC_CacheVariables()
 	
 	// Select start voltage basing on measurement mode
 	ControlledAmplitudeV = DesiredAmplitudeV = DesiredAmplitudeVHistory = _IQI(DataTable[REG_START_VOLTAGE_AC]);
-	
+
 	ModifySine = FALSE;
 	CurrentMultiply = 10;
 	if(LimitCurrent <= HVD_IL_TH)

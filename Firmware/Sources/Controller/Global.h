@@ -29,19 +29,7 @@
 #define DBG_USE_OPTO_TIMEOUT	TRUE
 #define DBG_USE_FOLLOWING_ERR	TRUE
 
-// Regulator parameters
-#define PWM_REDUCE_RATE			50				// in ticks per regulator cycle
-#define PWM_USE_BRIDGE_RECTIF	TRUE			// Use full-bridge rectifier on secondary side
-#define PWM_SKIP_NEG_PULSES		TRUE			// Skip measurement at negative primary pulses
-#define USE_DIRTY_PATCH			TRUE			// Dirty patch for 300mA
-
-// Redefine skip pulses setting
-#if PWM_USE_BRIDGE_RECTIF == FALSE
-#undef PWM_SKIP_NEG_PULSES
-#define PWM_SKIP_NEG_PULSES FALSE
-#endif
-
-// Invert result values
+#define PWM_REDUCE_RATE			50				// Скорость снижения сигнала регулятором (в тиках)
 #define SCOPE_DATA_INVERT		TRUE
 
 // First pulse max current
@@ -50,12 +38,8 @@
 // Modes for HVDigitizer
 #define HVD_VL_TH				_IQ(1000)		// < 1000V
 #define HVD_IL_TH				_IQ(30.0f)		// <= 30mA		(low range)
-
-#if USE_DIRTY_PATCH
+// 310мА выбрано для исключения отсечки на максимальном токе и возможности его корректного измерения
 #define HVD_IH_TH				_IQ(310.0f)		// <= 310mA		(high range)
-#else
-#define HVD_IH_TH				_IQ(300.0f)		// <= 300mA		(high range)
-#endif
 
 // Pre-plate parameters
 #define PRE_PLATE_MAX_TIME		1000			// pre-plate max time for stabilization (in ms)
