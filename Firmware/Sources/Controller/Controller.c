@@ -1,4 +1,4 @@
-﻿// -----------------------------------------
+﻿// ----------------------------------------
 // Controller logic
 // ----------------------------------------
 
@@ -577,7 +577,7 @@ void CONTROL_ReInitSPI_Rx()
 	// Init master optical receiver interface
 	ZwSPIa_Init(FALSE, 0, 16, SPIA_PLR, SPIA_PHASE, ZW_SPI_INIT_RX, TRUE, FALSE);
 }
-// -----------------------------------------
+// ----------------------------------------
 
 static void CONTROL_TriggerMeasurementDPC()
 {

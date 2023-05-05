@@ -1,4 +1,4 @@
-﻿// -----------------------------------------
+﻿// ----------------------------------------
 // Declaration file for ZbBoard library for VTM-CB board family
 // 
 //		BASED ON 	- 	TI C/C++ Headers and Examples
@@ -11,7 +11,7 @@
 //		LIBS		-	{ ZwDSP }
 //		MEMORY		-	LARGE UNIFIED MODEL; STACK 0x100
 //
-// -----------------------------------------
+// ----------------------------------------
 
 #ifndef __ZB_BOARD_H
 #define __ZB_BOARD_H
