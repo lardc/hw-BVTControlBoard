@@ -88,4 +88,4 @@ static void PSAMPLING_MonitoringVCRoutine(Int16U * const restrict aSampleVector)
 }
 // ----------------------------------------
 
-// No more.
+

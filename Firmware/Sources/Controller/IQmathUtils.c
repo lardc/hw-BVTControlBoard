@@ -34,4 +34,4 @@ _iq16 _IQ16log(_iq16 x)
 	return y;
 }
 
-// No more
+

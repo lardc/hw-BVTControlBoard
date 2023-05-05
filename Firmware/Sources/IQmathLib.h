@@ -4487,7 +4487,7 @@ extern  float _satf(float A, float Pos, float Neg);
 #define   _IQ2abs(A)   fabs(A)
 #define   _IQ1abs(A)   fabs(A)
 //###########################################################################
-#endif  // No more.
+#endif  
 //###########################################################################
 
 #endif /* __IQMATHLIB_H_INCLUDED__ */
