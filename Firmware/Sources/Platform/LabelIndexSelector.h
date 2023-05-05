@@ -8,7 +8,7 @@
 typedef enum __SelectorIndex
 {
 	SID_None = -1,
-	SID_PCB1_2_BVT_5V_Sync_Vg_5V = 0
+	SID_PCB2_0_Manufacturing_BridgeRectifier = 0
 } SelectorIndex;
 
 #endif // __LABEL_INDEX_SELECTOR_H

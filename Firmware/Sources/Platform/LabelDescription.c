@@ -4,6 +4,6 @@
 // Variables
 const Label BoardLabels[] =
 {
-		{"GTUControlBoard v.1.2 [BVT 5V Sync, Vg 5V]",	SID_PCB1_2_BVT_5V_Sync_Vg_5V}
+		{"BVTMainBoard v.2.0 [Manufacturing] + bridge rectifier",	SID_PCB2_0_Manufacturing_BridgeRectifier}
 };
 const Int16U BoardLabelsSize = sizeof(BoardLabels) / sizeof(BoardLabels[0]);

@@ -28,6 +28,9 @@
 #define ACT_UNLOCK_NV_AREA			204	// Unlock modifications of parameters area (password-protected)
 //
 #define ACT_BOOT_LOADER_REQUEST		320	// Request reboot to bootloader
+#define ACT_WRITE_LABEL1			321	// Записать первую метку: BVTMainBoard v.2.0 [Manufacturing] + bridge rectifier
+#define ACT_READ_SYMBOL				330	// Выполнить чтение символа из памяти
+#define ACT_SELECT_MEM_LABEL		331	// Переместить указатель считывания в область метки
 
 
 // REGISTERS
@@ -152,6 +155,8 @@
 // 258 - 259
 #define REG_FWINFO_STR_LEN			260	// Length of the information string record
 #define REG_FWINFO_STR_BEGIN		261	// Begining of the information string record
+//
+#define REG_MEM_SYMBOL				299	// Считанный по адресу памяти символ
 
 
 // ENDPOINTS
