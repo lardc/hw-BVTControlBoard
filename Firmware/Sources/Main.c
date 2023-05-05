@@ -13,6 +13,8 @@
 #include "Controller.h"
 #include "InterboardProtocol.h"
 #include "SecondarySampling.h"
+#include "Flash.h"
+#include "FirmwareLabel.h"
 
 
 // FORWARD FUNCTIONS
@@ -54,6 +56,8 @@ void main()
 
 	// Boot process
 	InitializeCPU();
+	FLASH_Init();
+	FWLB_LoadBoardLabel();
 
 	// Switch GPIO in proper state
 	InitializeBoard();
@@ -99,7 +103,6 @@ void main()
 	// Set watch-dog as WDRST
 	ZwSystem_SelectDogFunc(FALSE);
 	ZwSystem_EnableDog(SYS_WD_PRESCALER);
-	ZwSystem_LockDog();
 
 	// Start timers
 	ZwTimer_StartT2();
