@@ -66,7 +66,6 @@ volatile Int16U CONTROL_BootLoaderRequest = 0;
 
 // Forward functions
 //
-static void CONTROL_UpdateIdle();
 static void CONTROL_FillWPPartDefault();
 static void CONTROL_SetDeviceState(DeviceState NewState);
 static void CONTROL_SwitchStateToPowered();
@@ -136,17 +135,14 @@ void CONTROL_Init()
 
 void CONTROL_DelayedInit()
 {
-	// Initialize sampling of parameters at primary side
 	PSAMPLING_Init();
 }
 // ----------------------------------------
 
 void CONTROL_Idle()
 {
-	CONTROL_UpdateIdle();
 	DEVPROFILE_ProcessRequests();
 
-	// Process deferred procedures
 	if(DPCDelegate)
 	{
 		FUNC_AsyncDelegate del = DPCDelegate;
@@ -164,22 +160,7 @@ void inline CONTROL_RequestDPC(FUNC_AsyncDelegate Action)
 
 void CONTROL_UpdateLow()
 {
-	// Update capacitor state
 	PSAMPLING_DoSamplingVCap();
-}
-// ----------------------------------------
-
-static void CONTROL_UpdateIdle()
-{
-	// Monitoring bridge temperature
-	if(DBG_USE_TEMP_MON && DRIVER_ReadTemperatureFault())
-	{
-		if(CONTROL_State == DS_InProcess)
-			CONTROL_RequestStop(DF_TEMP_MON, FALSE);
-
-		if(CONTROL_State == DS_Powered)
-			CONTROL_SwitchStateToFault(DF_TEMP_MON);
-	}
 }
 // ----------------------------------------
 

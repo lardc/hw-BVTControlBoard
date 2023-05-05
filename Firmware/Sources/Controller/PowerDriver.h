@@ -19,8 +19,6 @@ void DRIVER_Init();
 void DRIVER_SwitchPower(Boolean Enable1, Boolean Enable2);
 // Clear TZ condition
 void DRIVER_ClearTZFault();
-// Check temperature lines state
-Boolean DRIVER_ReadTemperatureFault();
 // Get TZ pin state for bridge short circuit
 Boolean DRIVER_GetSHPinState();
 

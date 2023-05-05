@@ -61,28 +61,8 @@ void DRIVER_SwitchPower(Boolean Enable1, Boolean Enable2)
 }
 // ----------------------------------------
 
-Boolean DRIVER_ReadTemperatureFault()
-{
-	static Int16U FilterCounter = 0;
-
-	if (!ZwGPIO_ReadPin(PIN_TFAULT))
-	{
-		if (FilterCounter < 100)
-			FilterCounter++;
-		else
-			return TRUE;
-	}
-	else
-		FilterCounter = 0;
-
-	return FALSE;
-}
-// ----------------------------------------
-
 Boolean DRIVER_GetSHPinState()
 {
 	return ZwGPIO_ReadPin(PIN_SHORT);
 }
 // ----------------------------------------
-
-
