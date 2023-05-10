@@ -7,7 +7,7 @@
 #include "Global.h"
 
 // Definitions
-#define POWER_OPTIONS_MAXNUM		4
+#define POWER_OPTIONS_MAXNUM		3
 
 // Functions
 void DRIVER_Init();

@@ -19,9 +19,8 @@ typedef struct __MWPowerSettings
 } MWPowerSettings;
 
 MWPowerSettings MWPowerSettingsArray[POWER_OPTIONS_MAXNUM] = {
-		{24,	150,	DRIVER_SwitchPower24V},
-		{50,	500,	DRIVER_SwitchPower50V},
-		{100,	1000,	DRIVER_SwitchPower100V},
+		{24,	100,	DRIVER_SwitchPower24V},
+		{50,	300,	DRIVER_SwitchPower50V},
 		{150,	1500,	DRIVER_SwitchPower150V}
 };
 
