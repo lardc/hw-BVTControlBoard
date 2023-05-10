@@ -28,8 +28,7 @@
 #define ACT_UNLOCK_NV_AREA			204	// Unlock modifications of parameters area (password-protected)
 //
 #define ACT_BOOT_LOADER_REQUEST		320	// Request reboot to bootloader
-#define ACT_WRITE_LABEL1			321	// Записать первую метку: BVTMainBoard v.2.0 [Manufacturing] + bridge rectifier
-#define ACT_WRITE_LABEL2			322	// Записать первую метку: BVTMainBoard v.2.0 [Manufacturing] + diode rectifier
+#define ACT_WRITE_LABEL1			321	// Записать первую метку: BVTMainBoard v.2.0 [Manufacturing]
 #define ACT_READ_SYMBOL				330	// Выполнить чтение символа из памяти
 #define ACT_SELECT_MEM_LABEL		331	// Переместить указатель считывания в область метки
 
@@ -42,7 +41,9 @@
 #define REG_TEST_CURRENT			3	// Threshold current integer part (in mA x10) (for sensing configuration)
 #define REG_TEST_VOLTAGE			4	// Test voltage (for sensing configuration)
 //
-// 10 - 19
+#define REG_BRIDGE_RECTIFIER		10	// Флаг использования мостового выпрямителя
+#define REG_5mA_SOFT_RANGE			11	// Флаг использования программного поддиапазона тока до 5мА
+// 12 - 19
 #define REG_CAP_V_COFF_N			20	// Capacitor voltage coefficient (N)
 #define REG_CAP_V_COFF_D			21	// Capacitor voltage coefficient (D)
 // 22 - 23
@@ -98,7 +99,6 @@
 #define REG_SCURRENT1_FINE_P0		116	// Secondary current 1 tune quadratic coefficient P0 (in uA)
 #define REG_SCURRENT2_FINE_P0		117	// Secondary current 2 tune quadratic coefficient P0 (in uA)
 #define REG_SCURRENT3_FINE_P0		118	// Secondary current 3 tune quadratic coefficient P0 (in uA)
-#define REG_USE_5mA_SOFT_RANGE		119	// Флаг использования программного поддиапазона тока до 5мА
 //
 // ----------------------------------------
 //

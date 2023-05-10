@@ -712,8 +712,7 @@ static void MEASURE_AC_CacheVariables()
 	MaxSafePWM = DataTable[REG_SAFE_MAX_PWM];
 	
 	// Параметр задаётся для полномостового выпрямления
-	BridgeRectifier = (FWLB_GetSelector() == SID_PCB2_0_Manufacturing_BridgeRectifier);
-	InvertPolarity = BridgeRectifier;
+	InvertPolarity = BridgeRectifier = DataTable[REG_BRIDGE_RECTIFIER];
 
 	StartPauseTimeCounterTop = (CONTROL_FREQUENCY / DataTable[REG_VOLTAGE_FREQUENCY]) * 2;
 	NormalizedFrequency = _IQdiv(_IQ(1.0f), _IQI(CONTROL_FREQUENCY / DataTable[REG_VOLTAGE_FREQUENCY]));
@@ -725,12 +724,12 @@ static void MEASURE_AC_CacheVariables()
 	UseInstantMethod = DataTable[REG_USE_INST_METHOD] ? TRUE : FALSE;
 	PeakThresholdDetect = _FPtoIQ2(DataTable[REG_PEAK_SEARCH_ZONE], 100);
 	
-	DbgSRAM = DataTable[REG_DBG_SRAM] ? TRUE : FALSE;
-	DbgMutePWM = DataTable[REG_DBG_MUTE_PWM] ? TRUE : FALSE;
-	DbgDualPolarity = DataTable[REG_DBG_DUAL_POLARITY] ? TRUE : FALSE;
+	DbgSRAM = DataTable[REG_DBG_SRAM];
+	DbgMutePWM = DataTable[REG_DBG_MUTE_PWM];
+	DbgDualPolarity = DataTable[REG_DBG_DUAL_POLARITY];
 	
-	SkipLoggingVoids = DataTable[REG_SKIP_LOGGING_VOIDS] ? TRUE : FALSE;
-	SkipNegativeLogging = DataTable[REG_SKIP_NEG_LOGGING] ? TRUE : FALSE;
+	SkipLoggingVoids = DataTable[REG_SKIP_LOGGING_VOIDS];
+	SkipNegativeLogging = DataTable[REG_SKIP_NEG_LOGGING];
 	
 	// Optical connection monitor
 	OptoConnectionMonMax = DataTable[REG_OPTO_CONNECTION_MON];
@@ -742,7 +741,7 @@ static void MEASURE_AC_CacheVariables()
 	CurrentMultiply = 10;
 	if(LimitCurrent <= HVD_IL_TH)
 	{
-		if(DataTable[REG_USE_5mA_SOFT_RANGE] && LimitCurrent <= HVD_ILL_TH)
+		if(DataTable[REG_5mA_SOFT_RANGE] && LimitCurrent <= HVD_ILL_TH)
 		{
 			LimitCurrentHaltLevel = HVD_ILL_TH;
 

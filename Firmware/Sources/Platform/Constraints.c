@@ -24,8 +24,8 @@ const TableItemConstraint NVConstraint[DATA_TABLE_NV_SIZE] =
 										   {0, 0, 0},																// 7
 										   {0, 0, 0},																// 8
 										   {0, 0, 0},																// 9
-										   {0, 0, 0},																// 10
-										   {0, 0, 0},																// 11
+										   {NO, YES, NO},															// 10
+										   {NO, YES, NO},															// 11
 										   {0, 0, 0},																// 12
 										   {0, 0, 0},																// 13
 										   {0, 0, 0},																// 14
@@ -133,7 +133,7 @@ const TableItemConstraint NVConstraint[DATA_TABLE_NV_SIZE] =
 										   {0, INT16U_MAX, 0},														// 116
 										   {0, INT16U_MAX, 0},														// 117
 										   {0, INT16U_MAX, 0},														// 118
-										   {NO, YES, NO},															// 119
+										   {0, 0, 0},																// 119
 										   {0, 0, 0},																// 120
 										   {0, 0, 0},																// 121
 										   {0, 0, 0},																// 122
