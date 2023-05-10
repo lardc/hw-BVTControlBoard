@@ -44,17 +44,16 @@ static Int32U TimeCounter, StartPauseTimeCounterTop;
 static Int32U VRateCounter, VRateCounterTop;
 static Int32U VPlateTimeCounter, VPlateTimeCounterTop, VPrePlateTimeCounter, VPrePlateTimeCounterTop;
 static Int32U BrakeTimeCounter, BrakeTimeCounterTop, FrequencyDivisorCounter, FrequencyDivisorCounterTop;
-static Int16U NormalizedPIdiv2Shift;
+static Int16U FollowingErrorCounter, NormalizedPIdiv2Shift;
 static Int16S PeakShiftTicks;
 static Int16U OptoConnectionMon, OptoConnectionMonMax, CurrentMultiply;
-static Int16U FollowingErrorCounter;
 static Int16S MaxSafePWM, MinSafePWM, SSVoltageP2, SSCurrentP2;
 static _iq SSVoltageCoff, SSCurrentCoff, SSVoltageP1, SSVoltageP0, SSCurrentP1, SSCurrentP0, TransCoffInv, PWMCoff;
 static _iq LimitCurrent, LimitCurrentHaltLevel, LimitVoltage, VoltageRateStep, NormalizedFrequency;
 static _iq KpVAC, KiVAC, SIVAerr;
 static _iq FollowingErrorFraction, FollowingErrorAbsolute;
 static _iq ResultV, ResultI;
-static _iq DesiredAmplitudeV, DesiredAmplitudeVHistory, ControlledAmplitudeV, DesiredVoltageHistory;
+static _iq DesiredAmplitudeV, DesiredAmplitudeVHistory, ControlledAmplitudeV, DesiredVoltageHistory, SineValue;
 static _iq ActualMaxPosVoltage, ActualMaxPosCurrent;
 static _iq MaxPosVoltage, MaxPosCurrent, MaxPosInstantCurrent, PeakThresholdDetect;
 static DataSample ActualSecondarySample;
@@ -65,6 +64,7 @@ static Int16S PrevDuty;
 static Int16U AmplitudePeriodCounter;
 static Int16U Problem, Warning, Fault;
 static DataSampleIQ PeakDetectorData[PEAK_DETECTOR_SIZE], PeakSample;
+static DataSampleIQ PeakSampleByCurrent;
 static Int16U PeakDetectorCounter;
 //
 static volatile ACProcessState State = ACPS_None;
@@ -108,6 +108,7 @@ Boolean MEASURE_AC_StartProcess(Int16U Type, pInt16U pDFReason, pInt16U pProblem
 	AmplitudePeriodCounter = 0;
 	SkipRegulation = TRUE;
 	SIVAerr = 0;
+	SineValue = 0;
 	ZeroPWM = TRUE;
 	//
 	ActualSecondarySample.IQFields.Voltage = 0;
@@ -120,6 +121,8 @@ Boolean MEASURE_AC_StartProcess(Int16U Type, pInt16U pDFReason, pInt16U pProblem
 	DesiredVoltageHistory = -1;
 	PrevDuty = -1;
 	PeakDetectorCounter = 0;
+	PeakSampleByCurrent.Voltage = 0;
+	PeakSampleByCurrent.Current = 0;
 	//
 	ResultV = ResultI = 0;
 	State = ACPS_Ramp;
@@ -218,7 +221,10 @@ void MEASURE_AC_Stop(Int16U Reason)
 			break;
 
 		case PROBLEM_OUTPUT_SHORT:
+			Problem = Reason;
 			MEASURE_AC_HandleTripCondition(FALSE);
+			break;
+
 		case DF_NONE:
 			Problem = Reason;
 			break;
@@ -296,6 +302,10 @@ static void MEASURE_AC_HandlePeakLogic()
 				PeakSample.Voltage = 0;
 			}
 		}
+
+		if(PeakSample.Current < PeakSampleByCurrent.Current)
+			PeakSample.Current = PeakSampleByCurrent.Current;
+
 		MU_LogScopeIVpeak(PeakSample);
 		
 		// Handle overcurrent
@@ -336,6 +346,8 @@ static Boolean MEASURE_AC_PIControllerSequence(_iq DesiredV)
 			MaxPosInstantCurrent = 0;
 			//
 			PeakDetectorCounter = 0;
+			PeakSampleByCurrent.Voltage = 0;
+			PeakSampleByCurrent.Current = 0;
 			
 			if(SkipRegulation)
 			{
@@ -460,6 +472,13 @@ static void MEASURE_AC_HandleVI()
 		PeakDetectorData[PeakDetectorCounter].Current = ActualSecondarySample.IQFields.Current;
 		PeakDetectorData[PeakDetectorCounter].Voltage = ActualSecondarySample.IQFields.Voltage;
 		++PeakDetectorCounter;
+
+		_iq SineValueShifted = _IQsinPU(_IQmpyI32(NormalizedFrequency, (Int32S)TimeCounter - NormalizedPIdiv2Shift));
+		if(_IQmpy(SineValue, SineValueShifted) > 0 && PeakSampleByCurrent.Current < ActualSecondarySample.IQFields.Current)
+		{
+			PeakSampleByCurrent.Current = ActualSecondarySample.IQFields.Current;
+			PeakSampleByCurrent.Voltage = ActualSecondarySample.IQFields.Voltage;
+		}
 	}
 }
 // ----------------------------------------
@@ -482,8 +501,16 @@ static void MEASURE_AC_HandleTripCondition(Boolean UsePeakValues)
 	}
 	else
 	{
-		ResultI = ActualSecondarySample.IQFields.Current;
-		ResultV = ActualSecondarySample.IQFields.Voltage;
+		if(Problem == PROBLEM_OUTPUT_SHORT)
+		{
+			ResultI = MaxPosCurrent;
+			ResultV = MaxPosVoltage;
+		}
+		else
+		{
+			ResultI = ActualSecondarySample.IQFields.Current;
+			ResultV = ActualSecondarySample.IQFields.Voltage;
+		}
 	}
 }
 // ----------------------------------------
@@ -581,13 +608,20 @@ static void MEASURE_AC_ControlCycle()
 		case ACPS_Brake:
 			{
 				if(Problem == PROBLEM_OUTPUT_SHORT)
+				{
 					PrevCorrection = 0;
+					if(DataTable[REG_OUT_SHORT_WARNING])
+					{
+						Problem = PROBLEM_NONE;
+						Warning = WARNING_OUTPUT_OVERLOAD;
+					}
+				}
 
 				// Reduce correction value smoothly
 				correction =
 						(ABS(PrevCorrection) >= PWM_REDUCE_RATE) ?
 								(PrevCorrection - SIGN(PrevCorrection) * PWM_REDUCE_RATE) : 0;
-				MEASURE_AC_CCSub_CorrectionAndLog((Warning == WARNING_OUTPUT_OVERLOAD) ? 0 : correction);
+				MEASURE_AC_CCSub_CorrectionAndLog(correction);
 				
 				// Increase timer only when PWM reduced to zero
 				if(correction == 0)
@@ -641,7 +675,7 @@ static Int16S MEASURE_AC_CCSub_Regulator(Boolean *PeriodTrigger)
 	_iq desiredSecondaryVoltage;
 	
 	// Calculate desired amplitude
-	_iq SineValue = _IQsinPU(_IQmpyI32(NormalizedFrequency, TimeCounter));
+	SineValue = _IQsinPU(_IQmpyI32(NormalizedFrequency, TimeCounter));
 	if(ModifySine)
 		desiredSecondaryVoltage = _IQmpy(_IQmpy(SineValue, _IQexp(_IQ(1) - _IQabs(SineValue))), ControlledAmplitudeV);
 	else
