@@ -43,6 +43,7 @@
 //
 #define REG_BRIDGE_RECTIFIER		10	// Флаг использования мостового выпрямителя
 #define REG_5mA_SOFT_RANGE			11	// Флаг использования программного поддиапазона тока до 5мА
+#define REG_INVERT_MW_CONTROL		12	// Инверсия сигнала управления БП MeanWell (используется для RSP-500 совместно с BVTBridge v.2.1)
 // 12 - 19
 #define REG_CAP_V_COFF_N			20	// Capacitor voltage coefficient (N)
 #define REG_CAP_V_COFF_D			21	// Capacitor voltage coefficient (D)

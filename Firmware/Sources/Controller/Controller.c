@@ -118,6 +118,10 @@ void CONTROL_Init()
 	// Enable driver
 	DRIVER_Init();
 
+	// Настройка инверсии управления MW
+	ZbGPIO_SwitchPowerInvert(DataTable[REG_INVERT_MW_CONTROL]);
+	DRIVER_SwitchPower(FALSE, FALSE);
+
 	// Use quadratic correction for block
 	DataTable[REG_QUADRATIC_CORR] = 1;
 
