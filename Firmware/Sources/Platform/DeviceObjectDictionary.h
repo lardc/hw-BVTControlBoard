@@ -98,6 +98,7 @@
 #define REG_SCURRENT1_FINE_P0		116	// Secondary current 1 tune quadratic coefficient P0 (in uA)
 #define REG_SCURRENT2_FINE_P0		117	// Secondary current 2 tune quadratic coefficient P0 (in uA)
 #define REG_SCURRENT3_FINE_P0		118	// Secondary current 3 tune quadratic coefficient P0 (in uA)
+#define REG_USE_5mA_SOFT_RANGE		119	// Флаг использования программного поддиапазона тока до 5мА
 //
 // ----------------------------------------
 //

@@ -741,14 +741,31 @@ static void MEASURE_AC_CacheVariables()
 	CurrentMultiply = 10;
 	if(LimitCurrent <= HVD_IL_TH)
 	{
-		LimitCurrentHaltLevel = HVD_IL_TH;
-		
-		SSCurrentCoff = _FPtoIQ2(DataTable[REG_SCURRENT1_COFF_N], DataTable[REG_SCURRENT1_COFF_D]);
-		SSCurrentCoff = _IQdiv(SSCurrentCoff, _IQ(100.0f));
-		
-		SSCurrentP2 = (Int16S)DataTable[REG_SCURRENT1_FINE_P2];
-		SSCurrentP1 = _FPtoIQ2(DataTable[REG_SCURRENT1_FINE_P1], 1000);
-		SSCurrentP0 = _FPtoIQ2((Int16S)DataTable[REG_SCURRENT1_FINE_P0], 1000);
+		if(DataTable[REG_USE_5mA_SOFT_RANGE] && LimitCurrent <= HVD_ILL_TH)
+		{
+			LimitCurrentHaltLevel = HVD_ILL_TH;
+
+			ModifySine = DataTable[REG_MODIFY_SINE];
+			PeakShiftTicks = (Int16S)DataTable[REG_MODIFY_SINE_SHIFT];
+
+			SSCurrentCoff = _FPtoIQ2(DataTable[REG_SCURRENT3_COFF_N], DataTable[REG_SCURRENT3_COFF_D]);
+			SSCurrentCoff = _IQdiv(SSCurrentCoff, _IQ(100.0f));
+
+			SSCurrentP2 = (Int16S)DataTable[REG_SCURRENT3_FINE_P2];
+			SSCurrentP1 = _FPtoIQ2(DataTable[REG_SCURRENT3_FINE_P1], 1000);
+			SSCurrentP0 = _FPtoIQ2((Int16S)DataTable[REG_SCURRENT3_FINE_P0], 1000);
+		}
+		else
+		{
+			LimitCurrentHaltLevel = HVD_IL_TH;
+
+			SSCurrentCoff = _FPtoIQ2(DataTable[REG_SCURRENT1_COFF_N], DataTable[REG_SCURRENT1_COFF_D]);
+			SSCurrentCoff = _IQdiv(SSCurrentCoff, _IQ(100.0f));
+
+			SSCurrentP2 = (Int16S)DataTable[REG_SCURRENT1_FINE_P2];
+			SSCurrentP1 = _FPtoIQ2(DataTable[REG_SCURRENT1_FINE_P1], 1000);
+			SSCurrentP0 = _FPtoIQ2((Int16S)DataTable[REG_SCURRENT1_FINE_P0], 1000);
+		}
 	}
 	else
 	{
