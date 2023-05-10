@@ -118,9 +118,9 @@ void InitializeBoard()
 	ZwGPIO_PinToOutput(13);
 	ZwGPIO_PinToOutput(17);
 	//
-	ZwGPIO_WritePin(8, TRUE);
-	ZwGPIO_WritePin(13, TRUE);
-	ZwGPIO_WritePin(17, FALSE);
+	ZwGPIO_WritePin(8, FALSE);
+	ZwGPIO_WritePin(13, FALSE);
+	ZwGPIO_WritePin(17, TRUE);
 }
 // ----------------------------------------
 
