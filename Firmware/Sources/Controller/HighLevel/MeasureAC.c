@@ -58,7 +58,7 @@ static _iq ActualMaxPosVoltage, ActualMaxPosCurrent;
 static _iq MaxPosVoltage, MaxPosCurrent, MaxPosInstantCurrent, PeakThresholdDetect;
 static DataSample ActualSecondarySample;
 static Boolean TripConditionDetected, UseInstantMethod, FrequencyRateSwitch, ModifySine, DUTOpened;
-static Boolean DbgDualPolarity, DbgSRAM, DbgMutePWM, SkipRegulation, SkipLoggingVoids, SkipNegativeLogging;
+static Boolean DbgDualPolarity, DbgSRAM, DbgMutePWM, SkipRegulation, SkipLoggingVoids;
 static Boolean InvertPolarity, ZeroPWM, BridgeRectifier;
 static Int16S PrevDuty;
 static Int16U AmplitudePeriodCounter;
@@ -655,12 +655,9 @@ static void MEASURE_AC_CCSub_CorrectionAndLog(Int16S ActualCorrection)
 	Int16S PWMOutput = MEASURE_AC_SetPWM(ActualCorrection);
 	if(!SkipLoggingVoids || FrequencyRateSwitch)
 	{
-		if(!(SkipNegativeLogging && InvertPolarity))
-		{
-			MU_LogScope(&ActualSecondarySample, CurrentMultiply, DbgSRAM, DbgDualPolarity);
-			MU_LogScopeIV(ActualSecondarySample);
-			MU_LogScopeDIAG(PWMOutput);
-		}
+		MU_LogScope(&ActualSecondarySample, CurrentMultiply, DbgSRAM, DbgDualPolarity);
+		MU_LogScopeIV(ActualSecondarySample);
+		MU_LogScopeDIAG(PWMOutput);
 	}
 }
 // ----------------------------------------
@@ -763,7 +760,6 @@ static void MEASURE_AC_CacheVariables()
 	DbgDualPolarity = DataTable[REG_DBG_DUAL_POLARITY];
 	
 	SkipLoggingVoids = DataTable[REG_SKIP_LOGGING_VOIDS];
-	SkipNegativeLogging = DataTable[REG_SKIP_NEG_LOGGING];
 	
 	// Optical connection monitor
 	OptoConnectionMonMax = DataTable[REG_OPTO_CONNECTION_MON];
