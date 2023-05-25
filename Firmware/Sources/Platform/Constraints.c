@@ -54,8 +54,8 @@ const TableItemConstraint NVConstraint[DATA_TABLE_NV_SIZE] =
 										   {0, INT16U_MAX, SCURRENT3_COFF_N_DEF},									// 37
 										   {1, X_D_DEF3, X_D_DEF2},													// 38
 										   {0, 0, 0},																// 39
-										   {0, 0, 0},																// 40
-										   {0, 0, 0},																// 41
+										   {VSET_FRANGE_MIN, VSET_FRANGE_MAX, VSET_FRANGE_DEF},						// 40
+										   {PSET_FRANGE_MIN, PSET_FRANGE_MAX, PSET_FRANGE_DEF},						// 41
 										   {BRAKE_TIME_MIN, BRAKE_TIME_MAX, BRAKE_TIME_DEF},						// 42
 										   {TRANSFORMER_COFF_MIN, TRANSFORMER_COFF_MAX, TRANSFORMER_COFF_DEF}, 		// 43
 										   {NOMINAL_PRIMARY_V_MIN, NOMINAL_PRIMARY_V_MAX, NOMINAL_PRIMARY_V_DEF},	// 44

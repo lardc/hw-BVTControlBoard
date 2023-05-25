@@ -617,7 +617,11 @@ static void CONTROL_BatteryVoltagePrepare()
 	}
 	else
 	{
-		if ((OutputPower > CAP_SW_POWER) || (DataTable[REG_LIMIT_VOLTAGE] > CAP_SW_VOLTAGE))
+		Int16U SwitchVoltage =
+				(DataTable[REG_FULL_RANGE_SW_VSET] == 0) ? CAP_SW_VOLTAGE : DataTable[REG_FULL_RANGE_SW_VSET];
+		Int16U SwitchPower =
+				(DataTable[REG_FULL_RANGE_SW_PSET] == 0) ? CAP_SW_POWER : DataTable[REG_FULL_RANGE_SW_PSET];
+		if (OutputPower > SwitchPower || DataTable[REG_LIMIT_VOLTAGE] > SwitchVoltage)
 		{
 			// Turn all power supplies in this case
 			CONTROL_BatteryVoltageConfig(TRUE, TRUE, BVS_WaitRise);

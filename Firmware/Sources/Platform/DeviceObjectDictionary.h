@@ -65,7 +65,9 @@
 #define REG_KI_VAC_D				36	// AC voltage amplitude controller I coefficient (D)
 #define REG_SCURRENT3_COFF_N		37	// Secondary current 3 coefficient (N)
 #define REG_SCURRENT3_COFF_D		38	// Secondary current 3 coefficient (D)
-// 39 - 41
+// 39
+#define REG_FULL_RANGE_SW_VSET		40	// Напряжение задания, приводящее к переключению на полный диапазон первичного напряжения (В)
+#define REG_FULL_RANGE_SW_PSET		41	// Мощность задания, приводящая к переключению на полный диапазон первичного напряжения (Вт)
 #define REG_BRAKE_TIME				42	// Brake time (in ms)
 #define REG_TRANSFORMER_COFF		43	// Transformer V transfer ratio (secondary/primary)
 #define REG_PRIM_V_LOW_RANGE		44	// Low range voltage on primary side (in V)

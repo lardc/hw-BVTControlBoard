@@ -59,6 +59,14 @@ typedef struct __TableItemConstraint
 #define NOMINAL_PRIMARY_V_MAX	400		// (in V)
 #define NOMINAL_PRIMARY_V_DEF	150		// (in V)
 //
+#define VSET_FRANGE_MIN			1000	// (in V)
+#define VSET_FRANGE_MAX			5000	// (in V)
+#define VSET_FRANGE_DEF			3500	// (in V)
+//
+#define PSET_FRANGE_MIN			10		// (in W)
+#define PSET_FRANGE_MAX			500		// (in W)
+#define PSET_FRANGE_DEF			100		// (in W)
+//
 #define OPTO_MON_MIN			0
 #define OPTO_MON_MAX			50
 #define OPTO_MON_DEF			10
