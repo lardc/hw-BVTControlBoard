@@ -410,7 +410,7 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U UserError)
 					DRIVER_SwitchPower(TRUE, TRUE);
 					CONTROL_SwitchStateToPowered();
 				}
-				else
+				else if(CONTROL_State != DS_Powered)
 					*UserError = ERR_DEVICE_NOT_READY;
 			}
 			break;
