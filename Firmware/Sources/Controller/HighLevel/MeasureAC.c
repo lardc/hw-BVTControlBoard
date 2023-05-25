@@ -61,7 +61,6 @@ static Boolean TripConditionDetected, UseInstantMethod, FrequencyRateSwitch, Mod
 static Boolean DbgDualPolarity, DbgSRAM, DbgMutePWM, SkipRegulation, SkipLoggingVoids;
 static Boolean InvertPolarity, ZeroPWM, BridgeRectifier;
 static Int16S PrevDuty;
-static Int16U AmplitudePeriodCounter;
 static Int16U Problem, Warning, Fault;
 static DataSampleIQ PeakDetectorData[PEAK_DETECTOR_SIZE], PeakSample;
 static DataSampleIQ PeakSampleByCurrent;
@@ -105,7 +104,6 @@ Boolean MEASURE_AC_StartProcess(Int16U Type, pInt16U pDFReason, pInt16U pProblem
 	FollowingErrorFraction = FollowingErrorAbsolute = 0;
 	FollowingErrorCounter = 0;
 	//
-	AmplitudePeriodCounter = 0;
 	SkipRegulation = TRUE;
 	SIVAerr = 0;
 	SineValue = 0;
@@ -328,12 +326,7 @@ static Boolean MEASURE_AC_PIControllerSequence(_iq DesiredV)
 			FrequencyDivisorCounter = FrequencyDivisorCounterTop;
 		
 		if(FrequencyRateSwitch)
-			++AmplitudePeriodCounter;
-
-		// Условие чередования импульсов для мостового и одиночного выпрямителя
-		if((BridgeRectifier && AmplitudePeriodCounter > 1) || (!BridgeRectifier && AmplitudePeriodCounter > 0))
 		{
-			AmplitudePeriodCounter = 0;
 			_iq err = 0, p;
 			
 			MEASURE_AC_HandlePeakLogic();
@@ -691,7 +684,7 @@ static Int16S MEASURE_AC_CCSub_Regulator(Boolean *PeriodTrigger)
 	{
 		if((FollowingErrorFraction > FE_MAX_FRACTION) && (_IQabs(FollowingErrorAbsolute) > FE_MAX_ABSOLUTE))
 		{
-			if(FollowingErrorCounter++ > (FE_MAX_COUNTER * (BridgeRectifier ? 2 : 1)))
+			if(FollowingErrorCounter++ > FE_MAX_COUNTER)
 			{
 				correction = 0;
 				MEASURE_AC_Stop(DF_FOLLOWING_ERROR);
@@ -748,7 +741,7 @@ static void MEASURE_AC_CacheVariables()
 	StartPauseTimeCounterTop = (CONTROL_FREQUENCY / DataTable[REG_VOLTAGE_FREQUENCY]) * 2;
 	NormalizedFrequency = _IQdiv(_IQ(1.0f), _IQI(CONTROL_FREQUENCY / DataTable[REG_VOLTAGE_FREQUENCY]));
 	NormalizedPIdiv2Shift = CONTROL_FREQUENCY / (4L * DataTable[REG_VOLTAGE_FREQUENCY]);
-	VoltageRateStep = _IQmpy(_IQdiv(_IQI(1000 / (BridgeRectifier ? 2 : 1)), _IQI(DataTable[REG_VOLTAGE_FREQUENCY])),
+	VoltageRateStep = _IQmpy(_IQdiv(_IQ(1000), _IQI(DataTable[REG_VOLTAGE_FREQUENCY])),
 			_IQmpyI32(_IQ(0.1f), DataTable[REG_VOLTAGE_AC_RATE]));
 	MinSafePWM = (PWM_FREQUENCY / 1000L) * PWM_TH * ZW_PWM_DUTY_BASE / 1000000L;
 	
