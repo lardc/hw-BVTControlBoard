@@ -512,7 +512,10 @@ static void MEASURE_AC_HandleNonTripCondition()
 {
 	if(UseInstantMethod)
 	{
-		ResultI = PeakSample.Current;
+		const _iq MinCurrent = _IQ(0.1f);
+		ResultI =
+				(DataTable[REG_NONZERO_CURRENT] && PeakSample.Current < MinCurrent && ActualMaxPosCurrent > MinCurrent) ?
+						MinCurrent : PeakSample.Current;
 		ResultV = PeakSample.Voltage;
 	}
 	else
