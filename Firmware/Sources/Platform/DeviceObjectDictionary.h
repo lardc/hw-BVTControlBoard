@@ -47,7 +47,8 @@
 #define REG_INVERT_MW_CONTROL		12	// Инверсия сигнала управления БП MeanWell (используется для RSP-500 совместно с BVTBridge v.2.1)
 #define REG_OUT_SHORT_WARNING		13	// Выставлять Warning вместо Problem при обнаружении КЗ на выходе
 #define REG_NONZERO_CURRENT			14	// Не допускать результат тока равный 0
-// 15 - 19
+#define REG_OPEN_DUT_MAX_VALUES		15	// При отпирании DUT выводить макимальные достигнутые напряжение и ток
+// 16 - 19
 #define REG_CAP_V_COFF_N			20	// Capacitor voltage coefficient (N)
 #define REG_CAP_V_COFF_D			21	// Capacitor voltage coefficient (D)
 // 22 - 23

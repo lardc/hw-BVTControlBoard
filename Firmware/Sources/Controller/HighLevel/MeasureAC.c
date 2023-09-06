@@ -268,7 +268,7 @@ static void MEASURE_AC_HandlePeakLogic()
 			PeakSample.Current = MaxPosInstantCurrent;
 			PeakSample.Voltage = MaxPosVoltage;
 		}
-		else if(DUTOpened)
+		else if(DUTOpened && DataTable[REG_OPEN_DUT_MAX_VALUES])
 		{
 			PeakSample.Current = MaxPosCurrent;
 			PeakSample.Voltage = MaxPosVoltage;
