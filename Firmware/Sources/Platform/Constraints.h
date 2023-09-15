@@ -43,6 +43,9 @@ typedef struct __TableItemConstraint
 #define START_VAC_MAX			5000	// (in V)
 #define START_VAC_DEF			500		// (in V)
 //
+#define CUST_VLOW_LIM_MIN		100		// (in V)
+#define CUST_VLOW_LIM_MAX		2000	// (in V)
+//
 #define VOLTAGE_FREQUENCY_MIN	50		// (in Hz)
 #define VOLTAGE_FREQUENCY_MAX	60		// (in Hz)
 #define VOLTAGE_FREQUENCY_DEF	50		// (in Hz)

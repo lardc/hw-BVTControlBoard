@@ -804,7 +804,8 @@ static void MEASURE_AC_CacheVariables()
 		SSCurrentP0 = _FPtoIQ2((Int16S)DataTable[REG_SCURRENT2_FINE_P0], 1000);
 	}
 	
-	if(LimitVoltage < HVD_VL_TH)
+	_iq LowLimit = DataTable[REG_CUSTOM_VLOW_LIMIT] ? _IQI(DataTable[REG_CUSTOM_VLOW_LIMIT]) : HVD_VL_TH;
+	if(LimitVoltage < LowLimit)
 	{
 		SSVoltageCoff = _FPtoIQ2(DataTable[REG_SVOLTAGE1_COFF_N], DataTable[REG_SVOLTAGE1_COFF_D]);
 		

@@ -13,6 +13,7 @@
 #include "Global.h"
 #include "Controller.h"
 #include "DataTable.h"
+#include "IQmathUtils.h"
 
 
 // Variables
@@ -42,7 +43,8 @@ void SS_ConfigureSensingCircuits(_iq CurrentSet, _iq VoltageSet)
 		tmp = CurrentInput_High2;
 	cmdBuffer[1] |= tmp;
 
-	if (VoltageSet < HVD_VL_TH)
+	_iq LowLimit = DataTable[REG_CUSTOM_VLOW_LIMIT] ? _IQI(DataTable[REG_CUSTOM_VLOW_LIMIT]) : HVD_VL_TH;
+	if (VoltageSet < LowLimit)
 		tmp = VoltageInput_Low;
 	else
 		tmp = VoltageInput_High;

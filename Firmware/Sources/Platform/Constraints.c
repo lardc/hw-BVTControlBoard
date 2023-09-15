@@ -29,8 +29,8 @@ const TableItemConstraint NVConstraint[DATA_TABLE_NV_SIZE] =
 										   {NO, YES, NO},															// 12
 										   {NO, YES, NO},															// 13
 										   {NO, YES, NO},															// 14
-										   {0, 0, 0},																// 15
-										   {0, 0, 0},																// 16
+										   {NO, YES, NO},															// 15
+										   {CUST_VLOW_LIM_MIN, CUST_VLOW_LIM_MAX, 0},								// 16
 										   {0, 0, 0},																// 17
 										   {0, 0, 0},																// 18
 										   {0, 0, 0},																// 19
