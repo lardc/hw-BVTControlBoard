@@ -9,9 +9,10 @@
 #include "SysConfig.h"
 #include "ZbBoard.h"
 #include "Global.h"
+#include "DeviceObjectDictionary.h"
+#include "DataTable.h"
 
 // Definitions
-#define TZ_MASK_OST_BRIDGE		(DBG_USE_BRIDGE_SHORT ? BIT0 : 0)
 #define TZ_MASK_CBC				0
 
 // Functions
@@ -27,14 +28,15 @@ void DRIVER_Init()
 	DELAY_US(1000);
 
 	// Init PWM outputs
-	ZwPWMB_InitBridge12(CPU_FRQ, PWM_FREQUENCY, TZ_MASK_CBC, TZ_MASK_OST_BRIDGE, 0, PWM_SATURATION);
-	ZwPWM3_Init(PWMUp, CPU_FRQ, PWM_FREQUENCY, FALSE, FALSE, TZ_MASK_CBC, TZ_MASK_OST_BRIDGE, TRUE, TRUE, TRUE, FALSE, FALSE);
+	Int16U TZMaskOstBridge = DataTable[REG_DISABLE_BRIDGE_SHORT] ? 0 : BIT0;
+	ZwPWMB_InitBridge12(CPU_FRQ, PWM_FREQUENCY, TZ_MASK_CBC, TZMaskOstBridge, 0, PWM_SATURATION);
+	ZwPWM3_Init(PWMUp, CPU_FRQ, PWM_FREQUENCY, FALSE, FALSE, TZ_MASK_CBC, TZMaskOstBridge, TRUE, TRUE, TRUE, FALSE, FALSE);
 
 	// Clear possible faults
 	DRIVER_ClearTZFault();
 
 	// Configure TZ interrupts
-	ZwPWM_ConfigTZIntOST(FALSE, FALSE, DBG_USE_BRIDGE_SHORT, FALSE, FALSE, FALSE);
+	ZwPWM_ConfigTZIntOST(FALSE, FALSE, !DataTable[REG_DISABLE_BRIDGE_SHORT], FALSE, FALSE, FALSE);
 
 	// Configure temperature sensing pin
 	ZwGPIO_PinToInput(PIN_TFAULT, FALSE, PQ_Sample6);
@@ -63,6 +65,6 @@ void DRIVER_SwitchPower(Boolean Enable1, Boolean Enable2)
 
 Boolean DRIVER_GetSHPinState()
 {
-	return ZwGPIO_ReadPin(PIN_SHORT);
+	return DataTable[REG_DISABLE_BRIDGE_SHORT] ? TRUE : ZwGPIO_ReadPin(PIN_SHORT);
 }
 // ----------------------------------------

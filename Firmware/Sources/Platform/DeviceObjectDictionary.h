@@ -49,7 +49,8 @@
 #define REG_NONZERO_CURRENT			14	// Не допускать результат тока равный 0
 #define REG_OPEN_DUT_MAX_VALUES		15	// При отпирании DUT выводить макимальные достигнутые напряжение и ток
 #define REG_CUSTOM_VLOW_LIMIT		16	// Кастомный уровень верхней границы нижнего диапазона напряжения (в В)
-// 17 - 19
+#define REG_DISABLE_BRIDGE_SHORT	17	// Флаг отключения проверки КЗ драйвера
+// 18 - 19
 #define REG_CAP_V_COFF_N			20	// Capacitor voltage coefficient (N)
 #define REG_CAP_V_COFF_D			21	// Capacitor voltage coefficient (D)
 // 22 - 23

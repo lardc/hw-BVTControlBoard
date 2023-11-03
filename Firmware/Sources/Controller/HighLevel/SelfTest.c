@@ -19,7 +19,7 @@
 //
 Boolean ST_ValidateConnections(pInt16U pFault)
 {
-	if(DBG_USE_BRIDGE_SHORT && !DRIVER_GetSHPinState())
+	if(!DRIVER_GetSHPinState())
 	{
 		*pFault = DISABLE_NO_SHORT_SIGNAL;
 		return FALSE;
