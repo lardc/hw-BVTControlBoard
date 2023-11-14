@@ -24,7 +24,7 @@ typedef struct __TableItemConstraint
 // Restrictions
 //
 #define TEST_CURRENT_MIN		1		// in mA x10
-#define TEST_CURRENT_MAX		3000	// in mA x10
+#define TEST_CURRENT_MAX		5000	// in mA x10
 #define TEST_CURRENT_DEF		50		// in mA x10
 //
 #define LIMIT_VOLTAGE_MIN		100		// (in V)
