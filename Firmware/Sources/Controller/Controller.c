@@ -38,10 +38,11 @@ typedef struct __EndTestDPCClosure
 //
 typedef enum __BatteryVoltageState
 {
-	BVS_None		= 0,
-	BVS_WaitRise	= 1,
-	BVS_WaitFall	= 2,
-	BVS_Ready		= 3
+	BVS_None,
+	BVS_WaitRise,
+	BVS_WaitFall,
+	BVS_WaitAny,
+	BVS_Ready
 } BatteryVoltageState;
 
 
@@ -63,6 +64,9 @@ static volatile Int16U CurrentMeasurementType = MEASUREMENT_TYPE_NONE;
 #pragma DATA_SECTION(CONTROL_BootLoaderRequest, "bl_flag");
 volatile Int16U CONTROL_BootLoaderRequest = 0;
 
+// Переменные задания первичного напряжения
+static Int16U TargetPrimaryVoltage = 0;
+static volatile PSFunction PrimaryPSOperationFunc;
 
 // Forward functions
 //
@@ -81,6 +85,7 @@ static void CONTROL_StartSequence();
 static void CONTROL_BatteryVoltagePrepare();
 static void CONTROL_BatteryVoltageConfig(Boolean DriverParam1, Boolean DriverParam2, BatteryVoltageState NewState);
 static void CONTROL_BatteryVoltageCheck();
+static void CONTROL_BatteryVoltageCheck3Ranges();
 static void CONTROL_BatteryVoltageReady(Int16U Voltage);
 
 
@@ -615,6 +620,11 @@ static void CONTROL_BatteryVoltagePrepare()
 	{
 		CONTROL_BatteryVoltageReady(DataTable[REG_PRIM_V_CUSTOM]);
 	}
+	else if(DataTable[REG_3RANGES_PRIM_POWER])
+	{
+		TargetPrimaryVoltage = DRIVER_SwitchToTargetVoltage(PrimaryPSOperationFunc, DataTable[REG_ACTUAL_PRIM_VOLTAGE]);
+		CONTROL_BatteryVoltageConfig(FALSE, FALSE, BVS_WaitAny);
+	}
 	else
 	{
 		Int16U SwitchVoltage =
@@ -645,7 +655,13 @@ static void CONTROL_BatteryVoltagePrepare()
 
 static void CONTROL_BatteryVoltageConfig(Boolean DriverParam1, Boolean DriverParam2, BatteryVoltageState NewState)
 {
-	DRIVER_SwitchPower(DriverParam1, DriverParam2);
+	if(DataTable[REG_3RANGES_PRIM_POWER])
+		CONTROL_RequestDPC(&CONTROL_BatteryVoltageCheck3Ranges);
+	else
+	{
+		CONTROL_RequestDPC(&CONTROL_BatteryVoltageCheck);
+		DRIVER_SwitchPower(DriverParam1, DriverParam2);
+	}
 	CONTROL_Battery = NewState;
 	CONTROL_BatteryTimeout = CONTROL_TimeCounter + BAT_CHARGE_TIMEOUT;
 	CONTROL_RequestDPC(&CONTROL_BatteryVoltageCheck);
@@ -683,6 +699,26 @@ static void CONTROL_BatteryVoltageCheck()
 }
 // ----------------------------------------
 
+static void CONTROL_BatteryVoltageCheck3Ranges()
+{
+	if(CONTROL_Battery != BVS_Ready)
+	{
+		Int16U Vmin = (Int32U)TargetPrimaryVoltage * (100 - CAP_VOLTAGE_DELTA) / 100;
+		Int16U Vmax = (Int32U)TargetPrimaryVoltage * (100 + CAP_VOLTAGE_DELTA) / 100;
+		if(Vmin <= DataTable[REG_ACTUAL_PRIM_VOLTAGE] && DataTable[REG_ACTUAL_PRIM_VOLTAGE] <= Vmax)
+		{
+			PrimaryPSOperationFunc();
+			CONTROL_BatteryVoltageReady(DataTable[REG_ACTUAL_PRIM_VOLTAGE]);
+		}
+	}
+
+	if(CONTROL_TimeCounter > CONTROL_BatteryTimeout)
+		CONTROL_SwitchStateToFault(DF_LOW_SIDE_PS);
+	else if(CONTROL_Battery != BVS_Ready)
+		CONTROL_RequestDPC(&CONTROL_BatteryVoltageCheck3Ranges);
+}
+// ----------------------------------------
+
 static void CONTROL_BatteryVoltageReady(Int16U Voltage)
 {
 	CONTROL_Battery = BVS_Ready;
@@ -690,5 +726,3 @@ static void CONTROL_BatteryVoltageReady(Int16U Voltage)
 	CONTROL_RequestDPC(&CONTROL_TriggerMeasurementDPC);
 }
 // ----------------------------------------
-
-
