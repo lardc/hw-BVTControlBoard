@@ -10,6 +10,9 @@
 #include "ZwDSP.h"
 #include "Global.h"
 
+// Definitions
+#define CAP_VOLTAGE_DELTA		10		// Допустимый коридор отклонения первичного напряжения
+typedef void (*PSFunction)();
 
 // Functions
 //
@@ -21,7 +24,7 @@ void DRIVER_SwitchPower(Boolean Enable1, Boolean Enable2);
 void DRIVER_ClearTZFault();
 // Get TZ pin state for bridge short circuit
 Boolean DRIVER_GetSHPinState();
-
+Int16U DRIVER_SwitchToTargetVoltage(PSFunction CallbackFunc, Int16U ActualPrimaryVoltage);
 
 // Inline functions
 //
