@@ -111,6 +111,11 @@ Int16U DRIVER_SwitchToTargetVoltage(PSFunction CallbackFunc, Int16U ActualPrimar
 	Int32U SecondaryVoltage = DataTable[REG_LIMIT_VOLTAGE];
 	Int32U OutputPower = SecondaryVoltage * DataTable[REG_LIMIT_CURRENT] / 10000;
 
+	// Средняя мощность в одополупериодном импульсном режиме составляет 0,25 от максимальной
+	// и рассчитывается по формуле
+	// integrate sin(2 * pi * nu * x)^2 dx, x=0..(1 / (2 * nu)), где nu - частота импульсов
+	OutputPower /= 4;
+
 	Int16U TargetPrimaryVoltage = SecondaryVoltage * (100 + CAP_POW_VOLT_MARGIN) / 100 / DataTable[REG_TRANSFORMER_COFF];
 	Int16U TargetPower = OutputPower * (100 + CAP_POW_VOLT_MARGIN) / 100;
 
