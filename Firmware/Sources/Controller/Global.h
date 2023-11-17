@@ -37,8 +37,8 @@
 #define HVD_VL_TH				_IQ(1000)		// < 1000V
 #define HVD_ILL_TH				_IQ(5)			// <= 5mA		(lowest range)
 #define HVD_IL_TH				_IQ(30.0f)		// <= 30mA		(low range)
-// 310мА выбрано для исключения отсечки на максимальном токе и возможности его корректного измерения
-#define HVD_IH_TH				_IQ(310.0f)		// <= 310mA		(high range)
+// 510мА выбрано для исключения отсечки на максимальном токе и возможности его корректного измерения
+#define HVD_IH_TH				_IQ(510.0f)		// <= 510mA		(high range)
 
 // Pre-plate parameters
 #define PRE_PLATE_MAX_TIME		1000			// pre-plate max time for stabilization (in ms)
