@@ -664,7 +664,6 @@ static void CONTROL_BatteryVoltageConfig(Boolean DriverParam1, Boolean DriverPar
 	}
 	CONTROL_Battery = NewState;
 	CONTROL_BatteryTimeout = CONTROL_TimeCounter + BAT_CHARGE_TIMEOUT;
-	CONTROL_RequestDPC(&CONTROL_BatteryVoltageCheck);
 }
 // ----------------------------------------
 
