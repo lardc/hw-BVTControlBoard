@@ -33,6 +33,7 @@ static MWPowerSettings MWPowerSettingsArray[POWER_OPTIONS_MAX] = {
 		{12,	150,	DRIVER_SwitchPower12V},
 		{50,	500,	DRIVER_SwitchPower50V},
 		{150,	1500,	DRIVER_SwitchPower150V}};
+PSFunction PrimaryPSOperationFunc = NULL;
 
 // Functions
 //
@@ -106,7 +107,7 @@ void DRIVER_SwitchPower150V()
 }
 // ----------------------------------------
 
-Int16U DRIVER_SwitchToTargetVoltage(PSFunction CallbackFunc, Int16U ActualPrimaryVoltage)
+Int16U DRIVER_SwitchToTargetVoltage(Int16U ActualPrimaryVoltage)
 {
 	Int32U SecondaryVoltage = DataTable[REG_LIMIT_VOLTAGE];
 	Int32U OutputPower = SecondaryVoltage * DataTable[REG_LIMIT_CURRENT] / 10000;
@@ -127,8 +128,7 @@ Int16U DRIVER_SwitchToTargetVoltage(PSFunction CallbackFunc, Int16U ActualPrimar
 		if((TargetPrimaryVoltage < PrimaryVoltage && TargetPower < MWPowerSettingsArray[i].Power)
 				|| i == (POWER_OPTIONS_MAX - 1))
 		{
-			if(CallbackFunc)
-				CallbackFunc = MWPowerSettingsArray[i].Function;
+			PrimaryPSOperationFunc = MWPowerSettingsArray[i].Function;
 
 			if(ActualPrimaryVoltage > PrimaryVoltage * (100 + CAP_VOLTAGE_DELTA) / 100)
 				DRIVER_SwitchPower(FALSE, FALSE);

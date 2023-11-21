@@ -66,7 +66,6 @@ volatile Int16U CONTROL_BootLoaderRequest = 0;
 
 // Переменные задания первичного напряжения
 static Int16U TargetPrimaryVoltage = 0;
-static volatile PSFunction PrimaryPSOperationFunc;
 
 // Forward functions
 //
@@ -622,7 +621,7 @@ static void CONTROL_BatteryVoltagePrepare()
 	}
 	else if(DataTable[REG_3RANGES_PRIM_POWER])
 	{
-		TargetPrimaryVoltage = DRIVER_SwitchToTargetVoltage(PrimaryPSOperationFunc, DataTable[REG_ACTUAL_PRIM_VOLTAGE]);
+		TargetPrimaryVoltage = DRIVER_SwitchToTargetVoltage(DataTable[REG_ACTUAL_PRIM_VOLTAGE]);
 		CONTROL_BatteryVoltageConfig(FALSE, FALSE, BVS_WaitAny);
 	}
 	else
@@ -710,7 +709,8 @@ static void CONTROL_BatteryVoltageCheck3Ranges()
 
 		if(Vmin <= DataTable[REG_ACTUAL_PRIM_VOLTAGE] && DataTable[REG_ACTUAL_PRIM_VOLTAGE] <= Vmax)
 		{
-			PrimaryPSOperationFunc();
+			if(PrimaryPSOperationFunc)
+				PrimaryPSOperationFunc();
 			CONTROL_BatteryVoltageReady(DataTable[REG_ACTUAL_PRIM_VOLTAGE]);
 		}
 	}
