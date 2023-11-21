@@ -11,7 +11,8 @@
 #include "Global.h"
 
 // Definitions
-#define CAP_VOLTAGE_DELTA		10		// Допустимый коридор отклонения первичного напряжения
+#define CAP_VOLTAGE_DELTA		5		// Допустимый коридор отклонения первичного напряжения
+#define CAP_VOLTAGE_ABS_DELTA	3		// Абсолютная добавка по допустимому диапазону напряжения, в В
 typedef void (*PSFunction)();
 
 // Functions
