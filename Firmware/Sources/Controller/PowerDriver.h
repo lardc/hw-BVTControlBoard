@@ -15,6 +15,9 @@
 #define CAP_VOLTAGE_ABS_DELTA	3		// Абсолютная добавка по допустимому диапазону напряжения, в В
 typedef void (*PSFunction)();
 
+// Variables
+extern PSFunction PrimaryPSOperationFunc;
+
 // Functions
 //
 // Init driver
@@ -25,7 +28,7 @@ void DRIVER_SwitchPower(Boolean Enable1, Boolean Enable2);
 void DRIVER_ClearTZFault();
 // Get TZ pin state for bridge short circuit
 Boolean DRIVER_GetSHPinState();
-Int16U DRIVER_SwitchToTargetVoltage(PSFunction CallbackFunc, Int16U ActualPrimaryVoltage);
+Int16U DRIVER_SwitchToTargetVoltage(Int16U ActualPrimaryVoltage);
 
 // Inline functions
 //
