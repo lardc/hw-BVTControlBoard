@@ -703,8 +703,12 @@ static void CONTROL_BatteryVoltageCheck3Ranges()
 {
 	if(CONTROL_Battery != BVS_Ready)
 	{
-		Int16U Vmin = (Int32U)TargetPrimaryVoltage * (100 - CAP_VOLTAGE_DELTA) / 100;
-		Int16U Vmax = (Int32U)TargetPrimaryVoltage * (100 + CAP_VOLTAGE_DELTA) / 100;
+		Int16U Vmin = (Int32U)TargetPrimaryVoltage * (100 - CAP_VOLTAGE_DELTA) / 100 - CAP_VOLTAGE_ABS_DELTA;
+		Int16U Vmax = (Int32U)TargetPrimaryVoltage * (100 + CAP_VOLTAGE_DELTA) / 100 + CAP_VOLTAGE_ABS_DELTA;
+
+		DataTable[215] = Vmin;
+		DataTable[216] = Vmax;
+
 		if(Vmin <= DataTable[REG_ACTUAL_PRIM_VOLTAGE] && DataTable[REG_ACTUAL_PRIM_VOLTAGE] <= Vmax)
 		{
 			PrimaryPSOperationFunc();
