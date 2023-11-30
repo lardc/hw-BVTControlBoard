@@ -30,8 +30,8 @@ void DRIVER_SwitchPower50V();
 void DRIVER_SwitchPower150V();
 
 static MWPowerSettings MWPowerSettingsArray[POWER_OPTIONS_MAX] = {
-		{12,	25,	DRIVER_SwitchPower12V},
-		{50,	250,	DRIVER_SwitchPower50V},
+		{12,	25,		DRIVER_SwitchPower12V},
+		{50,	200,	DRIVER_SwitchPower50V},
 		{150,	1500,	DRIVER_SwitchPower150V}};
 PSFunction PrimaryPSOperationFunc = NULL;
 
