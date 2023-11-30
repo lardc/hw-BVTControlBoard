@@ -30,8 +30,8 @@ void DRIVER_SwitchPower50V();
 void DRIVER_SwitchPower150V();
 
 static MWPowerSettings MWPowerSettingsArray[POWER_OPTIONS_MAX] = {
-		{12,	150,	DRIVER_SwitchPower12V},
-		{50,	500,	DRIVER_SwitchPower50V},
+		{12,	25,	DRIVER_SwitchPower12V},
+		{50,	250,	DRIVER_SwitchPower50V},
 		{150,	1500,	DRIVER_SwitchPower150V}};
 PSFunction PrimaryPSOperationFunc = NULL;
 
@@ -115,7 +115,7 @@ Int16U DRIVER_SwitchToTargetVoltage(Int16U ActualPrimaryVoltage)
 	// Средняя мощность в одополупериодном импульсном режиме составляет 0,25 от максимальной
 	// и рассчитывается по формуле
 	// integrate sin(2 * pi * nu * x)^2 dx, x=0..(1 / (2 * nu)), где nu - частота импульсов
-	OutputPower /= 4;
+	// OutputPower /= 4;
 
 	Int16U TargetPrimaryVoltage = SecondaryVoltage * (100 + CAP_POW_VOLT_MARGIN) / 100 / DataTable[REG_TRANSFORMER_COFF];
 	Int16U TargetPower = OutputPower * (100 + CAP_POW_VOLT_MARGIN) / 100;
