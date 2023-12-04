@@ -331,7 +331,7 @@ static Boolean MEASURE_AC_PIControllerSequence(_iq DesiredV)
 			
 			MEASURE_AC_HandlePeakLogic();
 			
-			ActualMaxPosVoltage = UseInstantMethod ? PeakSample.Voltage : MaxPosVoltage;
+			ActualMaxPosVoltage = (!UseInstantMethod || PeakSample.Voltage == 0) ? MaxPosVoltage : PeakSample.Voltage;
 			ActualMaxPosCurrent = MaxPosCurrent;
 			//
 			MaxPosVoltage = 0;
