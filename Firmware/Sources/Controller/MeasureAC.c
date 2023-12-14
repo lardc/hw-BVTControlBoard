@@ -24,6 +24,7 @@
 #define SINE_FREQUENCY				50
 #define SINE_PERIOD_PULSES			(PWM_FREQUENCY / SINE_FREQUENCY)
 #define PWM_LIMIT					(ZW_PWM_DUTY_BASE * PWM_MAX_SAT / 100)
+#define PWM_PERIOD					(1000000ul / PWM_FREQUENCY)
 
 // Types
 typedef enum __ProcessState
@@ -287,6 +288,10 @@ static void MAC_ControlCycle()
 	// Расчёт и уставка ШИМ
 	if(State == PS_Break)
 	{
+		DataTable[REG_INFO_V] = 0;
+		DataTable[REG_INFO_I_mA] = 0;
+		DataTable[REG_INFO_I_uA] = 0;
+
 		PWM = (ABS(PWM) > ABS(PWMReduceRate)) ? (PWM - PWMReduceRate) : 0;
 
 		// Завершение процесса
@@ -364,6 +369,22 @@ static void MAC_ControlCycle()
 
 	PrevState = State;
 	TimeCounter++;
+
+	// Запись текущих показаний времени
+	// Делитель 100 000 т.к. время в секундах х10
+	DataTable[REG_TEST_TOTAL_TIME] = TimeCounter * PWM_PERIOD / 100000ul;
+	DataTable[REG_TEST_TOTAL_TIME] = (State == PS_Plate && TimeCounter < PlateCounterTop) ? \
+			(PlateCounterTop - TimeCounter) * PWM_PERIOD / 100000ul : 0;
+
+	// Информационные показания по току и напряжению
+	if(State == PS_Ramp || State == PS_Plate)
+	{
+		_iq V = _IQabs(SavedRMS.Voltage);
+		_iq I = _IQabs(SavedRMS.Current);
+		DataTable[REG_INFO_V] = _IQint(V);
+		DataTable[REG_INFO_I_mA] = _IQint(I);
+		DataTable[REG_INFO_I_uA] = _IQmpyI32int(_IQfrac(I), 1000);
+	}
 }
 // ----------------------------------------
 

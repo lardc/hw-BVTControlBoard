@@ -99,6 +99,9 @@
 #define REG_RESULT_I_ACT_uA			204	// Active current test result (uA part)
 #define REG_RESULT_COS_PHI			205	// Cos Phi value x1000
 //
+#define REG_TEST_TOTAL_TIME			206	// Время с момента запуска измерения (секунд х10)
+#define REG_TEST_PLATE_TIME			207	// Время с момента выхода на задание (секунд х10)
+//
 #define REG_ACTUAL_PRIM_VOLTAGE		210	// Primary side capacitor voltage based on sensing (in V)
 #define REG_SAFETY_IN_STATE			211	// State of the safety input
 //
@@ -112,6 +115,10 @@
 #define REG_CAN_DIAG_TEC			223	// CAN TEC
 #define REG_CAN_DIAG_REC			224	// CAN REC
 #define REG_SPI_RX_RESETS			225	// Counter for SPI Rx resets
+//
+#define REG_INFO_V					227	// Info voltage data (in V)
+#define REG_INFO_I_mA				228	// Info current data (mA part)
+#define REG_INFO_I_uA				229	// Info current data (uA part)
 //
 #define REG_DIAG_DIGI_RESULT		230	// Результат выполнения команды по оптическому интерфейсу
 #define REG_DIAG_DIGI_PACKET_B1		231	// Байт 1 пакета, полученного от HVDigitizer
