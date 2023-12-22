@@ -36,9 +36,11 @@
 // Modes for HVDigitizer
 #define HVD_VL_TH				_IQ(1000)		// < 1000V
 #define HVD_ILL_TH				_IQ(5)			// <= 5mA		(lowest range)
-#define HVD_IL_TH				_IQ(30.0f)		// <= 30mA		(low range)
-// 510мА выбрано для исключения отсечки на максимальном токе и возможности его корректного измерения
-#define HVD_IH_TH				_IQ(510.0f)		// <= 510mA		(high range)
+#define HVD_IL_TH				_IQ(30)			// <= 30mA		(low range)
+// Добавка 10мА выбрана для исключения отсечки на максимальном токе и возможности его корректного измерения
+#define HVD_I_ADD				10
+#define HVD_I_MAX				300				// <= 300mA		(high range), если не переопределён регистром REG_OVERRIDE_MAX_CURRENT
+#define HVD_IH_TH				_IQ(HVD_I_MAX + HVD_I_ADD)
 
 // Pre-plate parameters
 #define PRE_PLATE_MAX_TIME		1000			// pre-plate max time for stabilization (in ms)

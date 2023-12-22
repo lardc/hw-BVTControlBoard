@@ -33,7 +33,7 @@ const TableItemConstraint NVConstraint[DATA_TABLE_NV_SIZE] =
 										   {CUST_VLOW_LIM_MIN, CUST_VLOW_LIM_MAX, 0},								// 16
 										   {NO, YES, NO},															// 17
 										   {NO, YES, NO},															// 18
-										   {0, 0, 0},																// 19
+										   {0, MAX_CURRENT_OVERRIDE, 0},											// 19
 										   {0, INT16U_MAX, CAP_V_COFF_N_DEF},										// 20
 										   {1, X_D_DEF3, X_D_DEF2},													// 21
 										   {0, 0, 0},																// 22

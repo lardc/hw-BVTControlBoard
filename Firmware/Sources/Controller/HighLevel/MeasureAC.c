@@ -795,7 +795,7 @@ static void MEASURE_AC_CacheVariables()
 	}
 	else
 	{
-		LimitCurrentHaltLevel = HVD_IH_TH;
+		LimitCurrentHaltLevel = DataTable[REG_OVERRIDE_MAX_CURRENT] ? _IQI(DataTable[REG_OVERRIDE_MAX_CURRENT] + HVD_I_ADD) : HVD_IH_TH;
 		
 		SSCurrentCoff = _FPtoIQ2(DataTable[REG_SCURRENT2_COFF_N], DataTable[REG_SCURRENT2_COFF_D]);
 		

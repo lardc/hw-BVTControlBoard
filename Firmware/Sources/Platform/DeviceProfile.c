@@ -255,8 +255,13 @@ static Boolean DEVPROFILE_Validate16(Int16U Address, Int16U Data)
 			if(((Int16S)Data) < ((Int16S)(VConstraint[Address - DATA_TABLE_WR_START].Min)) || ((Int16S)Data) > ((Int16S)(VConstraint[Address - DATA_TABLE_WR_START].Max)))
 					return FALSE;
 		}
-		else if(Data < VConstraint[Address - DATA_TABLE_WR_START].Min || Data > VConstraint[Address - DATA_TABLE_WR_START].Max)
-			return FALSE;
+		else
+		{
+			Int16U Max = (Address == REG_LIMIT_CURRENT && DataTable[REG_OVERRIDE_MAX_CURRENT]) ?
+					(DataTable[REG_OVERRIDE_MAX_CURRENT] * 10) : VConstraint[Address - DATA_TABLE_WR_START].Max;
+			if(Data < VConstraint[Address - DATA_TABLE_WR_START].Min || Data > Max)
+				return FALSE;
+		}
 	}
 
 	return TRUE;

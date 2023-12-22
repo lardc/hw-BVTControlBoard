@@ -35,9 +35,12 @@ void SS_ConfigureSensingCircuits(_iq CurrentSet, _iq VoltageSet)
 	// Voltage configuration
 	cmdBuffer[0] = (IBP_PACKET_START_BYTE << 8) | IBP_CMD_SET_ADC;
 
+	// Определение границы верхнего диапазона тока
+	_iq IHigh = DataTable[REG_OVERRIDE_MAX_CURRENT] ? _IQI(DataTable[REG_OVERRIDE_MAX_CURRENT] + HVD_I_ADD) : HVD_IH_TH;
+
 	if (CurrentSet <= HVD_IL_TH)
 		tmp = CurrentInput_Low;
-	else if (CurrentSet <= HVD_IH_TH)
+	else if (CurrentSet <= IHigh)
 		tmp = CurrentInput_High;
 	else
 		tmp = CurrentInput_High2;

@@ -51,7 +51,8 @@
 #define REG_CUSTOM_VLOW_LIMIT		16	// Кастомный уровень верхней границы нижнего диапазона напряжения (в В)
 #define REG_DISABLE_BRIDGE_SHORT	17	// Флаг отключения проверки КЗ драйвера
 #define REG_3RANGES_PRIM_POWER		18	// Флаг использования трёхдиапазонного питания в BVT v.1.0.0 (12В, 50В, 150В)
-// 19
+#define REG_OVERRIDE_MAX_CURRENT	19	// Регистр переопределения максимального тока (в мА), отличного от 300мА. Активен, когда не равен 0.
+//
 #define REG_CAP_V_COFF_N			20	// Capacitor voltage coefficient (N)
 #define REG_CAP_V_COFF_D			21	// Capacitor voltage coefficient (D)
 // 22 - 23

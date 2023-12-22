@@ -23,8 +23,10 @@ typedef struct __TableItemConstraint
 
 // Restrictions
 //
+#define MAX_CURRENT_OVERRIDE	1000	// in mA
+//
 #define TEST_CURRENT_MIN		1		// in mA x10
-#define TEST_CURRENT_MAX		5000	// in mA x10
+#define TEST_CURRENT_MAX		(HVD_I_MAX * 10)
 #define TEST_CURRENT_DEF		50		// in mA x10
 //
 #define LIMIT_VOLTAGE_MIN		100		// (in V)
