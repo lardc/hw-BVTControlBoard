@@ -439,7 +439,8 @@ static void MEASURE_AC_HandleVI()
 	_iq CurrentLimit = MEASURE_AC_GetCurrentLimit();
 	if(UseInstantMethod)
 	{
-		if(ActualSecondarySample.IQFields.Current >= LimitCurrentHaltLevel)
+		Boolean IgnoreCurrent = TimeCounter < StartPauseTimeCounterTop || ModifySine;
+		if(!IgnoreCurrent && ActualSecondarySample.IQFields.Current >= LimitCurrentHaltLevel)
 			MEASURE_AC_Stop(PROBLEM_OUTPUT_SHORT);
 		else
 		{
