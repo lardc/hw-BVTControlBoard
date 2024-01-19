@@ -54,7 +54,7 @@ static Int16U RawZeroVoltage, RawZeroCurrent, FECounter, FECounterMax;
 static _iq TransAndPWMCoeff, Ki_err, Kp, Ki, FEAbsolute, FERelative;
 static _iq TargetVrms, ControlVrms, PeriodCorrection, VrmsRateStep, ActualInstantVoltageSet;
 static _iq LimitIrms, Isat_level, Irange;
-static Int32U TimeCounter, PlateCounterTop, Vsq_sum, Isq_sum;
+static Int32U TimeCounter, PlateCounter, PlateCounterTop, Vsq_sum, Isq_sum;
 static Boolean DbgMutePWM, DbgSRAM, StopByActiveCurrent, RequireSoftStop;
 static Int32S Wreal_sum;
 
@@ -275,6 +275,7 @@ static void MAC_ControlCycle()
 					break;
 
 				case PS_Plate:
+					PlateCounter++;
 					if(TimeCounter >= PlateCounterTop)
 					{
 						SavedCosPhi = CosPhi;
@@ -373,8 +374,7 @@ static void MAC_ControlCycle()
 	// Запись текущих показаний времени
 	// Делитель 100 000 т.к. время в секундах х10
 	DataTable[REG_TEST_TOTAL_TIME] = TimeCounter * PWM_PERIOD / 100000ul;
-	DataTable[REG_TEST_TOTAL_TIME] = (State == PS_Plate && TimeCounter < PlateCounterTop) ? \
-			(PlateCounterTop - TimeCounter) * PWM_PERIOD / 100000ul : 0;
+	DataTable[REG_TEST_PLATE_TIME] = PlateCounter * PWM_PERIOD / 100000ul;
 
 	// Информационные показания по току и напряжению
 	if(State == PS_Ramp || State == PS_Plate)
@@ -459,7 +459,7 @@ static Boolean MAC_InitStartState()
 
 	// Сброс переменных
 	PWM = 0;
-	FECounter = TimeCounter = 0;
+	FECounter = TimeCounter = PlateCounter = 0;
 	Ki_err = PeriodCorrection = 0;
 	ActualInstantVoltageSet = 0;
 	RequireSoftStop = FALSE;
