@@ -275,7 +275,6 @@ static void MAC_ControlCycle()
 					break;
 
 				case PS_Plate:
-					PlateCounter++;
 					if(TimeCounter >= PlateCounterTop)
 					{
 						SavedCosPhi = CosPhi;
@@ -370,6 +369,8 @@ static void MAC_ControlCycle()
 
 	PrevState = State;
 	TimeCounter++;
+	if(State == PS_Plate)
+		PlateCounter++;
 
 	// Запись текущих показаний времени
 	// Делитель 100 000 т.к. время в секундах х10
