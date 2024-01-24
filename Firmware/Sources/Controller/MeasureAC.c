@@ -336,7 +336,7 @@ static void MAC_ControlCycle()
 				_IQabs(_IQdiv(Instant.Voltage, ActualInstantVoltageSet)) < BR_DOWN_VOLTAGE_RATIO)
 		{
 			SavedCosPhi = _IQ(1);
-			SavedRMS.Current = Irange;
+			SavedRMS.Current = LimitIrms;
 
 			DataTable[REG_WARNING] = WARNING_CURR_RANGE_SAT;
 			MAC_RequestStop(PBR_CurrentSaturation);
