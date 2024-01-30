@@ -162,8 +162,8 @@ const TableItemConstraint VConstraint[DATA_TABLE_WP_START - DATA_TABLE_WR_START]
 	{NO, YES, NO},															// 131
 	{VOLTAGE_PLATE_TIME_MIN, VOLTAGE_PLATE_TIME_MAX, VOLTAGE_PLATE_TIME_DEF},	// 132
 	{0, SCOPE_RATE_MAX, SCOPE_RATE_DEF},									// 133
-	{0, 0, 0},																// 134
-	{0, 0, 0},																// 135
+	{0, ILIMIT_mA_MAX, 0},													// 134
+	{0, ILIMIT_uA_MAX, 0},													// 135
 	{0, 0, 0},																// 136
 	{0, 0, 0},																// 137
 	{0, 0, 0},																// 138

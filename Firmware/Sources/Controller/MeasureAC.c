@@ -53,7 +53,7 @@ static Int16S MinSafePWM, PWM, PWMReduceRate;
 static Int16U RawZeroVoltage, RawZeroCurrent, FECounter, FECounterMax;
 static _iq TransAndPWMCoeff, Ki_err, Kp, Ki, FEAbsolute, FERelative;
 static _iq TargetVrms, ControlVrms, PeriodCorrection, VrmsRateStep, ActualInstantVoltageSet;
-static _iq LimitIrms, Isat_level, Irange;
+static _iq LimitIrms, MinIrms, Isat_level, Irange;
 static Int32U TimeCounter, PlateCounter, PlateCounterTop, Vsq_sum, Isq_sum;
 static Boolean DbgMutePWM, DbgSRAM, StopByActiveCurrent, RequireSoftStop;
 static Int32S Wreal_sum;
@@ -238,6 +238,10 @@ static void MAC_ControlCycle()
 		_iq PeriodError = MAC_PeriodController(RMS.Voltage);
 		MU_LogScopeError(PeriodError);
 
+		// Проверка на минимальный ток
+		if(State == PS_Plate && MinIrms && RMS.Current < MinIrms)
+			MAC_RequestStop(PBR_MinCurrent);
+
 		// Проверка на запрос остановки
 		if(State != PS_Break && RequireSoftStop)
 		{
@@ -322,6 +326,11 @@ static void MAC_ControlCycle()
 
 				case PBR_PWMSaturation:
 					DataTable[REG_PROBLEM] = PROBLEM_PWM_SATURATION;
+					DataTable[REG_FINISHED] = OPRESULT_FAIL;
+					break;
+
+				case PBR_MinCurrent:
+					DataTable[REG_PROBLEM] = PROBLEM_MIN_CURRENT;
 					DataTable[REG_FINISHED] = OPRESULT_FAIL;
 					break;
 			}
@@ -431,6 +440,7 @@ static Boolean MAC_InitStartState()
 {
 	TargetVrms = _IQI(DataTable[REG_TEST_VOLTAGE]);
 	LimitIrms = _IQI(DataTable[REG_LIMIT_CURRENT_mA]) + _FPtoIQ2(DataTable[REG_LIMIT_CURRENT_uA], 1000);
+	MinIrms = _IQI(DataTable[REG_MIN_CURRENT_mA]) + _FPtoIQ2(DataTable[REG_MIN_CURRENT_uA], 1000);
 	
 	ControlVrms = _IQI(DataTable[REG_START_VOLTAGE]);
 

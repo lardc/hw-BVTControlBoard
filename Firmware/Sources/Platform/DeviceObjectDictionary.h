@@ -77,6 +77,8 @@
 #define REG_STOP_BY_ACTIVE_CURRENT	131	// Режим остановки по активной составляющей тока
 #define REG_TEST_TIME				132	// Длительность формирования полки (в сек)
 #define REG_SCOPE_RATE				133	// Делитель логгирования данных
+#define REG_MIN_CURRENT_mA			134	// Минимальный активный ток после выхода на полку (часть мА)
+#define REG_MIN_CURRENT_uA			135	// Минимальный активный ток после выхода на полку (часть мкА)
 //
 #define REG_DBG_SRAM				170	// Write saw-shape debug sequence to SRAM
 #define REG_DBG_MUTE_PWM			171	// Mute PWM output
@@ -159,6 +161,7 @@
 #define PROBLEM_STOP				1	// Stop by user command or safety signal
 #define PROBLEM_FOLLOWING_ERROR		2	// Following error
 #define PROBLEM_PWM_SATURATION		3	// PWM reached upper limit
+#define PROBLEM_MIN_CURRENT			4	// Ток после выхода на полку меньше заданного уровня
 
 // FAULT & DISABLE
 //

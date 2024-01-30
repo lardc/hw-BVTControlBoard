@@ -17,7 +17,8 @@ typedef enum __ProcessBreakReason
 	PBR_RequestSoftStop,
 	PBR_FollowingError,
 	PBR_PWMSaturation,
-	PBR_CurrentSaturation
+	PBR_CurrentSaturation,
+	PBR_MinCurrent
 } ProcessBreakReason;
 
 // Functions
