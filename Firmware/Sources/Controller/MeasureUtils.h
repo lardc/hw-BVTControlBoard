@@ -27,7 +27,7 @@ Boolean MU_LogScopeRaw(Int16S V1, Int16S V2, Boolean IgnoreRate);
 // Log diagnostic values
 Boolean MU_LogScopeDIAG(Int16S Value);
 // Log following error
-Boolean MU_LogScopeErr(Int16S Value);
+void MU_LogScopeErr(Int16S Value);
 // Load data from SRAM
 void MU_LoadDataFragment();
 // Move scope pointer back
