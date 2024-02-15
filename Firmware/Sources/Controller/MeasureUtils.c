@@ -15,16 +15,16 @@
 
 // Variables
 //
-static Int16U ScopeCounter, ScopeIVCounter, ScopeDiagCounter, ScopeErrCounter;
-static Int16U ScopeCounterMax, ScopeIVCounterMax, ScopeDiagCounterMax, ScopeErrCounterMax;
+static Int16U ScopeCounter, ScopeIVCounter, ScopeDiagCounter;
+static Int16U ScopeCounterMax, ScopeIVCounterMax, ScopeDiagCounterMax;
 static Int16U ValuesIV_Counter, ValuesDIAG_Counter;
 
 // Functions
 //
 void MU_StartScope()
 {
-	ScopeCounterMax = ScopeDiagCounterMax = ScopeIVCounterMax = ScopeErrCounterMax = DataTable[REG_SCOPE_RATE];
-	ScopeCounter = ScopeIVCounter = ScopeDiagCounter = ScopeErrCounter = 0;
+	ScopeCounterMax = ScopeDiagCounterMax = ScopeIVCounterMax = DataTable[REG_SCOPE_RATE];
+	ScopeCounter = ScopeIVCounter = ScopeDiagCounter = 0;
 
 	ValuesIV_Counter = MEMBUF_ValuesIV_Counter;
 	ValuesDIAG_Counter = MEMBUF_ValuesDIAG_Counter;
@@ -157,18 +157,12 @@ Boolean MU_LogScopeDIAG(Int16S Value)
 #ifdef BOOT_FROM_FLASH
 	#pragma CODE_SECTION(MU_LogScopeErr, "ramfuncs");
 #endif
-Boolean MU_LogScopeErr(Int16S Value)
+void MU_LogScopeErr(Int16S Value)
 {
 	if(MEMBUF_ValuesErr_Counter >= VALUES_x_SIZE)
 		MEMBUF_ValuesErr_Counter = 0;
 
-	if(ScopeErrCounter++ == ScopeErrCounterMax)
-	{
-		MEMBUF_Values_Err[MEMBUF_ValuesErr_Counter++] = Value;
-		ScopeErrCounter = 0;
-	}
-
-	return TRUE;
+	MEMBUF_Values_Err[MEMBUF_ValuesErr_Counter++] = Value;
 }
 // ----------------------------------------
 
