@@ -71,7 +71,6 @@ static volatile ACProcessState State = ACPS_None;
 // Forward functions
 //
 static void MEASURE_AC_ControlCycle();
-static void MEASURE_AC_CCSub_CorrectionAndLog(Int16S ActualCorrection);
 static Int16S MEASURE_AC_CCSub_Regulator(Boolean *PeriodTrigger);
 //
 static void MEASURE_AC_CacheVariables();
@@ -531,8 +530,6 @@ static void MEASURE_AC_HandleNonTripCondition()
 #endif
 static void MEASURE_AC_ControlCycle()
 {
-	ZbGPIO_SwitchSYNC(TRUE);
-
 	Int16S correction = 0;
 	Boolean trig_flag = FALSE;
 	static Int16S PrevCorrection = 0;
@@ -562,7 +559,7 @@ static void MEASURE_AC_ControlCycle()
 				correction = MEASURE_AC_CCSub_Regulator(NULL);
 				if(State == ACPS_Brake)
 					return;
-				MEASURE_AC_CCSub_CorrectionAndLog(correction);
+				MEASURE_AC_CCSub_CorrectionAndLog(correction, FALSE);
 			}
 			break;
 			
@@ -583,7 +580,7 @@ static void MEASURE_AC_ControlCycle()
 					DataTable[REG_VOLTAGE_ON_PLATE] = 1;
 				}
 				
-				MEASURE_AC_CCSub_CorrectionAndLog(correction);
+				MEASURE_AC_CCSub_CorrectionAndLog(correction, FALSE);
 			}
 			break;
 			
@@ -599,7 +596,7 @@ static void MEASURE_AC_ControlCycle()
 				if(VPlateTimeCounter > VPlateTimeCounterTop && trig_flag)
 					State = ACPS_Brake;
 				else
-					MEASURE_AC_CCSub_CorrectionAndLog(correction);
+					MEASURE_AC_CCSub_CorrectionAndLog(correction, FALSE);
 			}
 			break;
 			
@@ -619,7 +616,7 @@ static void MEASURE_AC_ControlCycle()
 				correction =
 						(ABS(PrevCorrection) >= PWM_REDUCE_RATE) ?
 								(PrevCorrection - SIGN(PrevCorrection) * PWM_REDUCE_RATE) : 0;
-				MEASURE_AC_CCSub_CorrectionAndLog(correction);
+				MEASURE_AC_CCSub_CorrectionAndLog(correction, FALSE);
 				
 				// Increase timer only when PWM reduced to zero
 				if(correction == 0)
@@ -642,23 +639,27 @@ static void MEASURE_AC_ControlCycle()
 	}
 	
 	PrevCorrection = correction;
-
-	ZbGPIO_SwitchSYNC(FALSE);
 }
 // ----------------------------------------
 
 #ifdef BOOT_FROM_FLASH
 #pragma CODE_SECTION(MEASURE_AC_CCSub_CorrectionAndLog, "ramfuncs");
 #endif
-static void MEASURE_AC_CCSub_CorrectionAndLog(Int16S ActualCorrection)
+void MEASURE_AC_CCSub_CorrectionAndLog(Int16S ActualCorrection, Boolean LogOnly)
 {
-	Int16S PWMOutput = MEASURE_AC_SetPWM(ActualCorrection);
-	if(!SkipLoggingVoids || FrequencyRateSwitch)
+	static Int16S PWMOutput = 0;
+
+	if(LogOnly)
 	{
-		MU_LogScope(&ActualSecondarySample, CurrentMultiply, DbgSRAM, DbgDualPolarity);
-		MU_LogScopeIV(ActualSecondarySample);
-		MU_LogScopeDIAG(PWMOutput);
+		if(!SkipLoggingVoids || FrequencyRateSwitch)
+		{
+			MU_LogScope(&ActualSecondarySample, CurrentMultiply, DbgSRAM, DbgDualPolarity);
+			MU_LogScopeIV(ActualSecondarySample);
+			MU_LogScopeDIAG(PWMOutput);
+		}
 	}
+	else
+		PWMOutput = MEASURE_AC_SetPWM(ActualCorrection);
 }
 // ----------------------------------------
 

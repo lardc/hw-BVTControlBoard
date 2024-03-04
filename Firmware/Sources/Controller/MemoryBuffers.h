@@ -13,7 +13,8 @@
 
 // Constants
 //
-#define VALUES_x_SIZE		1000
+#define VALUES_x_SIZE		500
+#define VALUES_xBIG_SIZE	2000
 
 
 // Macro

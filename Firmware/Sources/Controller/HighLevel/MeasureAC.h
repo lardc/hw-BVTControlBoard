@@ -19,5 +19,6 @@ void MEASURE_AC_FinishProcess();
 // Emergency stop during measurement process
 void MEASURE_AC_Stop(Int16U Reason);
 void MEASURE_AC_DoSampling();
+void MEASURE_AC_CCSub_CorrectionAndLog(Int16S ActualCorrection, Boolean LogOnly);
 
 #endif // __MEASURE_AC_H

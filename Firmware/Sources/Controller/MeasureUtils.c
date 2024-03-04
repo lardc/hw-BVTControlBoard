@@ -79,7 +79,7 @@ void MU_LogScope(pDataSample Sample, Int16U CurrentMultiply, Boolean SRAMDebug, 
 #endif
 Boolean MU_LogScopeIV(DataSample ActualSample)
 {
-	if(ValuesIV_Counter >= VALUES_x_SIZE)
+	if(ValuesIV_Counter >= VALUES_xBIG_SIZE)
 		ValuesIV_Counter = 0;
 
 	if(ScopeIVCounter++ >= ScopeIVCounterMax)
@@ -91,7 +91,7 @@ Boolean MU_LogScopeIV(DataSample ActualSample)
 		ScopeIVCounter = 0;
 	}
 
-	if (MEMBUF_ValuesIV_Counter < VALUES_x_SIZE)
+	if (MEMBUF_ValuesIV_Counter < VALUES_xBIG_SIZE)
 		MEMBUF_ValuesIV_Counter = ValuesIV_Counter;
 
 	return TRUE;
@@ -117,7 +117,7 @@ void MU_LogScopeIVpeak(DataSampleIQ ActualSample)
 #endif
 Boolean MU_LogScopeRaw(Int16S V1, Int16S V2, Boolean IgnoreRate)
 {
-	if(MEMBUF_ValuesIV_Counter >= VALUES_x_SIZE)
+	if(MEMBUF_ValuesIV_Counter >= VALUES_xBIG_SIZE)
 		MEMBUF_ValuesIV_Counter = 0;
 
 	if(IgnoreRate || (ScopeIVCounter++ >= ScopeIVCounterMax))
@@ -138,7 +138,7 @@ Boolean MU_LogScopeRaw(Int16S V1, Int16S V2, Boolean IgnoreRate)
 #endif
 Boolean MU_LogScopeDIAG(Int16S Value)
 {
-	if(ValuesDIAG_Counter >= VALUES_x_SIZE)
+	if(ValuesDIAG_Counter >= VALUES_xBIG_SIZE)
 		ValuesDIAG_Counter = 0;
 
 	if(ScopeDiagCounter++ >= ScopeDiagCounterMax)
@@ -147,7 +147,7 @@ Boolean MU_LogScopeDIAG(Int16S Value)
 		ScopeDiagCounter = 0;
 	}
 
-	if (MEMBUF_ValuesDIAG_Counter < VALUES_x_SIZE)
+	if (MEMBUF_ValuesDIAG_Counter < VALUES_xBIG_SIZE)
 		MEMBUF_ValuesDIAG_Counter = ValuesDIAG_Counter;
 
 	return TRUE;
@@ -171,7 +171,7 @@ void MU_LoadDataFragment()
 	Int16U i;
 	DataSample Sample;
 
-	for(i = 0; i < VALUES_x_SIZE; ++i)
+	for(i = 0; i < VALUES_xBIG_SIZE; ++i)
 	{
 		if(DL_ReadData(&Sample))
 			MU_LogScopeRaw(Sample.ScopeFields.Data.Voltage, Sample.ScopeFields.Data.Current, TRUE);

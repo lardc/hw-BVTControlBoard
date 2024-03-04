@@ -126,6 +126,7 @@ void SS_HandleSlaveTransmission()
 				SS_DataValid = TRUE;
 
 				MEASURE_AC_DoSampling();
+				MEASURE_AC_CCSub_CorrectionAndLog(0, TRUE);
 			}
 		}
 		else

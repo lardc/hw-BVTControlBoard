@@ -95,7 +95,8 @@ void CONTROL_Init()
 	Int16U Fault = DF_NONE;
 
 	Int16U EPIndexes[EP_COUNT] = { EP16_I, EP16_V, EP16_DIAG, EP16_ERR, EP16_PEAK_I, EP16_PEAK_V };
-	Int16U EPSized[EP_COUNT] = { VALUES_x_SIZE, VALUES_x_SIZE, VALUES_x_SIZE, VALUES_x_SIZE, VALUES_x_SIZE, VALUES_x_SIZE };
+	Int16U EPSized[EP_COUNT] = { VALUES_xBIG_SIZE, VALUES_xBIG_SIZE, VALUES_xBIG_SIZE,
+			VALUES_x_SIZE, VALUES_x_SIZE, VALUES_x_SIZE };
 	pInt16U EPCounters[EP_COUNT] = { (pInt16U)&MEMBUF_ValuesIV_Counter,		(pInt16U)&MEMBUF_ValuesIV_Counter,
 									 (pInt16U)&MEMBUF_ValuesDIAG_Counter,	(pInt16U)&MEMBUF_ValuesErr_Counter,
 									 (pInt16U)&MEMBUF_ValuesIVpeak_Counter,	(pInt16U)&MEMBUF_ValuesIVpeak_Counter };
