@@ -56,7 +56,7 @@ static _iq ResultV, ResultI;
 static _iq DesiredAmplitudeV, DesiredAmplitudeVHistory, ControlledAmplitudeV, DesiredVoltageHistory, SineValue;
 static _iq ActualMaxPosVoltage, ActualMaxPosCurrent;
 static _iq MaxPosVoltage, MaxPosCurrent, MaxPosInstantCurrent, PeakThresholdDetect;
-static DataSample ActualSecondarySample;
+static DataSample ActualSecondarySample, SecondarySample;
 static Boolean TripConditionDetected, UseInstantMethod, FrequencyRateSwitch, ModifySine, DUTOpened;
 static Boolean DbgDualPolarity, DbgSRAM, DbgMutePWM, SkipRegulation, SkipLoggingVoids;
 static Boolean InvertPolarity, ZeroPWM, BridgeRectifier;
@@ -111,6 +111,7 @@ Boolean MEASURE_AC_StartProcess(Int16U Type, pInt16U pDFReason, pInt16U pProblem
 	//
 	ActualSecondarySample.IQFields.Voltage = 0;
 	ActualSecondarySample.IQFields.Current = 0;
+	SecondarySample = ActualSecondarySample;
 	ActualMaxPosVoltage = 0;
 	ActualMaxPosCurrent = 0;
 	MaxPosVoltage = 0;
@@ -368,7 +369,7 @@ static Boolean MEASURE_AC_PIControllerSequence(_iq DesiredV)
 }
 // ----------------------------------------
 
-void inline MEASURE_AC_DoSampling()
+void MEASURE_AC_DoSampling()
 {
 	_iq tmp, tmp2;
 	_iq FilteredV, FilteredI;
@@ -378,21 +379,21 @@ void inline MEASURE_AC_DoSampling()
 	
 	tmp = _IQmpy(SSVoltageCoff, FilteredV);
 	tmp2 = _IQdiv(tmp, _IQ(1000.0f));
-	ActualSecondarySample.IQFields.Voltage = _IQmpy(tmp2, _IQmpyI32(tmp2, SSVoltageP2)) + _IQmpy(tmp, SSVoltageP1)
+	SecondarySample.IQFields.Voltage = _IQmpy(tmp2, _IQmpyI32(tmp2, SSVoltageP2)) + _IQmpy(tmp, SSVoltageP1)
 			+ SSVoltageP0;
 	
 	tmp = _IQmpy(SSCurrentCoff, FilteredI);
 	tmp2 = _IQdiv(tmp, _IQ(1000.0f));
-	ActualSecondarySample.IQFields.Current = _IQmpy(tmp2, _IQmpyI32(tmp2, SSCurrentP2)) + _IQmpy(tmp, SSCurrentP1)
+	SecondarySample.IQFields.Current = _IQmpy(tmp2, _IQmpyI32(tmp2, SSCurrentP2)) + _IQmpy(tmp, SSCurrentP1)
 			+ SSCurrentP0;
 
 	if(!DbgDualPolarity)
 	{
-		if(ActualSecondarySample.IQFields.Voltage < 0)
-			ActualSecondarySample.IQFields.Voltage = 0;
+		if(SecondarySample.IQFields.Voltage < 0)
+			SecondarySample.IQFields.Voltage = 0;
 
-		if(ActualSecondarySample.IQFields.Current < 0)
-			ActualSecondarySample.IQFields.Current = 0;
+		if(SecondarySample.IQFields.Current < 0)
+			SecondarySample.IQFields.Current = 0;
 	}
 }
 // ----------------------------------------
@@ -530,11 +531,13 @@ static void MEASURE_AC_HandleNonTripCondition()
 #endif
 static void MEASURE_AC_ControlCycle()
 {
+	ZbGPIO_SwitchSYNC(TRUE);
+
 	Int16S correction = 0;
 	Boolean trig_flag = FALSE;
 	static Int16S PrevCorrection = 0;
 	
-	MEASURE_AC_DoSampling();
+	ActualSecondarySample = SecondarySample;
 	TimeCounter++;
 	
 	switch (State)
@@ -639,6 +642,8 @@ static void MEASURE_AC_ControlCycle()
 	}
 	
 	PrevCorrection = correction;
+
+	ZbGPIO_SwitchSYNC(FALSE);
 }
 // ----------------------------------------
 

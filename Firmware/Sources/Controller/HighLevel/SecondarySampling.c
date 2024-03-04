@@ -124,6 +124,8 @@ void SS_HandleSlaveTransmission()
 				SS_Voltage |= ((Int32U)InputBuffer[3]) << 8;
 
 				SS_DataValid = TRUE;
+
+				MEASURE_AC_DoSampling();
 			}
 		}
 		else

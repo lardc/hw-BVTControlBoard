@@ -18,5 +18,6 @@ Boolean MEASURE_AC_StartProcess(Int16U Type, pInt16U pDFReason, pInt16U pProblem
 void MEASURE_AC_FinishProcess();
 // Emergency stop during measurement process
 void MEASURE_AC_Stop(Int16U Reason);
+void MEASURE_AC_DoSampling();
 
 #endif // __MEASURE_AC_H
