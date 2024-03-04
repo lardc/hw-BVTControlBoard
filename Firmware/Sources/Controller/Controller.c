@@ -138,6 +138,8 @@ void CONTROL_Init()
 		DataTable[REG_WARNING] = WARNING_WATCHDOG_RESET;
 		ZwSystem_ClearDogAlarmFlag();
 	}
+
+	SS_Dummy(FALSE);
 }
 // ----------------------------------------
 
@@ -513,13 +515,19 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U UserError)
 			break;
 		case ACT_DBG_DIGI_START_SMPL:
 			if(CONTROL_State == DS_None)
+			{
+				ZwTimer_StartT0();
 				SS_StartSampling();
+			}
 			else
 				*UserError = ERR_OPERATION_BLOCKED;
 			break;
 		case ACT_DBG_DIGI_STOP_SMPL:
 			if(CONTROL_State == DS_None)
+			{
 				SS_StopSampling();
+				ZwTimer_StopT0();
+			}
 			else
 				*UserError = ERR_OPERATION_BLOCKED;
 			break;

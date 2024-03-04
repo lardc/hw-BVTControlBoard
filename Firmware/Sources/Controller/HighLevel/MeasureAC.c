@@ -373,8 +373,6 @@ void inline MEASURE_AC_DoSampling()
 	_iq tmp, tmp2;
 	_iq FilteredV, FilteredI;
 	
-	SS_DoSampling();
-	
 	FIR_LoadValues(SS_Voltage, SS_Current);
 	FIR_Apply(&FilteredV, &FilteredI);
 	

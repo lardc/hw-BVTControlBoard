@@ -245,6 +245,8 @@ void InitializeController()
 
 ISRCALL Timer0_ISR(void)
 {
+	EINT;
+
 	// Do control cycle
 	CONTROL_RealTimeCycle();
 
