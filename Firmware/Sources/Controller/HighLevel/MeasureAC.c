@@ -39,7 +39,7 @@ typedef enum __ACProcessState
 
 // Variables
 //
-static Int32U TimeCounter, StartPauseTimeCounterTop;
+static Int32U TimeCounter;
 static Int32U VRateCounter, VRateCounterTop;
 static Int32U VPlateTimeCounter, VPlateTimeCounterTop, VPrePlateTimeCounter, VPrePlateTimeCounterTop;
 static Int32U BrakeTimeCounter, BrakeTimeCounterTop, FrequencyDivisorCounter, FrequencyDivisorCounterTop;
@@ -449,13 +449,9 @@ static void MEASURE_AC_HandleVI()
 		}
 	}
 	
-	// Assign voltage and current values
-	if(TimeCounter > StartPauseTimeCounterTop)
-	{
-		// Handle values
-		if(ActualSecondarySample.IQFields.Current > MaxPosCurrent)
-			MaxPosCurrent = ActualSecondarySample.IQFields.Current;
-	}
+	// Handle values
+	if(ActualSecondarySample.IQFields.Current > MaxPosCurrent)
+		MaxPosCurrent = ActualSecondarySample.IQFields.Current;
 	
 	// Detect maximum voltage for AC period
 	if((!ModifySine && (ActualSecondarySample.IQFields.Voltage >= MaxPosVoltage))
@@ -468,7 +464,9 @@ static void MEASURE_AC_HandleVI()
 	// Check current conditions
 	if(UseInstantMethod)
 	{
-		if(ActualSecondarySample.IQFields.Current >= LimitCurrentHaltLevel && LimitCurrent > HVD_IL_DCM_TH)
+		if(ActualSecondarySample.IQFields.Current >= LimitCurrentHaltLevel
+				|| (ActualSecondarySample.IQFields.Current >= LimitCurrent && DesiredVoltageHistory > _IQ(300)
+						&& ActualSecondarySample.IQFields.Voltage < _IQ(200)))
 			MEASURE_AC_Stop(PROBLEM_OUTPUT_SHORT);
 	}
 	else
@@ -500,10 +498,7 @@ static void MEASURE_AC_HandleVI()
 
 static _iq MEASURE_AC_GetCurrentLimit()
 {
-	if(TimeCounter < StartPauseTimeCounterTop)
-		return ((LimitCurrent < MAX_CURRENT_1ST_PULSE ) ? MAX_CURRENT_1ST_PULSE : LimitCurrent);
-	else
-		return LimitCurrent;
+	return LimitCurrent;
 }
 // ----------------------------------------
 
@@ -745,7 +740,6 @@ static void MEASURE_AC_CacheVariables()
 	PWMCoff = _IQdiv(_IQ(ZW_PWM_DUTY_BASE), _IQI(DataTable[REG_PRIM_VOLTAGE_CTRL]));
 	MaxSafePWM = DataTable[REG_SAFE_MAX_PWM];
 	
-	StartPauseTimeCounterTop = (CONTROL_FREQUENCY / DataTable[REG_VOLTAGE_FREQUENCY]) * 2;
 	NormalizedFrequency = _IQdiv(_IQ(1.0f), _IQI(CONTROL_FREQUENCY / DataTable[REG_VOLTAGE_FREQUENCY]));
 	NormalizedPIdiv2Shift = CONTROL_FREQUENCY / (4L * DataTable[REG_VOLTAGE_FREQUENCY]);
 	VoltageRateStep = _IQmpy(_IQdiv(_IQI(1000 / (PWM_SKIP_NEG_PULSES ? 2 : 1)), _IQI(DataTable[REG_VOLTAGE_FREQUENCY])),
