@@ -51,5 +51,6 @@ void DL_WriteData(pDataSample Sample);
 Boolean DL_ReadData(pDataSample pData);
 // Move read pointer with specified offset
 void DL_MoveReadPointer(Int16S Offset);
+void DL_ResetReadCounters();
 
 #endif // __DATA_LOGGER_H

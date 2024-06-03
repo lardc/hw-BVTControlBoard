@@ -483,9 +483,10 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U UserError)
 			}
 			break;
 		case ACT_READ_MOVE_BACK:
-			{
-				MU_SeekScopeBack(DataTable[REG_DBG_READ_XY_FRAGMENT]);
-			}
+			MU_SeekScopeBack(DataTable[REG_DBG_READ_XY_FRAGMENT]);
+			break;
+		case ACT_READ_MEM_AGAIN:
+			DL_ResetReadCounters();
 			break;
 		case ACT_CLR_FAULT:
 			{

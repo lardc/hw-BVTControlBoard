@@ -20,6 +20,7 @@
 #define ACT_STOP					101	// Stop test sequence
 #define ACT_READ_FRAGMENT			110	// Read next data portion
 #define ACT_READ_MOVE_BACK			111	// Move read pointer back
+#define ACT_READ_MEM_AGAIN			112	// Reset memory array pointers
 //
 #define ACT_SAVE_TO_ROM				200	// Save parameters to EEPROM module
 #define ACT_RESTORE_FROM_ROM		201	// Restore parameters from EEPROM module
