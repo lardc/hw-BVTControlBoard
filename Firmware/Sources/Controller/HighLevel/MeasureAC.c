@@ -774,7 +774,7 @@ static void MEASURE_AC_CacheVariables()
 		PeakShiftTicks = (Int16S)DataTable[REG_MODIFY_SINE_SHIFT];
 
 		CurrentMultiply = 1000;
-		LimitCurrentHaltLevel = HVD_IL_DCM_TH;
+		LimitCurrentHaltLevel = HVD_IL_TH;
 
 		SSCurrentCoff = _FPtoIQ2(DataTable[REG_SCURRENT1_COFF_N], DataTable[REG_SCURRENT1_COFF_D]);
 		SSCurrentCoff = _IQdiv(SSCurrentCoff, _IQ(100.0f));
