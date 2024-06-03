@@ -52,6 +52,12 @@ void DL_WriteData(pDataSample Sample)
 }
 // ----------------------------------------
 
+void DL_ResetReadCounters()
+{
+	DirectCounterR = AddressCounterR = BankCounterR = 0;
+}
+// ----------------------------------------
+
 Boolean DL_ReadData(pDataSample pData)
 {
 	DataSample buffer;
