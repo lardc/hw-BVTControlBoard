@@ -365,10 +365,14 @@ static Int16U DEVPROFILE_CallbackReadX(Int16U Endpoint, pInt16U *Buffer, Boolean
 
 	// Update content state
 	epState->LastReadCounter = epState->ReadCounter;
-	epState->ReadCounter += pLen;
+	if(!Streamed)
+	{
+		if(pLen == 0)
+			epState->ReadCounter = 0;
+		else
+			epState->ReadCounter += pLen;
+	}
 
 	return pLen;
 }
-
-
-// No more
+// ----------------------------------------
