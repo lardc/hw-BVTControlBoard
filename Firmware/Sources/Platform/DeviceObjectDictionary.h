@@ -30,9 +30,12 @@
 //
 #define ACT_BOOT_LOADER_REQUEST		320	// Request reboot to bootloader
 #define ACT_WRITE_LABEL1			321	// Записать первую метку: BVTMainBoard v.2.0 [Manufacturing]
-#define ACT_READ_SYMBOL				330	// Выполнить чтение символа из памяти
-#define ACT_SELECT_MEM_LABEL		331	// Переместить указатель считывания в область метки
 
+#define ACT_FLASH_DIAG_READ_SYMBOL	330	// Выполнить чтение символа из памяти отладочной информации
+#define ACT_FLASH_DIAG_INIT_READ	331	// Инициализировать начало считывания отладочной информации
+
+#define ACT_FLASH_DIAG_SAVE			332	// Сохранение блока отладочной информации во флэш
+#define ACT_FLASH_DIAG_ERASE		333	// Стирание области отладочной информации
 
 // REGISTERS
 //
@@ -111,6 +114,8 @@
 #define REG_SCURRENT1_FINE_P0		116	// Secondary current 1 tune quadratic coefficient P0 (in uA)
 #define REG_SCURRENT2_FINE_P0		117	// Secondary current 2 tune quadratic coefficient P0 (in uA)
 #define REG_SCURRENT3_FINE_P0		118	// Secondary current 3 tune quadratic coefficient P0 (in uA)
+// 119 - 120
+#define REG_PROBLEM_MASK			121	// Bit mask for saving problems
 //
 // ----------------------------------------
 //
