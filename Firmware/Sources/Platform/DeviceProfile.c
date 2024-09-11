@@ -14,6 +14,7 @@
 #include "Controller.h"
 #include "Constraints.h"
 #include "LabelDescription.h"
+#include "SaveToFlash.h"
 
 // Types
 //
@@ -332,12 +333,12 @@ static Boolean DEVPROFILE_DispatchAction(Int16U ActionID, pInt16U UserError)
 			FWLB_WriteBoardLabel(0);
 			break;
 
-		case ACT_READ_SYMBOL:
+		case ACT_FLASH_DIAG_READ_SYMBOL:
 			DataTable[REG_MEM_SYMBOL] = *(pInt16U)(MemoryPointer++);
 			break;
 
-		case ACT_SELECT_MEM_LABEL:
-			MemoryPointer = LABEL_START_ADDRESS;
+		case ACT_FLASH_DIAG_INIT_READ:
+			MemoryPointer = FLASH_START_ADDR;
 			break;
 
 		default:

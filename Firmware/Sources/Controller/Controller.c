@@ -20,6 +20,7 @@
 #include "SecondarySampling.h"
 #include "MeasureTest.h"
 #include "MeasureUtils.h"
+#include "SaveToFlash.h"
 
 
 // Types
@@ -86,6 +87,7 @@ static void CONTROL_BatteryVoltageConfig(Boolean DriverParam1, Boolean DriverPar
 static void CONTROL_BatteryVoltageCheck();
 static void CONTROL_BatteryVoltageCheck3Ranges();
 static void CONTROL_BatteryVoltageReady(Int16U Voltage);
+static void CONTROL_InitStoragePointers();
 
 
 // Functions
@@ -125,6 +127,7 @@ void CONTROL_Init()
 	// Настройка инверсии управления MW
 	ZbGPIO_SwitchPowerInvert(DataTable[REG_INVERT_MW_CONTROL]);
 	DRIVER_SwitchPower(FALSE, FALSE);
+	CONTROL_InitStoragePointers();
 
 	// Use quadratic correction for block
 	DataTable[REG_QUADRATIC_CORR] = 1;
@@ -403,6 +406,45 @@ static void CONTROL_SwitchStateToDisabled(Int16U DisableReason)
 }
 // ----------------------------------------
 
+void CONTROL_InitStoragePointers()
+{
+	STF_AssignPointer(0, (Int32U)MEMBUF_Values_I);
+	STF_AssignPointer(1, (Int32U)MEMBUF_Values_V);
+	STF_AssignPointer(2, (Int32U)MEMBUF_Values_DIAG);
+	STF_AssignPointer(3, (Int32U)MEMBUF_Values_Err);
+	STF_AssignPointer(4, (Int32U)MEMBUF_Values_Ipeak);
+	STF_AssignPointer(5, (Int32U)MEMBUF_Values_Vpeak);
+
+	STF_AssignPointer(6, (Int32U)&MEMBUF_ValuesIV_Counter);
+	STF_AssignPointer(7, (Int32U)&MEMBUF_ValuesDIAG_Counter);
+	STF_AssignPointer(8, (Int32U)&MEMBUF_ValuesErr_Counter);
+	STF_AssignPointer(9, (Int32U)&MEMBUF_ValuesIVpeak_Counter);
+
+	STF_AssignPointer(10, (Int32U)&REG_MEASUREMENT_TYPE);
+	STF_AssignPointer(11, (Int32U)&REG_MEASUREMENT_MODE);
+	STF_AssignPointer(12, (Int32U)&REG_LIMIT_CURRENT);
+	STF_AssignPointer(13, (Int32U)&REG_LIMIT_VOLTAGE);
+	STF_AssignPointer(14, (Int32U)&REG_VOLTAGE_PLATE_TIME);
+	STF_AssignPointer(15, (Int32U)&REG_VOLTAGE_AC_RATE);
+	STF_AssignPointer(16, (Int32U)&REG_START_VOLTAGE_AC);
+	STF_AssignPointer(17, (Int32U)&REG_VOLTAGE_FREQUENCY);
+	STF_AssignPointer(18, (Int32U)&REG_FREQUENCY_DIVISOR);
+	STF_AssignPointer(19, (Int32U)&REG_SCOPE_RATE);
+
+	STF_AssignPointer(20, (Int32U)&REG_DEV_STATE);
+	STF_AssignPointer(21, (Int32U)&REG_FAULT_REASON);
+	STF_AssignPointer(22, (Int32U)&REG_DISABLE_REASON);
+	STF_AssignPointer(23, (Int32U)&REG_WARNING);
+	STF_AssignPointer(24, (Int32U)&REG_PROBLEM);
+	STF_AssignPointer(25, (Int32U)&REG_FINISHED);
+	STF_AssignPointer(26, (Int32U)&REG_RESULT_V);
+	STF_AssignPointer(27, (Int32U)&REG_RESULT_I);
+	STF_AssignPointer(28, (Int32U)&REG_RESULT_I_UA_R);
+
+	STF_AssignPointer(29, (Int32U)&REG_ACTUAL_PRIM_VOLTAGE);
+	STF_AssignPointer(30, (Int32U)&REG_PRIM_VOLTAGE_CTRL);
+}
+
 static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U UserError)
 {
 	switch(ActionID)
@@ -554,6 +596,15 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U UserError)
 			else
 				*UserError = ERR_OPERATION_BLOCKED;
 			break;
+
+		case ACT_FLASH_DIAG_SAVE:
+			STF_SaveDiagData();
+			break;
+
+		case ACT_FLASH_DIAG_ERASE:
+			STF_EraseDataSector();
+			break;
+
 		default:
 			return FALSE;
 	}
