@@ -68,6 +68,8 @@ volatile Int16U CONTROL_BootLoaderRequest = 0;
 // Переменные задания первичного напряжения
 static Int16U TargetPrimaryVoltage = 0;
 
+static Boolean RequestSaveToFlash = FALSE;
+
 // Forward functions
 //
 static void CONTROL_FillWPPartDefault();
@@ -159,6 +161,12 @@ void CONTROL_Idle()
 		FUNC_AsyncDelegate del = DPCDelegate;
 		DPCDelegate = NULL;
 		del();
+	}
+
+	if (RequestSaveToFlash)
+	{
+		RequestSaveToFlash = FALSE;
+		STF_SaveDiagData();
 	}
 }
 // ----------------------------------------
@@ -283,7 +291,12 @@ static void CONTROL_EndTestDPC()
 		if(EndXDPCArgument.SavedRequestToDisable)
 			CONTROL_SwitchStateToDisabled(EndXDPCArgument.SavedDFReason);
 		else
+		{
 			CONTROL_SwitchStateToFault(EndXDPCArgument.SavedDFReason);
+			Int16U FCode = EndXDPCArgument.SavedDFReason - 200;
+			if (FCode && ((1 << FCode) & DataTable[REG_PROBLEM_MASK]))
+				RequestSaveToFlash = TRUE;
+		}
 	}
 	else
 	{
