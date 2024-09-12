@@ -420,29 +420,29 @@ void CONTROL_InitStoragePointers()
 	STF_AssignPointer(8, (Int32U)&MEMBUF_ValuesErr_Counter);
 	STF_AssignPointer(9, (Int32U)&MEMBUF_ValuesIVpeak_Counter);
 
-	STF_AssignPointer(10, (Int32U)&REG_MEASUREMENT_TYPE);
-	STF_AssignPointer(11, (Int32U)&REG_MEASUREMENT_MODE);
-	STF_AssignPointer(12, (Int32U)&REG_LIMIT_CURRENT);
-	STF_AssignPointer(13, (Int32U)&REG_LIMIT_VOLTAGE);
-	STF_AssignPointer(14, (Int32U)&REG_VOLTAGE_PLATE_TIME);
-	STF_AssignPointer(15, (Int32U)&REG_VOLTAGE_AC_RATE);
-	STF_AssignPointer(16, (Int32U)&REG_START_VOLTAGE_AC);
-	STF_AssignPointer(17, (Int32U)&REG_VOLTAGE_FREQUENCY);
-	STF_AssignPointer(18, (Int32U)&REG_FREQUENCY_DIVISOR);
-	STF_AssignPointer(19, (Int32U)&REG_SCOPE_RATE);
+	STF_AssignPointer(10, (Int32U)&DataTable[REG_MEASUREMENT_TYPE]);
+	STF_AssignPointer(11, (Int32U)&DataTable[REG_MEASUREMENT_MODE]);
+	STF_AssignPointer(12, (Int32U)&DataTable[REG_LIMIT_CURRENT]);
+	STF_AssignPointer(13, (Int32U)&DataTable[REG_LIMIT_VOLTAGE]);
+	STF_AssignPointer(14, (Int32U)&DataTable[REG_VOLTAGE_PLATE_TIME]);
+	STF_AssignPointer(15, (Int32U)&DataTable[REG_VOLTAGE_AC_RATE]);
+	STF_AssignPointer(16, (Int32U)&DataTable[REG_START_VOLTAGE_AC]);
+	STF_AssignPointer(17, (Int32U)&DataTable[REG_VOLTAGE_FREQUENCY]);
+	STF_AssignPointer(18, (Int32U)&DataTable[REG_FREQUENCY_DIVISOR]);
+	STF_AssignPointer(19, (Int32U)&DataTable[REG_SCOPE_RATE]);
 
-	STF_AssignPointer(20, (Int32U)&REG_DEV_STATE);
-	STF_AssignPointer(21, (Int32U)&REG_FAULT_REASON);
-	STF_AssignPointer(22, (Int32U)&REG_DISABLE_REASON);
-	STF_AssignPointer(23, (Int32U)&REG_WARNING);
-	STF_AssignPointer(24, (Int32U)&REG_PROBLEM);
-	STF_AssignPointer(25, (Int32U)&REG_FINISHED);
-	STF_AssignPointer(26, (Int32U)&REG_RESULT_V);
-	STF_AssignPointer(27, (Int32U)&REG_RESULT_I);
-	STF_AssignPointer(28, (Int32U)&REG_RESULT_I_UA_R);
+	STF_AssignPointer(20, (Int32U)&DataTable[REG_DEV_STATE]);
+	STF_AssignPointer(21, (Int32U)&DataTable[REG_FAULT_REASON]);
+	STF_AssignPointer(22, (Int32U)&DataTable[REG_DISABLE_REASON]);
+	STF_AssignPointer(23, (Int32U)&DataTable[REG_WARNING]);
+	STF_AssignPointer(24, (Int32U)&DataTable[REG_PROBLEM]);
+	STF_AssignPointer(25, (Int32U)&DataTable[REG_FINISHED]);
+	STF_AssignPointer(26, (Int32U)&DataTable[REG_RESULT_V]);
+	STF_AssignPointer(27, (Int32U)&DataTable[REG_RESULT_I]);
+	STF_AssignPointer(28, (Int32U)&DataTable[REG_RESULT_I_UA_R]);
 
-	STF_AssignPointer(29, (Int32U)&REG_ACTUAL_PRIM_VOLTAGE);
-	STF_AssignPointer(30, (Int32U)&REG_PRIM_VOLTAGE_CTRL);
+	STF_AssignPointer(29, (Int32U)&DataTable[REG_ACTUAL_PRIM_VOLTAGE]);
+	STF_AssignPointer(30, (Int32U)&DataTable[REG_PRIM_VOLTAGE_CTRL]);
 }
 
 static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U UserError)
