@@ -376,6 +376,16 @@
 			<locationURI>PARENT-2-PROJECT_LOC/hw-TMS-libs/BootLoader/Controller/Flash.h</locationURI>
 		</link>
 		<link>
+			<name>Sources/Platform/SaveToFlash.c</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/hw-TMS-libs/Firmware/SaveToFlash.c</locationURI>
+		</link>
+		<link>
+			<name>Sources/Platform/SaveToFlash.h</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/hw-TMS-libs/Firmware/SaveToFlash.h</locationURI>
+		</link>
+		<link>
 			<name>Sources/RTS/boot28.asm</name>
 			<type>1</type>
 			<locationURI>PARENT-2-PROJECT_LOC/hw-TMS-libs/RTS/boot28.asm</locationURI>
@@ -414,16 +424,6 @@
 			<name>Sources/RTS/u_div28.asm</name>
 			<type>1</type>
 			<locationURI>PARENT-2-PROJECT_LOC/hw-TMS-libs/RTS/u_div28.asm</locationURI>
-		</link>
-		<link>
-			<name>Source/Platform/SaveToFlash.c</name>
-			<type>1</type>
-			<locationURI>PARENT-2-PROJECT_LOC/hw-TMS-libs/Firmware/SaveToFlash.c</locationURI>
-		</link>
-		<link>
-			<name>Source/Platform/SaveToFlash.h</name>
-			<type>1</type>
-			<locationURI>PARENT-2-PROJECT_LOC/hw-TMS-libs/Firmware/SaveToFlash.h</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>
