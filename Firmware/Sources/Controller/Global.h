@@ -65,7 +65,6 @@
 #define RES_LIMIT_HIGH			200			// in MOhm
 
 // Regulator parameters
-#define CTRL_VOLT_TO_PWM_DIV	10				// Divisor to convert voltage to PWM
 #define CTRL_KI_SATURATION		_IQ(1000)
 
 // Modes for HVDigitizer

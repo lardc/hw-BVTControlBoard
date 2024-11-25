@@ -73,7 +73,7 @@ const TableItemConstraint NVConstraint[DATA_TABLE_NV_SIZE] =
 										   {0, INT16U_MAX, 0},														// 56
 										   {1, X_D_DEF3, X_D_DEF1},													// 57
 										   {RATE_VDC_MIN, RATE_VDC_MAX, RATE_VDC_DEF},								// 58
-										   {0, 0, 0},																// 59
+										   {1, INT16U_MAX, 100},													// 59
 										   {0, 0, 0},																// 60
 										   {0, 0, 0},																// 61
 										   {0, 0, 0},																// 62

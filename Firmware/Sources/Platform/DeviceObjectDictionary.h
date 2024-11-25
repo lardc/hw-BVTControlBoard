@@ -72,7 +72,8 @@
 #define REG_KI_VDC_N				56	// DC voltage amplitude controller I coefficient (N)
 #define REG_KI_VDC_D				57	// DC voltage amplitude controller I coefficient (D)
 #define REG_RES_VOLTAGE_RATE		58	// Resistance measure rise rate (in kV/s * 10)
-// 59 - 78
+#define REG_VDC_TO_PWM				59	// Коэффициент пересчёта напряжения в ШИМ для формирования DC (х1000)
+// 60 - 78
 #define REG_SAFE_MAX_PWM_DC			79	// Maximum PWM (DC mode)
 #define REG_SAFE_MAX_PWM			80	// Maximum PWM (AC mode)
 #define REG_USE_INST_METHOD			81	// Measurement method

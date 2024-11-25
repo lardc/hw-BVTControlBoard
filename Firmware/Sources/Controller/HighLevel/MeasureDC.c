@@ -43,7 +43,7 @@ static Int16U MeasurementType, OptoConnectionMon, CurrentMultiply, MaxPWM, Follo
 static Int16S SSCurrentP2, SSVoltageP2;
 static _iq SSCurrentCoff, SSCurrentP1, SSCurrentP0, SSVoltageCoff, SSVoltageP1, SSVoltageP0;
 static _iq LimitCurrent, LimitVoltage;
-static _iq KpVDC, KiVDC, SIDCerr;
+static _iq KpVDC, KiVDC, SIDCerr, VtoPWM;
 static _iq ResultV, ResultI;
 static Int16U ResultR, RFineK;
 static Int32S CollectI, CollectV, CollectCounter, ResCurrentOffset;
@@ -143,8 +143,7 @@ void inline MEASURE_DC_SwitchToBrake()
 
 Int16U inline MEASURE_DC_VoltageToPWM(_iq Voltage)
 {
-	// Recalculating formula
-	Int32S pwm = _IQint(Voltage) / CTRL_VOLT_TO_PWM_DIV;
+	Int32S pwm = _IQint(_IQmpy(Voltage, VtoPWM));
 
 	if (pwm > MaxPWM)
 		return MaxPWM;
@@ -461,6 +460,7 @@ static void MEASURE_DC_CacheVariables(_iq *OverrideLimitCurrent)
 	KiVDC = _FPtoIQ2(DataTable[REG_KI_VDC_N], DataTable[REG_KI_VDC_D]);
 	BrakeTimeCounterTop = (CONTROL_FREQUENCY * DataTable[REG_BRAKE_TIME]) / 1000;
 	MaxPWM = DataTable[REG_SAFE_MAX_PWM_DC];
+	VtoPWM = _FPtoIQ2(DataTable[REG_VDC_TO_PWM], 1000);
 
 	DbgSRAM = DataTable[REG_DBG_SRAM] ? TRUE : FALSE;
 	DbgMutePWM = DataTable[REG_DBG_MUTE_PWM] ? TRUE : FALSE;

@@ -32,11 +32,11 @@ typedef struct __TableItemConstraint
 //
 #define VPLATE_TIME_MAX			60000	// (in ms)
 //
-#define STEP_DC_V_MIN			50		// in V
+#define STEP_DC_V_MIN			10		// in V
 #define STEP_DC_V_MAX			200		// in V
 #define STEP_DC_V_DEF			50		// in V
 //
-#define STEP_DC_T_MIN			50		// in ms
+#define STEP_DC_T_MIN			10		// in ms
 #define STEP_DC_T_MAX			200		// in ms
 #define STEP_DC_T_DEF			100		// in ms
 //
