@@ -15,6 +15,7 @@
 #include "Constraints.h"
 #include "LabelDescription.h"
 #include "SaveToFlash.h"
+#include "MemoryBuffers.h"
 
 // Types
 //
@@ -339,6 +340,15 @@ static Boolean DEVPROFILE_DispatchAction(Int16U ActionID, pInt16U UserError)
 
 		case ACT_FLASH_DIAG_INIT_READ:
 			MemoryPointer = FLASH_START_ADDR;
+			break;
+
+		case ACT_FLASH_DIAG_TO_EP:
+			{
+				DEVPROFILE_ResetEPReadState();
+				DEVPROFILE_ResetScopes(0, 0);
+				for(CONTROL_DiagCounter = 0; CONTROL_DiagCounter < VALUES_DIAG_SIZE && MemoryPointer <= FLASH_END_ADDR;)
+					CONTROL_DiagData[CONTROL_DiagCounter++] = *(pInt16U)(MemoryPointer++);
+			}
 			break;
 
 		default:

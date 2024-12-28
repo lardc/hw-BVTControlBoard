@@ -31,6 +31,7 @@ typedef void (*CONTROL_FUNC_RealTimeRoutine)();
 // Variables
 //
 extern volatile Int64U CONTROL_TimeCounter;
+extern Int16U CONTROL_DiagCounter;
 extern volatile DeviceState CONTROL_State;
 extern volatile Int16U CONTROL_BootLoaderRequest;
 

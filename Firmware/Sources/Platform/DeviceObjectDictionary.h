@@ -36,6 +36,7 @@
 
 #define ACT_FLASH_DIAG_SAVE			332	// Сохранение блока отладочной информации во флэш
 #define ACT_FLASH_DIAG_ERASE		333	// Стирание области отладочной информации
+#define ACT_FLASH_DIAG_TO_EP		340	// Выполнить чтение массива из памяти отладочной информации в EP
 
 // REGISTERS
 //
@@ -186,6 +187,8 @@
 #define EP16_ERR					4	// Endpoint for V following error
 #define EP16_PEAK_I					5	// Endpoint for peak I value sequence
 #define EP16_PEAK_V					6	// Endpoint for peak V value sequence
+
+#define EP16_DiagData				20	// Diag data drom flash
 
 // MEASUREMENT TYPE
 //
