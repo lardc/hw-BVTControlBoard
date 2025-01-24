@@ -15,6 +15,7 @@
 #include "Constraints.h"
 #include "LabelDescription.h"
 #include "SaveToFlash.h"
+#include "FormatOutputJSON.h"
 #include "MemoryBuffers.h"
 
 // Types
@@ -348,6 +349,15 @@ static Boolean DEVPROFILE_DispatchAction(Int16U ActionID, pInt16U UserError)
 				DEVPROFILE_ResetScopes(0, 0);
 				for(CONTROL_ExtInfoCounter = 0; CONTROL_ExtInfoCounter < VALUES_EXT_INFO_SIZE && MemoryPointer <= FLASH_END_ADDR;)
 					CONTROL_ExtInfoData[CONTROL_ExtInfoCounter++] = *(pInt16U)(MemoryPointer++);
+			}
+			break;
+
+		case ACT_JSON_TO_EP:
+			{
+				DEVPROFILE_ResetEPReadState();
+				DEVPROFILE_ResetScopes(0, 0);
+				for(CONTROL_ExtInfoCounter = 0; CONTROL_ExtInfoCounter < VALUES_EXT_INFO_SIZE;)
+					CONTROL_ExtInfoData[CONTROL_ExtInfoCounter++] = JSON_ReadSymbol();
 			}
 			break;
 

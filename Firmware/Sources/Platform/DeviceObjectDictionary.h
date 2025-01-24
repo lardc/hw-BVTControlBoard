@@ -37,6 +37,7 @@
 #define ACT_FLASH_DIAG_SAVE			332	// Сохранение блока отладочной информации во флэш
 #define ACT_FLASH_DIAG_ERASE		333	// Стирание области отладочной информации
 #define ACT_FLASH_DIAG_TO_EP		340	// Выполнить чтение массива из памяти отладочной информации в EP
+#define ACT_JSON_TO_EP				341	// Выполнить чтение шаблона JSON в EP
 
 // REGISTERS
 //
