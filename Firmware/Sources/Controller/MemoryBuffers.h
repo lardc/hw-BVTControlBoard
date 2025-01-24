@@ -34,7 +34,7 @@ extern Int16U MEMBUF_Values_DIAG[];
 extern Int16U MEMBUF_Values_Err[];
 extern Int16U MEMBUF_Values_Ipeak[];
 extern Int16U MEMBUF_Values_Vpeak[];
-extern Int16U CONTROL_DiagData[];
+extern Int16U CONTROL_ExtInfoData[];
 //
 extern volatile Int16U MEMBUF_ValuesIV_Counter;
 extern volatile Int16U MEMBUF_ValuesDIAG_Counter;

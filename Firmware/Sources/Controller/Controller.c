@@ -53,7 +53,7 @@ volatile Int64U CONTROL_TimeCounter = 0;
 volatile Int64U CONTROL_BatteryTimeout;
 volatile DeviceState CONTROL_State = DS_None;
 volatile BatteryVoltageState CONTROL_Battery = BVS_None;
-Int16U CONTROL_DiagCounter = 0;
+Int16U CONTROL_ExtInfoCounter = 0;
 //
 static CONTROL_FUNC_RealTimeRoutine RealTimeRoutine = NULL;
 static EndTestDPCClosure EndXDPCArgument = { FALSE, 0, 0, DF_NONE, WARNING_NONE, PROBLEM_NONE };
@@ -100,12 +100,12 @@ void CONTROL_Init()
 	Int16U Fault = DF_NONE;
 
 	Int16U EPIndexes[EP_COUNT] = { EP16_I, EP16_V, EP16_DIAG, EP16_ERR, EP16_PEAK_I, EP16_PEAK_V, EP16_DiagData };
-	Int16U EPSized[EP_COUNT] = { VALUES_x_SIZE, VALUES_x_SIZE, VALUES_x_SIZE, VALUES_x_SIZE, VALUES_x_SIZE, VALUES_x_SIZE, VALUES_DIAG_SIZE };
+	Int16U EPSized[EP_COUNT] = { VALUES_x_SIZE, VALUES_x_SIZE, VALUES_x_SIZE, VALUES_x_SIZE, VALUES_x_SIZE, VALUES_x_SIZE, VALUES_EXT_INFO_SIZE };
 	pInt16U EPCounters[EP_COUNT] = { (pInt16U)&MEMBUF_ValuesIV_Counter,		(pInt16U)&MEMBUF_ValuesIV_Counter,
 									 (pInt16U)&MEMBUF_ValuesDIAG_Counter,	(pInt16U)&MEMBUF_ValuesErr_Counter,
-									 (pInt16U)&MEMBUF_ValuesIVpeak_Counter,	(pInt16U)&MEMBUF_ValuesIVpeak_Counter, (pInt16U)&CONTROL_DiagCounter };
+									 (pInt16U)&MEMBUF_ValuesIVpeak_Counter,	(pInt16U)&MEMBUF_ValuesIVpeak_Counter, (pInt16U)&CONTROL_ExtInfoCounter };
 	pInt16U EPDatas[EP_COUNT] = { MEMBUF_Values_I, MEMBUF_Values_V, MEMBUF_Values_DIAG,
-								  MEMBUF_Values_Err, MEMBUF_Values_Ipeak, MEMBUF_Values_Vpeak, CONTROL_DiagData };
+								  MEMBUF_Values_Err, MEMBUF_Values_Ipeak, MEMBUF_Values_Vpeak, CONTROL_ExtInfoData };
 	// Data-table EPROM service configuration
 	EPROMServiceConfig EPROMService = { &ZbMemory_WriteValuesEPROM, &ZbMemory_ReadValuesEPROM };
 

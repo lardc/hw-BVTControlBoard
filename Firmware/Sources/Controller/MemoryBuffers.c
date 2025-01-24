@@ -13,7 +13,7 @@ Int16U MEMBUF_Values_Err[VALUES_x_SIZE];
 Int16U MEMBUF_Values_DIAG[VALUES_x_SIZE];
 Int16U MEMBUF_Values_Ipeak[VALUES_x_SIZE];
 Int16U MEMBUF_Values_Vpeak[VALUES_x_SIZE];
-Int16U CONTROL_DiagData[VALUES_DIAG_SIZE];
+Int16U CONTROL_ExtInfoData[VALUES_EXT_INFO_SIZE];
 //
 volatile Int16U MEMBUF_ValuesIV_Counter = 0;
 volatile Int16U MEMBUF_ValuesDIAG_Counter = 0;
