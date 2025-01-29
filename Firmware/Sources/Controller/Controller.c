@@ -458,6 +458,7 @@ void CONTROL_InitStoragePointers()
 	STF_AssignPointer(29, (Int32U)&DataTable[REG_ACTUAL_PRIM_VOLTAGE]);
 	STF_AssignPointer(30, (Int32U)&DataTable[REG_PRIM_VOLTAGE_CTRL]);
 }
+// ----------------------------------------
 
 static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U UserError)
 {
@@ -609,14 +610,6 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U UserError)
 			}
 			else
 				*UserError = ERR_OPERATION_BLOCKED;
-			break;
-
-		case ACT_FLASH_DIAG_SAVE:
-			STF_SaveDiagData();
-			break;
-
-		case ACT_FLASH_DIAG_ERASE:
-			STF_EraseDataSector();
 			break;
 
 		default:

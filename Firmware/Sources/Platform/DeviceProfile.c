@@ -335,8 +335,12 @@ static Boolean DEVPROFILE_DispatchAction(Int16U ActionID, pInt16U UserError)
 			FWLB_WriteBoardLabel(0);
 			break;
 
-		case ACT_FLASH_DIAG_READ_SYMBOL:
-			DataTable[REG_MEM_SYMBOL] = *(pInt16U)(MemoryPointer++);
+		case ACT_FLASH_DIAG_SAVE:
+			STF_SaveDiagData();
+			break;
+
+		case ACT_FLASH_DIAG_ERASE:
+			STF_EraseDataSector();
 			break;
 
 		case ACT_FLASH_DIAG_INIT_READ:
