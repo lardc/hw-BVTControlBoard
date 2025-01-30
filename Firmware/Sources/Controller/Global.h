@@ -35,7 +35,9 @@
 #define MAX_CURRENT_1ST_PULSE	_IQ(25.0f)		// in mA
 
 // Modes for HVDigitizer
-#define HVD_VL_TH				_IQ(1000)		// < 1000V
+#define HVD_VLL_TH				_IQ(500)		// <= 500v
+#define HVD_VL_TH				_IQ(1000)		// <= 1000v
+#define HVD_VH_TH				_IQ(8000)		// <= 8000v
 #define HVD_ILL_TH				_IQ(5)			// <= 5mA		(lowest range)
 #define HVD_IL_TH				_IQ(30)			// <= 30mA		(low range)
 // Добавка 10мА выбрана для исключения отсечки на максимальном токе и возможности его корректного измерения

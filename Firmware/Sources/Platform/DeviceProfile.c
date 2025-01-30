@@ -347,6 +347,10 @@ static Boolean DEVPROFILE_DispatchAction(Int16U ActionID, pInt16U UserError)
 			MemoryPointer = FLASH_START_ADDR;
 			break;
 
+		case ACT_JSON_INIT_READ:
+			CONTROL_InitJSONPointers();
+			break;
+
 		case ACT_FLASH_DIAG_TO_EP:
 			{
 				DEVPROFILE_ResetEPReadState();

@@ -61,5 +61,6 @@ void CONTROL_NotifyCANFault(ZwCAN_SysFlags Flag);
 // Re-init RX SPI channels
 void CONTROL_ReInitSPI_Rx();
 
+void CONTROL_InitJSONPointers();
 
 #endif // __CONTROLLER_H

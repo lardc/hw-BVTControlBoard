@@ -21,6 +21,7 @@
 #include "MeasureTest.h"
 #include "MeasureUtils.h"
 #include "SaveToFlash.h"
+#include "JSONDescription.h"
 
 
 // Types
@@ -459,6 +460,33 @@ void CONTROL_InitStoragePointers()
 	STF_AssignPointer(30, (Int32U)&DataTable[REG_PRIM_VOLTAGE_CTRL]);
 }
 // ----------------------------------------
+
+void CONTROL_InitJSONPointers()
+{
+	const Int16U Voltage1Min = DataTable[REG_OVERRIDE_VOLTAGE_1_MIN] ? _IQint(DataTable[REG_OVERRIDE_VOLTAGE_1_MIN]) : _IQint(HVD_VLL_TH);
+	const Int16U Voltage1Max = DataTable[REG_CUSTOM_VLOW_LIMIT] ? _IQint(DataTable[REG_CUSTOM_VLOW_LIMIT]) : _IQint(HVD_VL_TH);
+	const Int16U Voltage2Max = DataTable[REG_OVERRIDE_VOLTAGE_2_MAX] ? _IQint(DataTable[REG_OVERRIDE_VOLTAGE_2_MAX]) : _IQint(HVD_VH_TH);
+
+	const Int16U Current1Max = _IQint(HVD_ILL_TH);
+	const Int16U Current2Max = _IQint(HVD_IL_TH);
+
+	const Int16U Current3Max = DataTable[REG_OVERRIDE_MAX_CURRENT] ? _IQint(DataTable[REG_OVERRIDE_MAX_CURRENT]) : _IQint(HVD_I_MAX);
+
+	JSON_AssignPointer(0, (Int32U)&Voltage1Min);
+	JSON_AssignPointer(1, (Int32U)&Voltage1Max);
+
+	JSON_AssignPointer(2, (Int32U)&Voltage1Max);
+	JSON_AssignPointer(3, (Int32U)&Voltage2Max);
+
+	JSON_AssignPointer(4, (Int32U)&DataTable[REG_5mA_SOFT_RANGE]);
+	JSON_AssignPointer(5, (Int32U)&Current1Max);
+
+	JSON_AssignPointer(6, (Int32U)&Current1Max);
+	JSON_AssignPointer(7, (Int32U)&Current2Max);
+
+	JSON_AssignPointer(8, (Int32U)&Current2Max);
+	JSON_AssignPointer(9, (Int32U)&Current3Max);
+}
 
 static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U UserError)
 {

@@ -36,8 +36,8 @@
 #define ACT_FLASH_DIAG_SAVE			332	// Сохранение блока отладочной информации во флэш
 #define ACT_FLASH_DIAG_ERASE		333	// Стирание области отладочной информации
 #define ACT_FLASH_DIAG_TO_EP		340	// Выполнить чтение массива из памяти отладочной информации в EP
-#define ACT_JSON_TO_EP				341	// Выполнить чтение шаблона JSON в EP
-#define ACT_JSON_INIT_READ			342	// Инициализация начала считывания JSON
+#define ACT_JSON_INIT_READ			341	// Инициализация начала считывания JSON
+#define ACT_JSON_TO_EP				342	// Выполнить чтение шаблона JSON в EP
 
 // REGISTERS
 //
@@ -48,6 +48,8 @@
 #define REG_TEST_VOLTAGE			4	// Test voltage (for sensing configuration)
 //
 // Конфигурация аппаратных особенностей блока
+#define REG_OVERRIDE_VOLTAGE_1_MIN	8	// Регистр переопределения минимального напряжения 
+#define REG_OVERRIDE_VOLTAGE_2_MAX	9	// Регистр переопределния максимального напряжения
 #define REG_BRIDGE_RECTIFIER		10	// Флаг использования мостового выпрямителя
 #define REG_5mA_SOFT_RANGE			11	// Флаг использования программного поддиапазона тока до 5мА
 #define REG_INVERT_MW_CONTROL		12	// Инверсия сигнала управления БП MeanWell (используется для RSP-500 совместно с BVTBridge v.2.1)
