@@ -31,6 +31,16 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
+			<name>FormatOutputJSON.c</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/hw-TMS-libs/Firmware/FormatOutputJSON.c</locationURI>
+		</link>
+		<link>
+			<name>FormatOutputJSON.h</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/hw-TMS-libs/Firmware/FormatOutputJSON.h</locationURI>
+		</link>
+		<link>
 			<name>IQmath</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>

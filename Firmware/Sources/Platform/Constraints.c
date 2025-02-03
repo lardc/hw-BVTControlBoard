@@ -22,8 +22,8 @@ const TableItemConstraint NVConstraint[DATA_TABLE_NV_SIZE] =
 										   {0, 0, 0},																// 5
 										   {0, 0, 0},																// 6
 										   {0, 0, 0},																// 7
-										   {CUST_VLOW_LIM_MIN, CUST_VLOW_LIM_MAX, 0},								// 8
-										   {CUST_VLOW_LIM_MIN, LIMIT_VOLTAGE_MAX, 0},								// 9
+										   {0, CUST_VLOW_LIM_MAX, 0},								// 8
+										   {0, LIMIT_VOLTAGE_MAX, 0},								// 9
 										   {NO, YES, NO},															// 10
 										   {NO, YES, NO},															// 11
 										   {NO, YES, NO},															// 12
