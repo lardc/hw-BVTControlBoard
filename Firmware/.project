@@ -31,12 +31,12 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
-			<name>FormatOutputJSON.c</name>
+			<name>Sources/Platform/FormatOutputJSON.c</name>
 			<type>1</type>
 			<locationURI>PARENT-2-PROJECT_LOC/hw-TMS-libs/Firmware/FormatOutputJSON.c</locationURI>
 		</link>
 		<link>
-			<name>FormatOutputJSON.h</name>
+			<name>Sources/Platform/FormatOutputJSON.h</name>
 			<type>1</type>
 			<locationURI>PARENT-2-PROJECT_LOC/hw-TMS-libs/Firmware/FormatOutputJSON.h</locationURI>
 		</link>
