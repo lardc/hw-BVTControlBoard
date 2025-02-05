@@ -463,14 +463,14 @@ void CONTROL_InitStoragePointers()
 
 void CONTROL_InitJSONPointers()
 {
-	Voltage1Min = DataTable[REG_OVERRIDE_VOLTAGE_1_MIN] ? _IQint(DataTable[REG_OVERRIDE_VOLTAGE_1_MIN]) : _IQint(HVD_VLL_TH);
-	Voltage1Max = DataTable[REG_CUSTOM_VLOW_LIMIT] ? _IQint(DataTable[REG_CUSTOM_VLOW_LIMIT]) : _IQint(HVD_VL_TH);
-	Voltage2Max = DataTable[REG_OVERRIDE_VOLTAGE_2_MAX] ? _IQint(DataTable[REG_OVERRIDE_VOLTAGE_2_MAX]) : _IQint(HVD_VH_TH);
+	Voltage1Min = DataTable[REG_OVERRIDE_VOLTAGE_1_MIN] ? DataTable[REG_OVERRIDE_VOLTAGE_1_MIN] : _IQint(HVD_VLL_TH);
+	Voltage1Max = DataTable[REG_CUSTOM_VLOW_LIMIT] ? DataTable[REG_CUSTOM_VLOW_LIMIT] : _IQint(HVD_VL_TH);
+	Voltage2Max = DataTable[REG_OVERRIDE_VOLTAGE_2_MAX] ? DataTable[REG_OVERRIDE_VOLTAGE_2_MAX] : _IQint(HVD_VH_TH);
 
 	Current1Max = _IQint(HVD_ILL_TH);
 	Current2Max = _IQint(HVD_IL_TH);
 
-	Current3Max = DataTable[REG_OVERRIDE_MAX_CURRENT] ? _IQint(DataTable[REG_OVERRIDE_MAX_CURRENT]) : _IQint(HVD_I_MAX);
+	Current3Max = DataTable[REG_OVERRIDE_MAX_CURRENT] ? DataTable[REG_OVERRIDE_MAX_CURRENT] : _IQint(HVD_I_MAX);
 
 	JSON_AssignPointer(0, (Int32U)&Voltage1Min);
 	JSON_AssignPointer(1, (Int32U)&Voltage1Max);

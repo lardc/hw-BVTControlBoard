@@ -42,7 +42,7 @@
 #define HVD_IL_TH				_IQ(30)			// <= 30mA		(low range)
 // Добавка 10мА выбрана для исключения отсечки на максимальном токе и возможности его корректного измерения
 #define HVD_I_ADD				10
-#define HVD_I_MAX				300				// <= 300mA		(high range), если не переопределён регистром REG_OVERRIDE_MAX_CURRENT
+#define HVD_I_MAX				_IQ(300)				// <= 300mA		(high range), если не переопределён регистром REG_OVERRIDE_MAX_CURRENT
 #define HVD_IH_TH				_IQ(HVD_I_MAX + HVD_I_ADD)
 
 // Pre-plate parameters
