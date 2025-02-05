@@ -47,6 +47,9 @@ const char TemplateJSON[] = "[{\n"
 "		}]\n"
 "}]";
 
+Int16U Voltage1Min, Voltage1Max, Voltage2Max;
+Int16U Current1Max, Current2Max, Current3Max;
+
 Int16U JSONPointers[JSON_POINTERS_SIZE] = {0};
 
 void JSON_AssignPointer(Int16U Index, Int32U Pointer)

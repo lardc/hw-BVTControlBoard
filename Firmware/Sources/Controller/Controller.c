@@ -100,7 +100,7 @@ void CONTROL_Init()
 {
 	Int16U Fault = DF_NONE;
 
-	Int16U EPIndexes[EP_COUNT] = { EP16_I, EP16_V, EP16_DIAG, EP16_ERR, EP16_PEAK_I, EP16_PEAK_V, EP16_DiagData };
+	Int16U EPIndexes[EP_COUNT] = { EP16_I, EP16_V, EP16_DIAG, EP16_ERR, EP16_PEAK_I, EP16_PEAK_V, EP16_ExtInfoData };
 	Int16U EPSized[EP_COUNT] = { VALUES_x_SIZE, VALUES_x_SIZE, VALUES_x_SIZE, VALUES_x_SIZE, VALUES_x_SIZE, VALUES_x_SIZE, VALUES_EXT_INFO_SIZE };
 	pInt16U EPCounters[EP_COUNT] = { (pInt16U)&MEMBUF_ValuesIV_Counter,		(pInt16U)&MEMBUF_ValuesIV_Counter,
 									 (pInt16U)&MEMBUF_ValuesDIAG_Counter,	(pInt16U)&MEMBUF_ValuesErr_Counter,
@@ -463,14 +463,14 @@ void CONTROL_InitStoragePointers()
 
 void CONTROL_InitJSONPointers()
 {
-	const Int16U Voltage1Min = DataTable[REG_OVERRIDE_VOLTAGE_1_MIN] ? _IQint(DataTable[REG_OVERRIDE_VOLTAGE_1_MIN]) : _IQint(HVD_VLL_TH);
-	const Int16U Voltage1Max = DataTable[REG_CUSTOM_VLOW_LIMIT] ? _IQint(DataTable[REG_CUSTOM_VLOW_LIMIT]) : _IQint(HVD_VL_TH);
-	const Int16U Voltage2Max = DataTable[REG_OVERRIDE_VOLTAGE_2_MAX] ? _IQint(DataTable[REG_OVERRIDE_VOLTAGE_2_MAX]) : _IQint(HVD_VH_TH);
+	Voltage1Min = DataTable[REG_OVERRIDE_VOLTAGE_1_MIN] ? _IQint(DataTable[REG_OVERRIDE_VOLTAGE_1_MIN]) : _IQint(HVD_VLL_TH);
+	Voltage1Max = DataTable[REG_CUSTOM_VLOW_LIMIT] ? _IQint(DataTable[REG_CUSTOM_VLOW_LIMIT]) : _IQint(HVD_VL_TH);
+	Voltage2Max = DataTable[REG_OVERRIDE_VOLTAGE_2_MAX] ? _IQint(DataTable[REG_OVERRIDE_VOLTAGE_2_MAX]) : _IQint(HVD_VH_TH);
 
-	const Int16U Current1Max = _IQint(HVD_ILL_TH);
-	const Int16U Current2Max = _IQint(HVD_IL_TH);
+	Current1Max = _IQint(HVD_ILL_TH);
+	Current2Max = _IQint(HVD_IL_TH);
 
-	const Int16U Current3Max = DataTable[REG_OVERRIDE_MAX_CURRENT] ? _IQint(DataTable[REG_OVERRIDE_MAX_CURRENT]) : _IQint(HVD_I_MAX);
+	Current3Max = DataTable[REG_OVERRIDE_MAX_CURRENT] ? _IQint(DataTable[REG_OVERRIDE_MAX_CURRENT]) : _IQint(HVD_I_MAX);
 
 	JSON_AssignPointer(0, (Int32U)&Voltage1Min);
 	JSON_AssignPointer(1, (Int32U)&Voltage1Max);

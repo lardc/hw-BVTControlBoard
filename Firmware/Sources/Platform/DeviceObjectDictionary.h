@@ -191,7 +191,7 @@
 #define EP16_PEAK_I					5	// Endpoint for peak I value sequence
 #define EP16_PEAK_V					6	// Endpoint for peak V value sequence
 
-#define EP16_DiagData				20	// Diag data drom flash
+#define EP16_ExtInfoData			7	// External information from flash
 
 // MEASUREMENT TYPE
 //
