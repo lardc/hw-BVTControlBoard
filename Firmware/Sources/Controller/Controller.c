@@ -470,7 +470,7 @@ void CONTROL_InitJSONPointers()
 	Current1Max = _IQint(HVD_ILL_TH);
 	Current2Max = _IQint(HVD_IL_TH);
 
-	Current3Max = DataTable[REG_OVERRIDE_MAX_CURRENT] ? DataTable[REG_OVERRIDE_MAX_CURRENT] : _IQint(HVD_I_MAX);
+	Current3Max = DataTable[REG_OVERRIDE_MAX_CURRENT] ? DataTable[REG_OVERRIDE_MAX_CURRENT] : HVD_I_MAX;
 
 	JSON_AssignPointer(0, (Int32U)&Voltage1Min);
 	JSON_AssignPointer(1, (Int32U)&Voltage1Max);
