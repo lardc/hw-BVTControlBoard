@@ -32,10 +32,11 @@
 #define ACT_WRITE_LABEL1			321	// Записать первую метку: BVTMainBoard v.2.0 [Manufacturing]
 
 #define ACT_FLASH_DIAG_INIT_READ	331	// Инициализировать начало считывания отладочной информации
-
 #define ACT_FLASH_DIAG_SAVE			332	// Сохранение блока отладочной информации во флэш
 #define ACT_FLASH_DIAG_ERASE		333	// Стирание области отладочной информации
+
 #define ACT_FLASH_DIAG_TO_EP		340	// Выполнить чтение массива из памяти отладочной информации в EP
+
 #define ACT_JSON_INIT_READ			341	// Инициализация начала считывания JSON
 #define ACT_JSON_TO_EP				342	// Выполнить чтение шаблона JSON в EP
 
@@ -178,8 +179,6 @@
 // 258 - 259
 #define REG_FWINFO_STR_LEN			260	// Length of the information string record
 #define REG_FWINFO_STR_BEGIN		261	// Begining of the information string record
-//
-#define REG_MEM_SYMBOL				299	// Считанный по адресу памяти символ
 
 
 // ENDPOINTS
@@ -191,7 +190,7 @@
 #define EP16_PEAK_I					5	// Endpoint for peak I value sequence
 #define EP16_PEAK_V					6	// Endpoint for peak V value sequence
 
-#define EP16_ExtInfoData			7	// External information from flash
+#define EP16_ExtInfoData			20	// External information from flash
 
 // MEASUREMENT TYPE
 //

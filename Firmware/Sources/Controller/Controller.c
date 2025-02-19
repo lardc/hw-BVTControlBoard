@@ -487,6 +487,7 @@ void CONTROL_InitJSONPointers()
 	JSON_AssignPointer(8, &Current2Max);
 	JSON_AssignPointer(9, &Current3Max);
 }
+// ----------------------------------------
 
 static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U UserError)
 {
