@@ -21,7 +21,7 @@
 #include "MeasureTest.h"
 #include "MeasureUtils.h"
 #include "SaveToFlash.h"
-#include "JSONDescription.h"
+#include "FormatOutputJSON.h"
 
 
 // Types
@@ -472,20 +472,20 @@ void CONTROL_InitJSONPointers()
 
 	Current3Max = DataTable[REG_OVERRIDE_MAX_CURRENT] ? DataTable[REG_OVERRIDE_MAX_CURRENT] : HVD_I_MAX;
 
-	JSON_AssignPointer(0, (Int32U)&Voltage1Min);
-	JSON_AssignPointer(1, (Int32U)&Voltage1Max);
+	JSON_AssignPointer(0, &Voltage1Min);
+	JSON_AssignPointer(1, &Voltage1Max);
 
-	JSON_AssignPointer(2, (Int32U)&Voltage1Max);
-	JSON_AssignPointer(3, (Int32U)&Voltage2Max);
+	JSON_AssignPointer(2, &Voltage1Max);
+	JSON_AssignPointer(3, &Voltage2Max);
 
-	JSON_AssignPointer(4, (Int32U)&DataTable[REG_5mA_SOFT_RANGE]);
-	JSON_AssignPointer(5, (Int32U)&Current1Max);
+	JSON_AssignPointer(4, (pInt16U)&DataTable[REG_5mA_SOFT_RANGE]);
+	JSON_AssignPointer(5, &Current1Max);
 
-	JSON_AssignPointer(6, (Int32U)&Current1Max);
-	JSON_AssignPointer(7, (Int32U)&Current2Max);
+	JSON_AssignPointer(6, &Current1Max);
+	JSON_AssignPointer(7, &Current2Max);
 
-	JSON_AssignPointer(8, (Int32U)&Current2Max);
-	JSON_AssignPointer(9, (Int32U)&Current3Max);
+	JSON_AssignPointer(8, &Current2Max);
+	JSON_AssignPointer(9, &Current3Max);
 }
 
 static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U UserError)
