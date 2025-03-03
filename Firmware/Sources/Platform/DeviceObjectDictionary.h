@@ -119,7 +119,8 @@
 #define REG_SCURRENT2_FINE_P0		117	// Secondary current 2 tune quadratic coefficient P0 (in uA)
 #define REG_SCURRENT3_FINE_P0		118	// Secondary current 3 tune quadratic coefficient P0 (in uA)
 // 119 - 120
-#define REG_PROBLEM_MASK			121	// Bit mask for saving problems
+#define REG_DIAG_PROBLEM_MASK		121	// Bit mask for saving problems
+#define REG_DIAG_CATCH_COLD_SHORT	122	// Отлавливать момент пробоя на DUT при измерении на холодную
 //
 // ----------------------------------------
 //

@@ -297,7 +297,7 @@ static void CONTROL_EndTestDPC()
 			CONTROL_SwitchStateToFault(EndXDPCArgument.SavedDFReason);
 			Int16U FCode = EndXDPCArgument.SavedDFReason - 200;
 
-			if (FCode && ((1 << FCode) & DataTable[REG_PROBLEM_MASK]))
+			if (FCode && ((1 << FCode) & DataTable[REG_DIAG_PROBLEM_MASK]))
 				RequestSaveToFlash = TRUE;
 		}
 	}
@@ -311,7 +311,7 @@ static void CONTROL_EndTestDPC()
 		CONTROL_SwitchStateToPowered();
 
 		// Если отсечка меньше 10мА, а итоговый ток больше 28мА, то сохраняем отладочные данные
-		if(DataTable[REG_LIMIT_CURRENT] <= 100 && EndXDPCArgument.SavedResultI >= 280)
+		if(DataTable[REG_LIMIT_CURRENT] <= 100 && EndXDPCArgument.SavedResultI >= 280 && DataTable[REG_DIAG_CATCH_COLD_SHORT])
 			RequestSaveToFlash = TRUE;
 	}
 
