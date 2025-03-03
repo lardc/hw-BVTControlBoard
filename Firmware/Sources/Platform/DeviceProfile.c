@@ -344,7 +344,7 @@ static Boolean DEVPROFILE_DispatchAction(Int16U ActionID, pInt16U UserError)
 			break;
 
 		case ACT_FLASH_DIAG_INIT_READ:
-			MemoryPointer = FLASH_START_ADDR;
+			MemoryPointer = FLASH_DIAG_START_ADDR;
 			break;
 
 		case ACT_JSON_INIT_READ:
@@ -356,7 +356,8 @@ static Boolean DEVPROFILE_DispatchAction(Int16U ActionID, pInt16U UserError)
 			{
 				DEVPROFILE_ResetEPReadState();
 				DEVPROFILE_ResetScopes(0, 0);
-				for(CONTROL_ExtInfoCounter = 0; CONTROL_ExtInfoCounter < VALUES_EXT_INFO_SIZE && MemoryPointer <= FLASH_END_ADDR;)
+				for(CONTROL_ExtInfoCounter = 0;
+						CONTROL_ExtInfoCounter < VALUES_EXT_INFO_SIZE && MemoryPointer <= FLASH_DIAG_END_ADDR;)
 					CONTROL_ExtInfoData[CONTROL_ExtInfoCounter++] = *(pInt16U)(MemoryPointer++);
 			}
 			break;
