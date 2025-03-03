@@ -13,7 +13,6 @@
 #include "DataTable.h"
 #include "Controller.h"
 #include "Constraints.h"
-#include "LabelDescription.h"
 #include "SaveToFlash.h"
 #include "FormatOutputJSON.h"
 #include "MemoryBuffers.h"
@@ -329,10 +328,6 @@ static Boolean DEVPROFILE_DispatchAction(Int16U ActionID, pInt16U UserError)
 
 		case ACT_BOOT_LOADER_REQUEST:
 			CONTROL_BootLoaderRequest = BOOT_LOADER_REQUEST;
-			break;
-
-		case ACT_WRITE_LABEL1:
-			FWLB_WriteBoardLabel(0);
 			break;
 
 		case ACT_FLASH_DIAG_SAVE:

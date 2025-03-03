@@ -31,16 +31,6 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
-			<name>Sources/Platform/FormatOutputJSON.c</name>
-			<type>1</type>
-			<locationURI>PARENT-2-PROJECT_LOC/hw-TMS-libs/Firmware/FormatOutputJSON.c</locationURI>
-		</link>
-		<link>
-			<name>Sources/Platform/FormatOutputJSON.h</name>
-			<type>1</type>
-			<locationURI>PARENT-2-PROJECT_LOC/hw-TMS-libs/Firmware/FormatOutputJSON.h</locationURI>
-		</link>
-		<link>
 			<name>IQmath</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
@@ -366,16 +356,6 @@
 			<locationURI>PARENT-2-PROJECT_LOC/hw-TMS-libs/Firmware/FirmwareInfo.h</locationURI>
 		</link>
 		<link>
-			<name>Sources/Platform/FirmwareLabel.c</name>
-			<type>1</type>
-			<locationURI>PARENT-2-PROJECT_LOC/hw-TMS-libs/Firmware/FirmwareLabel.c</locationURI>
-		</link>
-		<link>
-			<name>Sources/Platform/FirmwareLabel.h</name>
-			<type>1</type>
-			<locationURI>PARENT-2-PROJECT_LOC/hw-TMS-libs/Firmware/FirmwareLabel.h</locationURI>
-		</link>
-		<link>
 			<name>Sources/Platform/Flash.c</name>
 			<type>1</type>
 			<locationURI>PARENT-2-PROJECT_LOC/hw-TMS-libs/BootLoader/Controller/Flash.c</locationURI>
@@ -384,6 +364,16 @@
 			<name>Sources/Platform/Flash.h</name>
 			<type>1</type>
 			<locationURI>PARENT-2-PROJECT_LOC/hw-TMS-libs/BootLoader/Controller/Flash.h</locationURI>
+		</link>
+		<link>
+			<name>Sources/Platform/FormatOutputJSON.c</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/hw-TMS-libs/Firmware/FormatOutputJSON.c</locationURI>
+		</link>
+		<link>
+			<name>Sources/Platform/FormatOutputJSON.h</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/hw-TMS-libs/Firmware/FormatOutputJSON.h</locationURI>
 		</link>
 		<link>
 			<name>Sources/Platform/SaveToFlash.c</name>

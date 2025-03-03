@@ -20,7 +20,6 @@
 #include "DataLogger.h"
 #include "PowerDriver.h"
 #include "FIRFilter.h"
-#include "FirmwareLabel.h"
 
 // Definitions
 //

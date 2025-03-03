@@ -14,7 +14,6 @@
 #include "InterboardProtocol.h"
 #include "SecondarySampling.h"
 #include "Flash.h"
-#include "FirmwareLabel.h"
 
 
 // FORWARD FUNCTIONS
@@ -57,17 +56,16 @@ void main()
 	// Boot process
 	InitializeCPU();
 	FLASH_Init();
-	FWLB_LoadBoardLabel();
 
 	// Switch GPIO in proper state
 	InitializeBoard();
 
-   	// Wait for power-on
-   	for(i = 0; i < MSC_PON_DELAY_MS; ++i)
-   	{
-   		DELAY_US(1000);
-   		ZbWatchDog_Strobe();
-   	}
+	// Wait for power-on
+	for(i = 0; i < MSC_PON_DELAY_MS; ++i)
+	{
+		DELAY_US(1000);
+		ZbWatchDog_Strobe();
+	}
 
 	// Only if good clocking was established
 	InitializeTimers();

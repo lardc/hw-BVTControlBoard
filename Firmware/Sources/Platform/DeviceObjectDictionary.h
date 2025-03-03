@@ -29,7 +29,6 @@
 #define ACT_UNLOCK_NV_AREA			204	// Unlock modifications of parameters area (password-protected)
 //
 #define ACT_BOOT_LOADER_REQUEST		320	// Request reboot to bootloader
-#define ACT_WRITE_LABEL1			321	// Записать первую метку: BVTMainBoard v.2.0 [Manufacturing]
 
 #define ACT_FLASH_DIAG_INIT_READ	331	// Инициализировать начало считывания отладочной информации
 #define ACT_FLASH_DIAG_SAVE			332	// Сохранение блока отладочной информации во флэш
