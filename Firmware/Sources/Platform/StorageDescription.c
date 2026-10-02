@@ -37,7 +37,7 @@ RecordDescription StorageDescription[] =
 	{"Indicates that test is done and there is result or fault",		DT_Int16U, 1},
 	{"Test result (in V)",												DT_Int16U, 1},
 	{"Test result (mA * 10 or uA)",										DT_Int16U, 1},
-	{"Resistance result DC-mode or Test result mA fraction for AC mode",DT_Int16U, 1},
+	{"Resistance result DC-mode or Test result mA fraction for AC",		DT_Int16U, 1},
 
 	{"Primary side capacitor voltage based on sensing (in V)",			DT_Int16U, 1},
 	{"Primary side capacitor voltage used by control system (in V)",	DT_Int16U, 1},
